@@ -1,0 +1,235 @@
+<?php
+
+namespace App\Http\Controllers\Agency;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Models\AgentService;
+use App\Models\Service;
+use App\Models\ServiceField;
+use App\Models\Transaction;
+use App\Models\Wallet;
+use Illuminate\Support\Facades\Storage;
+
+class CacRegistrationController extends Controller
+{
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        $serviceKey = 'CAC'; // Assuming the service name in DB is 'CAC'
+
+        // Query submissions
+        $submissions = AgentService::with('transaction')
+            ->where('user_id', $user->id)
+            ->where('service_name', $serviceKey)
+            ->when($request->filled('search'), fn($q) =>
+                $q->where('reference', 'like', "%{$request->search}%")
+                  ->orWhere('business_name', 'like', "%{$request->search}%")) // Assuming business_name might be stored or searched in JSON? simpler to search ref
+            ->orderByRaw("
+                CASE
+                    WHEN status = 'pending' THEN 1
+                    WHEN status = 'processing' THEN 2
+                    WHEN status = 'query' THEN 3
+                    WHEN status = 'successful' THEN 4
+                    ELSE 99
+                END
+            ")->orderByDesc('submission_date')
+            ->paginate(10)
+            ->withQueryString();
+
+        // Load active service and its fields
+        $service = Service::where('name', $serviceKey)
+            ->where('is_active', true)
+            ->with(['fields' => fn($q) => $q->where('is_active', true), 'prices'])
+            ->first();
+
+        $wallet = Wallet::firstOrCreate(
+            ['user_id' => $user->id],
+            ['balance' => 0.00, 'status' => 'active']
+        );
+
+        $fields = $service?->fields ?? collect();
+        $prices = $service?->prices ?? collect();
+
+        return view('pages.dashboard.cac.index', [
+            'fields'        => $fields,
+            'service'       => $service,
+            'submissions'   => $submissions,
+            'servicePrices' => $prices,
+            'wallet'        => $wallet,
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $user = Auth::user();
+        $serviceKey = 'CAC';
+
+        // Validate Service Field ID first to determine requirements
+        $request->validate([
+            'service_field_id' => 'required|exists:service_fields,id',
+        ]);
+
+        $serviceField = ServiceField::with(['service', 'prices'])->findOrFail($request->service_field_id);
+        $serviceName = $serviceField->service->name; // Should be 'CAC'
+        $fieldName = $serviceField->field_name; // e.g., 'Business Name'
+
+        // Define Base Rules
+        $rules = [
+            'surname' => 'required|string',
+            'first_name' => 'required|string',
+            'phone_number' => 'required|string',
+            'gender' => 'required|string',
+            'date_of_birth' => 'required|date',
+            'res_state' => 'required|string',
+            'res_lga' => 'required|string',
+            'res_city' => 'required|string',
+            'res_house_no' => 'required|string',
+            'res_street' => 'required|string',
+            'bus_state' => 'required|string',
+            'bus_lga' => 'required|string',
+            'bus_city' => 'required|string',
+            'bus_house_no' => 'required|string',
+            'bus_street' => 'required|string',
+            'nature_of_business' => 'required|string',
+            'business_name_1' => 'required|string',
+            'email' => 'required|email',
+            'nin_upload' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'signature_upload' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'passport_upload' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ];
+
+        // Director 2 fields are optional
+        $rules = array_merge($rules, [
+            'director2_surname' => 'nullable|string',
+            'director2_first_name' => 'nullable|string',
+            'director2_phone_number' => 'nullable|string',
+            'director2_gender' => 'nullable|string',
+            'director2_date_of_birth' => 'nullable|date',
+            'director2_res_state' => 'nullable|string',
+            'director2_res_lga' => 'nullable|string',
+            'director2_res_city' => 'nullable|string',
+            'director2_res_house_no' => 'nullable|string',
+            'director2_res_street' => 'nullable|string',
+            'director2_nin_upload' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'director2_signature_upload' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'director2_passport_upload' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ]);
+
+        $request->validate($rules);
+
+        // Determine price
+        $servicePrice = $serviceField->prices
+            ->where('user_type', $user->role)
+            ->first()?->price ?? $serviceField->base_price;
+
+        $totalAmount = $servicePrice;
+
+        if ($servicePrice === null) {
+            return back()->with(['status' => 'error', 'message' => 'Service price not configured.'])->withInput();
+        }
+
+        $wallet = Wallet::where('user_id', $user->id)->firstOrFail();
+
+        if ($wallet->status !== 'active') {
+            return back()->with(['status' => 'error', 'message' => 'Your wallet is not active.'])->withInput();
+        }
+
+        if ($wallet->balance < $totalAmount) {
+            return back()->with(['status' => 'error', 'message' => 'Insufficient balance.'])->withInput();
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $reference = 'CAC' . date('ymd') . strtoupper(substr(uniqid(), -5));
+            $performedBy = trim($user->first_name . ' ' . $user->last_name);
+
+            // Handle Uploads
+            $ninPath = $request->file('nin_upload')->store('uploads/cac/nin', 'public');
+            $signaturePath = $request->file('signature_upload')->store('uploads/cac/signature', 'public');
+            $passportPath = $request->file('passport_upload')->store('uploads/cac/passport', 'public');
+
+            $uploads = [
+                'nin' => $ninPath,
+                'signature' => $signaturePath,
+                'passport' => $passportPath,
+            ];
+
+            // Handle Director 2 Uploads if present
+            if ($request->hasFile('director2_nin_upload')) {
+                $uploads['director2_nin'] = $request->file('director2_nin_upload')->store('uploads/cac/nin', 'public');
+            }
+            if ($request->hasFile('director2_signature_upload')) {
+                $uploads['director2_signature'] = $request->file('director2_signature_upload')->store('uploads/cac/signature', 'public');
+            }
+            if ($request->hasFile('director2_passport_upload')) {
+                $uploads['director2_passport'] = $request->file('director2_passport_upload')->store('uploads/cac/passport', 'public');
+            }
+
+            // Prepare Data for JSON field
+            $formData = $request->except([
+                '_token', 'nin_upload', 'signature_upload', 'passport_upload',
+                'director2_nin_upload', 'director2_signature_upload', 'director2_passport_upload'
+            ]);
+            $formData['uploads'] = $uploads;
+
+            // Create Transaction
+            $transaction = Transaction::create([
+                'transaction_ref' => $reference,
+                'user_id'         => $user->id,
+                'amount'          => $totalAmount,
+                'performed_by'    => $performedBy,
+                'description'     => "{$serviceName} Registration - {$fieldName}",
+                'type'            => 'debit',
+                'status'          => 'completed',
+                'metadata'        => [
+                    'service' => $serviceName,
+                    'field' => $fieldName,
+                    'details' => $formData
+                ],
+            ]);
+
+            // Create AgentService
+            AgentService::create([
+                'reference'       => $reference,
+                'user_id'         => $user->id,
+                'service_id'      => $serviceField->service_id,
+                'service_field_id'=> $serviceField->id,
+                'field_code'      => $serviceField->id, // Redundant but consistent
+                'service_name'    => $serviceName,
+                'field_name'      => $fieldName,
+                'amount_paid'     => $totalAmount,
+                'performed_by'    => $performedBy,
+                'transaction_id'  => $transaction->id,
+                'submission_date' => now(),
+                'status'          => 'pending',
+                'service_type'    => 'cac_registration',
+                'field'           => json_encode($formData), // Store all form data here
+                'first_name'      => $request->first_name,
+                'last_name'       => $request->surname,
+                'email'           => $request->email,
+                'phone_number'    => $request->phone_number,
+                'passport_url'    => isset($uploads['passport']) ? asset('storage/' . $uploads['passport']) : null, // Migration has 'number' or 'phone_number'? Migration has 'number'.
+                'number'          => $request->phone_number,
+                'state'           => $request->res_state,
+                'lga'             => $request->res_lga,
+            ]);
+
+            $wallet->decrement('balance', $totalAmount);
+
+            DB::commit();
+
+            return redirect()->route('cac.index')->with([
+                'status' => 'success',
+                'message' => 'CAC Registration submitted successfully. Reference: ' . $reference
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with(['status' => 'error', 'message' => 'Error: ' . $e->getMessage()])->withInput();
+        }
+    }
+}

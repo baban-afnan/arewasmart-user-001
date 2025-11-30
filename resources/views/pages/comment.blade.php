@@ -1,0 +1,99 @@
+<!-- AREWA SMART: Comment Response Modal -->
+<div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden">
+            
+            <!-- Header -->
+            <div class="modal-header bg-primary text-white py-3 px-4">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-chat-left-text fs-4"></i>
+                    <h5 class="modal-title text-white mb-0 fw-semibold" id="commentModalLabel">Request Response</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <!-- Body -->
+            <div class="modal-body bg-light p-4" id="commentModalBody" style="font-size: 1rem; white-space: pre-wrap; min-height: 160px;">
+                <div class="text-center text-secondary">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <p class="mb-0">Loading comment...</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer bg-white border-top d-flex justify-content-between align-items-center py-2 px-4">
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                        <i class="bi bi-file-earmark-text me-1"></i> BVN Report
+                    </a>
+                    <a href="#" class="btn btn-sm btn-outline-warning rounded-pill px-3">
+                        <i class="bi bi-award me-1"></i> VIP Access
+                    </a>
+                    <a href="#" class="btn btn-sm btn-outline-info rounded-pill px-3">
+                        <i class="bi bi-question-circle me-1"></i> Complain
+                    </a>
+                    <a href="#" id="downloadBtn" class="btn btn-sm btn-success rounded-pill px-3 d-none" target="_blank" download>
+                        <i class="bi bi-download me-1"></i> Download File
+                    </a>
+                </div>
+
+                <div id="encouragement" class="text-muted small fst-italic"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AREWA SMART: Dynamic Encouragement Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const messages = [
+            "Keep pushing forward — success is near!",
+            "Believe in yourself, you’ve got this!",
+            "Every step counts, no matter how small.",
+            "Great things take time — stay patient.",
+            "Your effort today is your victory tomorrow!",
+            "Stay focused — progress is happening.",
+            "Never give up — your breakthrough is close!"
+        ];
+
+        const encouragement = document.getElementById("encouragement");
+        const modal = document.getElementById("commentModal");
+        const modalBody = document.getElementById("commentModalBody");
+        const downloadBtn = document.getElementById("downloadBtn");
+
+        // Show random encouragement each time modal opens
+        modal.addEventListener("show.bs.modal", function (event) {
+            const button = event.relatedTarget;
+            const comment = button.getAttribute('data-comment');
+            const fileUrl = button.getAttribute('data-file-url');
+            const approvedBy = button.getAttribute('data-approved-by');
+
+            // Populate Comment
+            let content = '';
+            if (comment) {
+                content += comment;
+            } else {
+                content += 'No comment available.';
+            }
+
+            if (approvedBy) {
+                content += '\n\nApproved By: ' + approvedBy;
+            }
+
+            modalBody.innerText = content;
+
+            // Handle Download Button
+            if (fileUrl && fileUrl !== 'null') {
+                downloadBtn.href = fileUrl;
+                downloadBtn.classList.remove('d-none');
+            } else {
+                downloadBtn.classList.add('d-none');
+                downloadBtn.href = '#';
+            }
+
+            // Random Encouragement
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            encouragement.innerText = randomMessage;
+        });
+    });
+</script>
