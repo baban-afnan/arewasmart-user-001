@@ -100,14 +100,14 @@ class TinRegistrationController extends Controller
                 'cac_certificate' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
                 // Require contact person details for corporate as well
                 'first_name' => 'required|string',
-                'surname' => 'required|string',
+                'last_name' => 'required|string',
             ]);
         } else {
             // Individual Rules
             $rules = array_merge($rules, [
                 'bvn' => 'required|string',
                 'first_name' => 'required|string',
-                'surname' => 'required|string',
+                'last_name' => 'required|string',
                 'middle_name' => 'nullable|string',
                 'nin' => 'required|string',
                 'date_of_birth' => 'required|date',
@@ -196,7 +196,7 @@ class TinRegistrationController extends Controller
                 'service_type'    => $isCorporate ? 'Tin_corporate' : 'Tin_individual',
                 'field'           => json_encode($formData),
                 'first_name'      => $request->first_name,
-                'last_name'       => $request->surname,
+                'last_name'       => $request->last_name,
                 'business_name'   => $request->company_name ?? null,
                 'email'           => $request->email,
                 'phone_number'    => $request->phone_number,
