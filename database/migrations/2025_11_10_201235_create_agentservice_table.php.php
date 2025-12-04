@@ -43,14 +43,43 @@ return new class extends Migration {
             $table->string('affidavit')->nullable(); 
             $table->string('affidavit_file_url')->nullable();
             $table->string('file_url')->nullable();
+            $table->string('passport_url')->nullable();
+            $table->string('nin_slip_url')->nullable();
+            $table->string('cac_file')->nullable();
+            $table->string('memart_file')->nullable();
+            $table->string('status_report_file')->nullable();
+            $table->string('tin_file')->nullable();
             $table->text('field')->nullable(); 
             $table->string('performed_by', 150)->nullable();
             $table->string('approved_by', 150)->nullable();
             $table->string('completed_by', 150)->nullable();
             $table->decimal('amount', 10, 2)->nullable();
             $table->dateTime('submission_date');
-            $table->enum('status', ['pending', 'processing', 'in-progress', 'resolved', 'successful', 'rejected', 'failed','query', 'remark'])->default('pending');
+
+            $table->enum('status', [
+                'pending',
+                'processing',
+                'in-progress',
+                'resolved',
+                'successful',
+                'rejected',
+                'failed',
+                'query',
+                'remark'
+            ])->default('pending');
+
             $table->text('comment')->nullable();
+
+            // Newly added company-related fields
+            $table->string('company_name')->nullable();
+            $table->string('registration_number')->nullable();
+            $table->string('phone_number')->nullable();
+            $table->string('city')->nullable();
+            $table->string('house_number')->nullable();
+            $table->string('street_name')->nullable();
+            $table->string('country')->nullable();
+            $table->string('cac_certificate')->nullable();
+
             $table->timestamps();
         });
     }

@@ -11,7 +11,7 @@ class AgentService extends Model
 
     protected $table = 'agent_services';
 
-     protected $fillable = [
+    protected $fillable = [
         'reference',
         'user_id',
         'service_id',
@@ -60,6 +60,16 @@ class AgentService extends Model
         'submission_date',
         'status',
         'comment',
+
+        // New Columns
+        'company_name',
+        'registration_number',
+        'phone_number',
+        'city',
+        'house_number',
+        'street_name',
+        'country',
+        'cac_certificate',
     ];
 
     protected $casts = [

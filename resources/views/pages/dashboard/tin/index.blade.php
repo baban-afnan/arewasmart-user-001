@@ -110,7 +110,7 @@
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label">Surname <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" name="surname" value="{{ old('surname') }}">
+                                            <input type="text" class="form-control" name="last_name" value="{{ old('last_name') }}">
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label">First Name <span class="text-danger">*</span></label>
@@ -178,7 +178,7 @@
                                     <div class="row g-3 mb-4">
                                         <div class="col-md-6">
                                             <label class="form-label">Surname <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control corporate-contact" name="surname" value="{{ old('surname') }}">
+                                            <input type="text" class="form-control corporate-contact" name="last_name" value="{{ old('last_name') }}">
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">First Name <span class="text-danger">*</span></label>
@@ -397,7 +397,7 @@
                         </div>
                         <div class="col-md-6">
                             <strong>Name/Company:</strong><br>
-                            {{ $submission->business_name ?? ($submission->first_name . ' ' . $submission->surname) }}
+                            {{ $submission->business_name ?? ($submission->first_name . ' ' . $submission->last_name) }}
                         </div>
                     </div>
 
