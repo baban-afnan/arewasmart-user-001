@@ -21,7 +21,7 @@ class AffidavitController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $serviceKey = 'Affidavit';
+        $serviceKey = 'Affidavit-app';
 
         // Query only this user's submissions
         $submissions = AgentService::with('transaction')

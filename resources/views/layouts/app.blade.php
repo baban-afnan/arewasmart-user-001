@@ -204,10 +204,8 @@
     <script src="{{ asset('assets/js/airtime.js') }}"></script>
     <script src="{{ asset('assets/js/pin.js') }}"></script>
     <script src="{{ asset('assets/js/bvnservices.js') }}"></script>
-    <script src="{{ asset('assets/js/payout.js') }}"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('assets/js/sweetalert.js') }}"></script>
-    <script src="{{ asset('assets/js/select2.min.js') }}"></script>
 
     @if(!Auth::user()->bvn || !Auth::user()->phone_no || !Auth::user()->nin || !Auth::user()->lga || !Auth::user()->pin)
         <script>

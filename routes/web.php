@@ -17,6 +17,10 @@ use App\Http\Controllers\Agency\NinModificationController;
 use App\Http\Controllers\EnrolmentReportController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\Agency\NinValidationController;
+use App\Http\Controllers\NINverificationController;
+use App\Http\Controllers\BvnverificationController;
+
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -197,6 +201,35 @@ Route::prefix('wallet')->group(function () {
         Route::get('/{ticket}', [SupportController::class, 'show'])->name('support.show');
         Route::post('/{ticket}/reply', [SupportController::class, 'reply'])->name('support.reply');
     });
+
+
+     /*
+    |--------------------------------------------------------------------------
+    | NIN Verification
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('nin-verification')->group(function () {
+        Route::get('/', [NINverificationController::class, 'index'])->name('nin.verification.index');
+        Route::post('/', [NINverificationController::class, 'store'])->name('nin.verification.store');
+        Route::post('/{id}/status', [NINverificationController::class, 'updateStatus'])->name('nin.verification.status');
+        Route::get('/standardSlip/{id}', [NINverificationController::class, 'standardSlip'])->name('standardSlip');
+        Route::get('/premiumSlip/{id}', [NINverificationController::class, 'premiumSlip'])->name('premiumSlip');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | BVN Verification
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('bvn-verification')->group(function () {
+        Route::get('/', [BvnverificationController::class, 'index'])->name('bvn.verification.index');
+        Route::post('/', [BvnverificationController::class, 'store'])->name('bvn.verification.store');
+       Route::get('/standardBVN/{id}', [BvnverificationController::class, 'standardBVN'])->name("standardBVN");
+    Route::get('/premiumBVN/{id}', [BvnverificationController::class, 'premiumBVN'])->name("premiumBVN");
+    Route::get('/plasticBVN/{id}', [BvnverificationController::class, 'plasticBVN'])->name("plasticBVN");
+
+    });
+
 
 });
  

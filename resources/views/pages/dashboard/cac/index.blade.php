@@ -459,7 +459,6 @@
                                 </div>
                             </div>
                         </div>
-                    @endif
 
                     <h6 class="fw-bold">Submitted Information</h6>
                     @php 

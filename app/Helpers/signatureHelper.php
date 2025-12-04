@@ -21,6 +21,7 @@ class signatureHelper
 
         return $signature;
     }
+    
 
     /**
      * Sorts the given array of data by keys in ascending order and construcs a query string

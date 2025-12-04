@@ -11,7 +11,7 @@
                     ['route' => route('buy-data'), 'icon' => 'ti-world', 'color' => 'bg-warning', 'name' => 'Data'],
                     ['route' => route('electricity'), 'icon' => 'ti-bolt', 'color' => 'bg-danger', 'name' => 'Electricity'],
                     ['route' => route('education'), 'icon' => 'ti-home', 'color' => 'bg-success', 'name' => 'Educational Pin'],
-                    ['route' => route('jamb'), 'icon' => 'ti-home', 'color' => 'bg-success', 'name' => 'Jamb Pin'],
+                    ['route' => route('jamb'), 'icon' => 'ti-home', 'color' => 'bg-secondary', 'name' => 'Jamb Pin'],
                     ['route' => route('bvn-crm'), 'icon' => 'ti-user-plus', 'color' => 'bg-info', 'name' => 'CRM'],
                     ['route' => route('send-vnin'), 'icon' => 'ti-user-plus', 'color' => 'bg-warning', 'name' => 'Vnin/Fas'],
                     ['route' => route('modification'), 'icon' => 'ti-user-plus', 'color' => 'bg-danger', 'name' => 'BVN Modification'],
@@ -19,9 +19,11 @@
                     ['modal' => '#agentEnrolmentModal', 'icon' => 'ti-user-plus', 'color' => 'bg-secondary', 'name' => 'BVN Agent'],
                     ['route' => route('nin-modification'), 'icon' => 'ti-user-plus', 'color' => 'bg-info', 'name' => 'NIN Modification'],
                     ['route' => route('nin-validation'), 'icon' => 'ti-user-plus', 'color' => 'bg-warning', 'name' => 'Validation & IPE'],
-                    ['route' => route('affidavit.index'), 'icon' => 'ti-home-plus', 'color' => 'bg-secondary', 'name' => 'Affidavit'],
-                    ['route' => route('cac.index'), 'icon' => 'ti-user-plus', 'color' => 'bg-primary', 'name' => 'CAC Reg'],
-                    ['route' => route('cac.tin'), 'icon' => 'ti-user-plus', 'color' => 'bg-primary', 'name' => 'TIN Reg'],
+                    ['route' => route('affidavit.index'), 'icon' => 'ti-home-plus', 'color' => 'bg-danger', 'name' => 'Affidavit'],
+                    ['route' => route('cac.index'), 'icon' => 'ti-user-plus', 'color' => 'bg-success', 'name' => 'CAC Reg'],
+                    ['route' => route('cac.tin'), 'icon' => 'ti-user-plus', 'color' => 'bg-secondary', 'name' => 'TIN Reg'],
+                    ['route' => route('enrolment.report'), 'icon' => 'ti-user-plus', 'color' => 'bg-info', 'name' => 'Enrolment Report'],
+                    ['modal' => '#verifyModal', 'icon' => 'ti-id-badge', 'color' => 'bg-primary', 'name' => 'Verify (NIN / BVN)'],
                 ];
             @endphp
 
@@ -122,6 +124,72 @@
   </div>
 </div>
 <!-- /Agent Enrolment Modal -->
+
+
+<!-- Verify Modal -->
+<div class="modal fade" id="verifyModal" tabindex="-1" aria-labelledby="verifyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow-lg border-0">
+
+      <!-- HEADER -->
+      <div class="modal-header bg-primary text-white py-3">
+        <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="verifyModalLabel">
+          <i class="ti ti-id-badge fs-3"></i>
+          BVN / NIN Verification
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body p-4">
+
+        @php
+            $verifyServices = [
+                [
+                    'route' => route('bvn.verification.index'),
+                    'icon' => 'ti-fingerprint',
+                    'color' => 'bg-primary',
+                    'name' => 'Verify BVN'
+                ],
+                [
+                    'route' => route('nin.verification.index'),
+                    'icon' => 'ti-credit-card',
+                    'color' => 'bg-success',
+                    'name' => 'Verify NIN'
+                ],
+            ];
+        @endphp
+
+        <div class="row service-grid justify-content-center">
+
+            @foreach ($verifyServices as $sv)
+                <div class="col-6 d-flex">
+                    <a href="{{ $sv['route'] }}" class="w-100">
+                        <div class="card flex-fill shadow-sm text-center border-0 rounded-3 service-card">
+                            <div class="card-body p-3 d-flex flex-column align-items-center">
+                                <span class="avatar rounded-circle {{ $sv['color'] }} mb-2 p-3">
+                                    <i class="ti {{ $sv['icon'] }} text-white fs-18"></i>
+                                </span>
+                                <h6 class="fs-13 fw-semibold mb-0">{{ $sv['name'] }}</h6>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            @endforeach
+
+        </div>
+
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-footer p-3">
+        <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- /Verify Modal -->
 
 <style>
 

@@ -46,6 +46,22 @@
                                         <option value="Cable" {{ request('service_type') == 'Cable' ? 'selected' : '' }}>Cable TV</option>
                                         <option value="Education" {{ request('service_type') == 'Education' ? 'selected' : '' }}>Education (WAEC/NECO/JAMB)</option>
                                         <option value="Funding" {{ request('service_type') == 'Funding' ? 'selected' : '' }}>Wallet Funding</option>
+                                        <option value="Funding" {{ request('service_type') == 'Funding' ? 'selected' : '' }}>Wallet Debit</option>
+                                        <option value="VNIN_TO_NIBSS" {{ request('service_type') == 'VNIN_TO_NIBSS' ? 'selected' : '' }}>VNIN TO NIBSS</option>
+                                        <option value="BVN_SEARCH" {{ request('service_type') == 'BVN_SEARCH' ? 'selected' : '' }}>BVN Search</option>
+                                        <option value="BVN_MODIFICATION" {{ request('service_type') == 'BVN_MODIFICATION' ? 'selected' : '' }}>BVN Modification</option>
+                                        <option value="CRM" {{ request('service_type') == 'CRM' ? 'selected' : '' }}>CRM</option>
+                                        <option value="BVN_USER" {{ request('service_type') == 'BVN_USER' ? 'selected' : '' }}>BVN User</option>
+                                        <option value="APPROVAL_REQUEST" {{ request('service_type') == 'APPROVAL_REQUEST' ? 'selected' : '' }}>Approval Request</option>
+                                        <option value="AFFIDAVIT" {{ request('service_type') == 'AFFIDAVIT' ? 'selected' : '' }}>Affidavit</option>
+                                        <option value="NIN_SELFSERVICE" {{ request('service_type') == 'NIN_SELFSERVICE' ? 'selected' : '' }}>NIN Self Service</option>
+                                        <option value="NIN_VALIDATION" {{ request('service_type') == 'NIN_VALIDATION' ? 'selected' : '' }}>NIN Validation</option>
+                                        <option value="IPE" {{ request('service_type') == 'IPE' ? 'selected' : '' }}>IPE</option>
+                                        <option value="NIN_MODIFICATION" {{ request('service_type') == 'NIN_MODIFICATION' ? 'selected' : '' }}>NIN Modification</option>
+                                        <option value="TIN_INDIVIDUAL" {{ request('service_type') == 'TIN_INDIVIDUAL' ? 'selected' : '' }}>TIN Individual</option>
+                                        <option value="TIN_CORPORATE" {{ request('service_type') == 'TIN_CORPORATE' ? 'selected' : '' }}>TIN Corporate</option>
+                                        <option value="CAC" {{ request('service_type') == 'CAC' ? 'selected' : '' }}>CAC</option>
+                                        <option value="not_selected" {{ request('service_type') == 'not_selected' ? 'selected' : '' }}>Not Selected</option>
                                     </select>
                                 </div>
                                 <div class="col-12 col-md-2">
@@ -134,7 +150,7 @@
                             </div>
 
                             <div class="mt-4 d-flex justify-content-center">
-                                {{ $transactions->withQueryString()->links('vendor.pagination.bootstrap-4') }}
+                                {{ $transactions->withQueryString()->links('vendor.pagination.custom') }}
                             </div>
 
                         </div>

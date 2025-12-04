@@ -2,8 +2,8 @@
 
 namespace App\Repositories;
 
-use App\Models\Ninverification;
 use App\Models\Verification;
+
 use TCPDF;
 
 class NIN_PDF_Repository
@@ -11,7 +11,7 @@ class NIN_PDF_Repository
     public function regularPDF($nin_no)
     {
 
-        if (Ninverification::where('number_nin', $nin_no)->exists()) {
+        if (Verification::where('number_nin', $nin_no)->exists()) {
             $verifiedRecord = Verification::where('number_nin', $nin_no)
                 ->latest()
                 ->first();
@@ -96,8 +96,8 @@ class NIN_PDF_Repository
     public function standardPDF($nin_no)
     {
 
-        if (Ninverification::where('number_nin', $nin_no)->exists()) {
-            $verifiedRecord = Ninverification::where('number_nin', $nin_no)
+        if (Verification::where('number_nin', $nin_no)->exists()) {
+            $verifiedRecord = Verification::where('number_nin', $nin_no)
                 ->latest()
                 ->first();
 
@@ -194,8 +194,8 @@ class NIN_PDF_Repository
 
     public function premiumPDF($nin_no)
     {
-        if (Ninverification::where('number_nin', $nin_no)->exists()) {
-            $verifiedRecord = Ninverification::where('number_nin', $nin_no)
+        if (Verification::where('number_nin', $nin_no)->exists()) {
+            $verifiedRecord = Verification::where('number_nin', $nin_no)
                 ->latest()
                 ->first();
 

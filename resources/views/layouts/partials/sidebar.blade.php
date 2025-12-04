@@ -121,6 +121,19 @@
                     </ul>
                 </li>
 
+                 <!-- Verification Services -->
+                <li class="submenu">
+                    <a href="javascript:void(0);" class="{{ request()->routeIs('nin.verification.index') ? 'active subdrop' : '' }}">
+                        <i class="ti ti-user-check"></i>
+                        <span>Verification</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <ul style="{{ request()->routeIs('nin.verification.index') ? 'display: block;' : 'display: none;' }}">
+                        <li><a href="{{ route('bvn.verification.index') }}" class="{{ request()->routeIs('bvn.verification.index') ? 'active' : '' }}">Verify BVN</a></li>
+                        <li><a href="{{ route('nin.verification.index') }}" class="{{ request()->routeIs('nin.verification.index') ? 'active' : '' }}">Verify NIN</a></li>
+                    </ul>
+                </li>
+
                 <!-- BVN Services -->
                 <li class="submenu">
                     <a href="javascript:void(0);" class="{{ request()->routeIs('modification', 'bvn-crm', 'bvn.index', 'send-vnin', 'phone.search.index') ? 'active subdrop' : '' }}">
@@ -232,7 +245,7 @@
 
 /* Active state */
 .sidebar-menu li a.active {
-    background: #007bff;
+    background: #f1cfbfff;
     color: white;
 }
 
