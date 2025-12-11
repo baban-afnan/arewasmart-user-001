@@ -175,11 +175,7 @@
 
                                     @if(!$message->is_admin_reply)
                                         <div class="ms-2 mt-1">
-                                            @if($ticket->user && $ticket->user->photo)
-                                                <img src="{{ Auth::user()->photo ? asset(Auth::user()->photo) : asset('assets/img/profiles/avatar-01.jpg') }}" alt="User" class="avatar-img">
-                                            @else
-                                                <img src="{{ Auth::user()->photo ? asset(Auth::user()->photo) : asset('assets/img/profiles/avatar-01.jpg') }}" alt="User" class="avatar-img">
-                                            @endif
+                                            <img src="{{ Auth::user()->photo ? asset(Auth::user()->photo) : asset('assets/img/profiles/avatar-01.jpg') }}" alt="User" class="avatar-img">
                                         </div>
                                     @endif
                                 </div>
@@ -343,7 +339,7 @@
                     }
 
                     // User Photo Logic
-                    const userPhotoUrl = `{{ $ticket->user && $ticket->user->photo ? Storage::url($ticket->user->photo) : 'http://127.0.0.1:8000/storage/uploads/tin/passport/1phLlk2TKVB5pSplQXbLHfjKKSofR7zSPA0N0NA6.jpg' }}`;
+                    const userPhotoUrl = "{{ Auth::user()->photo ? asset(Auth::user()->photo) : asset('assets/img/profiles/avatar-01.jpg') }}";
 
                     let html = `
                         <div class="d-flex mb-3 ${alignClass} message-wrapper" data-id="${msg.id}">
