@@ -43,7 +43,7 @@ class SupportController extends Controller
 
         $attachmentPath = null;
         if ($request->hasFile('attachment')) {
-            $attachmentPath = $request->file('attachment')->store('support-attachments', 'public');
+            $attachmentPath = $request->file('attachment')->store('uploads/support', 'public');
         }
 
         SupportMessage::create([
@@ -84,7 +84,7 @@ class SupportController extends Controller
 
         $attachmentPath = null;
         if ($request->hasFile('attachment')) {
-            $attachmentPath = $request->file('attachment')->store('support-attachments', 'public');
+            $attachmentPath = $request->file('attachment')->store('uploads/support', 'public');
         }
 
         SupportMessage::create([
@@ -119,6 +119,30 @@ class SupportController extends Controller
             'user_id' => null, // System message
             'message' => $message,
             'is_admin_reply' => true,
+        ]);
+    }
+    public function fetchUpdates(Request $request, $reference)
+    {
+        $ticket = SupportTicket::where('ticket_reference', $reference)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // Check for new messages since the last loaded message ID
+        $lastMessageId = $request->input('last_message_id', 0);
+        
+        $messages = SupportMessage::where('support_ticket_id', $ticket->id)
+            ->where('id', '>', $lastMessageId)
+            ->with('user') // Eager load user for avatar/name
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        // Check if admin is typing (assuming Admin sets this cache key)
+        // Key format assumption: admin_typing_TICKETID
+        $isTyping = \Illuminate\Support\Facades\Cache::get('admin_typing_' . $ticket->id, false);
+
+        return response()->json([
+            'messages' => $messages,
+            'is_typing' => $isTyping,
         ]);
     }
 }

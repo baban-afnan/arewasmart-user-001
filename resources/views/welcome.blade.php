@@ -160,10 +160,10 @@
                 Empowering northern Nigeria through innovative digital solutions and smart technology services. Join us in building a smarter, more connected future.
             </p>
             <div class="hero-btns" data-aos="fade-up" data-aos-delay="400" data-aos-duration="1000">
-                <a href="{{route ('register')}}" class="btn btn-primary btn-lg me-3" style="padding: 12px 30px; border-radius: 30px;">
+                <a href="{{route ('register')}}" class="btn btn-primary btn-lg me-3" style="padding: 12px 30px; border-radius: 30px; background: linear-gradient(45deg, #FF416C, #FF4B2B); border: none;">
                     Get Started
                 </a>
-                <a href="{{route ('login')}}" class="btn btn-secondary btn-lg me-3" style="padding: 12px 30px; border-radius: 30px;">
+                <a href="{{route ('login')}}" class="btn btn-secondary btn-lg me-3" style="padding: 12px 30px; border-radius: 30px; background: transparent; border: 2px solid #FF416C; color: #fff;">
                     Login Now
                 </a>
             </div>

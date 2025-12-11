@@ -199,6 +199,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/store', [SupportController::class, 'store'])->name('support.store');
             Route::get('/{ticket}', [SupportController::class, 'show'])->name('support.show');
             Route::post('/{ticket}/reply', [SupportController::class, 'reply'])->name('support.reply');
+            Route::get('/{ticket}/updates', [SupportController::class, 'fetchUpdates'])->name('support.updates');
         });
 
 
