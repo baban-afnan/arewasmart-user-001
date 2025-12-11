@@ -115,11 +115,17 @@ class SupportController extends Controller
 
     private function sendAutoReply(SupportTicket $ticket)
     {
+        // Only send auto reply if this is the first message
+        $messageCount = SupportMessage::where('support_ticket_id', $ticket->id)->count();
+        if ($messageCount > 1) {
+            return;
+        }
+
         $now = now();
         $isWeekend = $now->isSaturday() || $now->isSunday();
         
         if ($isWeekend) {
-            $message = "Thank you for reaching out. Please note that our support team is currently unavailable as it is the weekend. We will attend to your request on the next working day.\n\nFor urgent matters, please chat with us on WhatsApp: https://wa.me/2349110501995";
+            $message = "Thank you for reaching out. Please note that our support team is currently unavailable as we don't work on weekends. We will attend to your request on the next working day.\n\nFor urgent matters, please chat with us on WhatsApp: https://wa.me/2349110501995";
         } else {
             $message = "Thank you for contacting us. Your request has been received, and a support agent will respond to you shortly. Please hold on.";
         }
@@ -131,6 +137,7 @@ class SupportController extends Controller
             'is_admin_reply' => true,
         ]);
     }
+
     public function fetchUpdates(Request $request, $reference)
     {
         $ticket = SupportTicket::where('ticket_reference', $reference)
@@ -142,11 +149,11 @@ class SupportController extends Controller
         
         $messages = SupportMessage::where('support_ticket_id', $ticket->id)
             ->where('id', '>', $lastMessageId)
-            ->with('user') // Eager load user for avatar/name
+            ->with('user') 
             ->orderBy('created_at', 'asc')
             ->get();
 
-        // Check if admin is typing (assuming Admin sets this cache key)
+       
         // Key format assumption: admin_typing_TICKETID
         $isTyping = \Illuminate\Support\Facades\Cache::get('admin_typing_' . $ticket->id, false);
 
