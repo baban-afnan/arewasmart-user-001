@@ -94,4 +94,5 @@
             <p class="text-muted mb-0">&copy; {{ date('Y') }} Arewa Smart</p>
         </div>
     </form>
+
 </x-guest-layout>

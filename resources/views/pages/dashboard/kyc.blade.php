@@ -219,7 +219,7 @@
 <!-- /Force Profile Modal -->
 
     @push('scripts')
-        @if(!Auth::user()->bvn || !Auth::user()->phone_no)
+        @if(!Auth::user()->bvn || !Auth::user()->phone_no || !Auth::user()->nin || !Auth::user()->lga || !Auth::user()->pin)
             <script>
 
 				const lgas = {

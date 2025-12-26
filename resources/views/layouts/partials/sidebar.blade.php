@@ -185,6 +185,12 @@
                         <i class="ti ti-settings"></i><span>Settings</span>
                     </a>
                 </li>
+
+                <li>
+                    <a href="{{ route('api.dashboard') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-settings"></i><span>Smart API</span>
+                    </a>
+                </li>
                 
                 <li>
                     <a href="{{ route('transactions') }}" class="{{ request()->routeIs('transactions') ? 'active' : '' }}">

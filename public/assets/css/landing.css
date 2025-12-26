@@ -1,17 +1,18 @@
 /* ===================================================
-   GOLD THEME STYLESHEET
-   Cleaned, Optimized & Gold-Enhanced
+   ORANGE THEME STYLESHEET
+   Cleaned, Optimized & Orange-Enhanced
    =================================================== */
 
 /* Global Styles */
 :root {
-    --primary: #2c3e50;
-    --secondary: #D4AF37; /* Gold replaces old secondary blue */
-    --accent: #b8941f; /* Deep gold accent tone */
-    --gold: #D4AF37;
+    --primary: #111827; /* Dark Gray/Black for text/headings */
+    --secondary: #F26522; /* Orange replaces old secondary */
+    --accent: #d94e0f; /* Darker Orange accent tone */
+    --gold: #F26522; /* Retaining var name for compatibility, but mapped to Orange */
+    --gold-light: #ffcdb2; /* Light orange for subtle effects */
     --light: #f9f9f9;
-    --dark: #2c3e50;
-    --gray: #7f8c8d;
+    --dark: #111827;
+    --gray: #6b7280;
     --transition: all 0.3s ease;
 }
 
@@ -19,7 +20,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Figtree', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 html {
@@ -70,7 +71,7 @@ p {
 .btn:hover {
     background-color: var(--accent);
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+    box-shadow: 0 5px 15px rgba(242, 101, 34, 0.3);
 }
 
 /* Section Titles */
@@ -94,7 +95,7 @@ p {
     transform: translateX(-50%);
     width: 80px;
     height: 4px;
-    background-color: var(--gold);
+    background-color: var(--secondary);
 }
 
 /* Header Styles */
@@ -151,7 +152,7 @@ nav ul li a:hover {
     cursor: pointer;
 }
 
-/* Hero Section */
+/* Hero Section - Handled in welcome.blade.php mainly */
 .hero {
     background: linear-gradient(135deg, var(--primary) 0%, #3b4b60 100%);
     color: white;
@@ -198,7 +199,7 @@ nav ul li a:hover {
     text-align: center;
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(242, 101, 34, 0.1);
 }
 
 .service-card::before {
@@ -208,7 +209,7 @@ nav ul li a:hover {
     left: 0;
     width: 100%;
     height: 4px;
-    background: linear-gradient(90deg, var(--gold), #f1c40f);
+    background: linear-gradient(90deg, var(--secondary), #ff8c5a);
 }
 
 .service-card:hover {
@@ -223,7 +224,7 @@ nav ul li a:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(241, 196, 15, 0.05));
+    background: linear-gradient(135deg, rgba(242, 101, 34, 0.1), rgba(255, 140, 90, 0.05));
     border-radius: 50%;
     position: relative;
     transition: var(--transition);
@@ -231,18 +232,18 @@ nav ul li a:hover {
 
 .service-card:hover .service-icon {
     transform: scale(1.1);
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(241, 196, 15, 0.1));
+    background: linear-gradient(135deg, rgba(242, 101, 34, 0.2), rgba(255, 140, 90, 0.1));
 }
 
 .service-icon i {
     font-size: 2.8rem;
-    color: var(--gold);
+    color: var(--secondary);
     transition: var(--transition);
 }
 
 .service-card:hover .service-icon i {
-    color: #b8941f;
-    text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+    color: #d94e0f;
+    text-shadow: 0 0 15px rgba(242, 101, 34, 0.4);
 }
 
 .service-card h3 {
@@ -257,7 +258,7 @@ nav ul li a:hover {
     line-height: 1.7;
 }
 
-/* Footer */
+/* Footer - Handled in welcome.blade.php mainly */
 footer {
     background-color: var(--primary);
     color: white;
@@ -284,7 +285,7 @@ footer {
     left: 0;
     width: 40px;
     height: 3px;
-    background-color: var(--gold);
+    background-color: var(--secondary);
 }
 
 .footer-links {
@@ -302,7 +303,7 @@ footer {
 }
 
 .footer-links a:hover {
-    color: var(--gold);
+    color: var(--secondary);
     padding-left: 5px;
 }
 
@@ -325,7 +326,7 @@ footer {
 }
 
 .social-links a:hover {
-    background-color: var(--gold);
+    background-color: var(--secondary);
     transform: translateY(-5px);
 }
 
@@ -404,7 +405,7 @@ footer {
 
 /* Partners Section */
 .partners {
-  background: linear-gradient(180deg, #fff 0%, #fdf8e6 100%);
+  background: linear-gradient(180deg, #fff 0%, #fff6f2 100%);
   position: relative;
   overflow: hidden;
 }
@@ -416,12 +417,12 @@ footer {
   left: -100px;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(212,175,55,0.05) 0%, transparent 70%);
-  animation: gold-glow 10s infinite alternate;
+  background: radial-gradient(circle, rgba(242, 101, 34, 0.05) 0%, transparent 70%);
+  animation: orange-glow 10s infinite alternate;
   z-index: 0;
 }
 
-@keyframes gold-glow {
+@keyframes orange-glow {
   0% { transform: rotate(0deg); opacity: 0.4; }
   100% { transform: rotate(360deg); opacity: 0.8; }
 }
@@ -454,7 +455,7 @@ footer {
   height: 120px;
   box-shadow: 0 5px 20px rgba(0,0,0,0.05);
   transition: var(--transition);
-  border: 1px solid rgba(212,175,55,0.1);
+  border: 1px solid rgba(242, 101, 34, 0.1);
   position: relative;
   overflow: hidden;
 }
@@ -466,7 +467,7 @@ footer {
   left: -100%;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, var(--gold), #f1c40f);
+  background: linear-gradient(90deg, var(--secondary), #ff8c5a);
   transition: var(--transition);
 }
 
@@ -484,7 +485,7 @@ footer {
 
 .partner-logo:hover {
   transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(212,175,55,0.2);
+  box-shadow: 0 15px 30px rgba(242, 101, 34, 0.2);
 }
 
 .partner-logo:hover img {
@@ -505,7 +506,7 @@ footer {
 
 
 .support-section {
-  background: linear-gradient(180deg, #fff, #fdf8e6);
+  background: linear-gradient(180deg, #fff, #fff6f2);
   padding: 80px 0;
   position: relative;
   overflow: hidden;
@@ -518,14 +519,9 @@ footer {
   left: -100px;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 70%);
-  animation: gold-glow 12s infinite alternate;
+  background: radial-gradient(circle, rgba(242, 101, 34, 0.06) 0%, transparent 70%);
+  animation: orange-glow 12s infinite alternate;
   z-index: 0;
-}
-
-@keyframes gold-glow {
-  0% { transform: rotate(0deg); opacity: 0.4; }
-  100% { transform: rotate(360deg); opacity: 0.8; }
 }
 
 .support-grid {
@@ -551,8 +547,8 @@ footer {
 
 .feature-icon {
   font-size: 1.8rem;
-  color: var(--gold, #d4af37);
-  background: rgba(212,175,55,0.1);
+  color: var(--secondary);
+  background: rgba(242, 101, 34, 0.1);
   border-radius: 50%;
   padding: 12px;
 }
@@ -584,7 +580,7 @@ footer {
 }
 
 .support-contacts a:hover {
-  color: var(--gold, #d4af37);
+  color: var(--secondary);
 }
 
 .support-form {
@@ -616,13 +612,13 @@ footer {
 
 .support-form input:focus,
 .support-form textarea:focus {
-  border-color: var(--gold, #d4af37);
-  box-shadow: 0 0 5px rgba(212,175,55,0.4);
+  border-color: var(--secondary);
+  box-shadow: 0 0 5px rgba(242, 101, 34, 0.4);
   outline: none;
 }
 
 .btn-support {
-  background: linear-gradient(90deg, var(--gold, #d4af37), #f1c40f);
+  background: linear-gradient(90deg, var(--secondary), #ff8c5a);
   color: #fff;
   padding: 12px 25px;
   border: none;
@@ -632,7 +628,7 @@ footer {
 }
 
 .btn-support:hover {
-  box-shadow: 0 8px 20px rgba(212,175,55,0.4);
+  box-shadow: 0 8px 20px rgba(242, 101, 34, 0.4);
   transform: translateY(-2px);
 }
 
@@ -646,7 +642,7 @@ footer {
 }
 
 .testimonials-section {
-  background: linear-gradient(180deg, #fdf8e6 0%, #fff 100%);
+  background: linear-gradient(180deg, #fff6f2 0%, #fff 100%);
   padding: 80px 0;
   position: relative;
   overflow: hidden;
@@ -659,8 +655,8 @@ footer {
   left: -100px;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 70%);
-  animation: gold-glow 15s infinite alternate;
+  background: radial-gradient(circle, rgba(242, 101, 34, 0.06) 0%, transparent 70%);
+  animation: orange-glow 15s infinite alternate;
   z-index: 0;
 }
 
@@ -679,13 +675,13 @@ footer {
   box-shadow: 0 10px 25px rgba(0,0,0,0.05);
   padding: 30px;
   transition: transform 0.4s ease, box-shadow 0.4s ease;
-  border-top: 4px solid var(--gold, #d4af37);
+  border-top: 4px solid var(--secondary);
   position: relative;
 }
 
 .testimonial-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 15px 40px rgba(212,175,55,0.2);
+  box-shadow: 0 15px 40px rgba(242, 101, 34, 0.2);
 }
 
 .testimonial-content p {
@@ -706,7 +702,7 @@ footer {
   width: 70px;
   height: 70px;
   object-fit: cover;
-  border: 2px solid var(--gold, #d4af37);
+  border: 2px solid var(--secondary);
 }
 
 .testimonial-author h4 {
@@ -722,7 +718,7 @@ footer {
 }
 
 .stars i {
-  color: var(--gold, #d4af37);
+  color: var(--secondary);
   font-size: 0.9rem;
 }
 
@@ -735,7 +731,7 @@ footer {
 
 
 .about-section {
-  background: linear-gradient(180deg, #fff, #fdf8e6);
+  background: linear-gradient(180deg, #fff, #fff6f2);
   padding: 100px 0;
   overflow: hidden;
 }
@@ -758,8 +754,8 @@ footer {
   max-width: 380px;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid var(--gold, #d4af37);
-  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.25);
+  border: 4px solid var(--secondary);
+  box-shadow: 0 8px 25px rgba(242, 101, 34, 0.25);
   transition: all 1s ease-in-out;
   animation: rotateBorder 15s linear infinite;
 }
@@ -782,7 +778,7 @@ footer {
 }
 
 .about-content h4 {
-  color: var(--gold, #d4af37);
+  color: var(--secondary);
   margin-bottom: 20px;
   font-weight: 600;
 }

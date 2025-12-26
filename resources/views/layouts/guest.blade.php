@@ -71,6 +71,38 @@
 {{-- JavaScript Validation --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            
+            // --- Global Scripts ---
+
+            // Password Toggle
+            document.querySelectorAll('.toggle-password').forEach(toggle => {
+                toggle.addEventListener('click', function () {
+                    const input = this.closest('.pass-group').querySelector('input');
+                    if (input) {
+                        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                        input.setAttribute('type', type);
+                        
+                        this.classList.toggle('ti-eye');
+                        this.classList.toggle('ti-eye-off');
+                    }
+                });
+            });
+
+            // Submit Button Loading State
+            document.querySelectorAll('form').forEach(form => {
+                const submitButton = form.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    form.addEventListener('submit', function () {
+                        // Only disable if form is valid (though native validation might stop it, 
+                        // this event fires usually when submit happens)
+                        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Processing...';
+                        submitButton.disabled = true;
+                    });
+                }
+            });
+
+            // --- Specific Validation Scripts (Safeguarded) ---
+
             const email = document.getElementById('email');
             const emailError = document.getElementById('emailError');
             const password = document.getElementById('password');
@@ -80,74 +112,80 @@
             const passwordMatchError = document.getElementById('passwordMatchError');
 
             // Email Validation
-            email.addEventListener('input', () => {
-                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailPattern.test(email.value.trim())) {
-                    emailError.classList.remove('d-none');
-                } else {
-                    emailError.classList.add('d-none');
-                }
-            });
+            if (email && emailError) {
+                email.addEventListener('input', () => {
+                    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailPattern.test(email.value.trim())) {
+                        emailError.classList.remove('d-none');
+                    } else {
+                        emailError.classList.add('d-none');
+                    }
+                });
+            }
 
             // Password Strength
-            password.addEventListener('input', () => {
-                const val = password.value;
-                let strength = 0;
+            if (password && passwordStrengthBar && passwordStrengthText) {
+                password.addEventListener('input', () => {
+                    const val = password.value;
+                    let strength = 0;
 
-                if (val.length >= 8) strength++;
-                if (/[A-Z]/.test(val)) strength++;
-                if (/[a-z]/.test(val)) strength++;  // Added lowercase check
-                if (/[0-9]/.test(val)) strength++;
-                if (/[^A-Za-z0-9]/.test(val)) strength++;
-                if (val.length >= 12) strength++;   // Extra point for longer passwords
+                    if (val.length >= 8) strength++;
+                    if (/[A-Z]/.test(val)) strength++;
+                    if (/[a-z]/.test(val)) strength++;
+                    if (/[0-9]/.test(val)) strength++;
+                    if (/[^A-Za-z0-9]/.test(val)) strength++;
+                    if (val.length >= 12) strength++;
 
-                let width = 0, color = '', label = '';
+                    let width = 0, color = '', label = '';
 
-                switch (strength) {
-                    case 0: 
-                        width = 0; 
-                        color = 'bg-secondary';
-                        label = 'Time to create something special! 🎯'; 
-                        break;
-                    case 1: 
-                        width = 20; 
-                        color = 'bg-danger'; 
-                        label = 'Getting started! Add some magic to make it stronger ✨'; 
-                        break;
-                    case 2: 
-                        width = 40; 
-                        color = 'bg-warning'; 
-                        label = 'Nice progress! Mix it up a bit more! 🌟'; 
-                        break;
-                    case 3: 
-                        width = 60; 
-                        color = 'bg-info'; 
-                        label = 'Looking good! Almost fortress-level security! 🏰'; 
-                        break;
-                    case 4: 
-                        width = 80; 
-                        color = 'bg-success'; 
-                        label = 'Excellent! Your password is getting super strong! 💪'; 
-                        break;
-                    case 5: 
-                        width = 100; 
-                        color = 'bg-success'; 
-                        label = 'Perfect! Your password is now fortress-level secure! 🔒'; 
-                        break;
-                }
+                    switch (strength) {
+                        case 0: 
+                            width = 0; 
+                            color = 'bg-secondary';
+                            label = 'Time to create something special! 🎯'; 
+                            break;
+                        case 1: 
+                            width = 20; 
+                            color = 'bg-danger'; 
+                            label = 'Getting started! Add some magic to make it stronger ✨'; 
+                            break;
+                        case 2: 
+                            width = 40; 
+                            color = 'bg-warning'; 
+                            label = 'Nice progress! Mix it up a bit more! 🌟'; 
+                            break;
+                        case 3: 
+                            width = 60; 
+                            color = 'bg-info'; 
+                            label = 'Looking good! Almost fortress-level security! 🏰'; 
+                            break;
+                        case 4: 
+                            width = 80; 
+                            color = 'bg-success'; 
+                            label = 'Excellent! Your password is getting super strong! 💪'; 
+                            break;
+                        case 5: 
+                            width = 100; 
+                            color = 'bg-success'; 
+                            label = 'Perfect! Your password is now fortress-level secure! 🔒'; 
+                            break;
+                    }
 
-                passwordStrengthBar.style.width = width + '%';
-                passwordStrengthBar.className = 'progress-bar ' + color;
-                passwordStrengthText.textContent = label;
-            });
+                    passwordStrengthBar.style.width = width + '%';
+                    passwordStrengthBar.className = 'progress-bar ' + color;
+                    passwordStrengthText.textContent = label;
+                });
+            }
 
             // Password Match
-            confirmPassword.addEventListener('input', () => {
-                if (confirmPassword.value && confirmPassword.value !== password.value) {
-                    passwordMatchError.classList.remove('d-none');
-                } else {
-                    passwordMatchError.classList.add('d-none');
-                }
-            });
+            if (confirmPassword && password && passwordMatchError) {
+                confirmPassword.addEventListener('input', () => {
+                    if (confirmPassword.value && confirmPassword.value !== password.value) {
+                        passwordMatchError.classList.remove('d-none');
+                    } else {
+                        passwordMatchError.classList.add('d-none');
+                    }
+                });
+            }
         });
     </script>

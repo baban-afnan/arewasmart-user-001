@@ -1,13 +1,13 @@
 <!-- Support Section -->
 <section id="support" class="support-section" style="padding: 100px 0; background: #fff; position: relative; overflow: hidden;">
     <!-- Decorative Circle -->
-    <div style="position: absolute; top: -50px; left: -50px; width: 200px; height: 200px; background: rgba(255, 215, 0, 0.1); border-radius: 50%;"></div>
+    <div style="position: absolute; top: -50px; left: -50px; width: 200px; height: 200px; background: rgba(242, 101, 34, 0.1); border-radius: 50%;"></div>
     
     <div class="container">
         <div class="section-title text-center mb-5" data-aos="fade-up">
-            <h4 style="color: #ffd700; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;">Get In Touch</h4>
-            <h2 style="color: #004d40; font-weight: 800; font-size: 2.5rem;">We're Here to Help</h2>
-            <hr style="width: 60px; height: 3px; background: #ffd700; margin: 15px auto; border: none;">
+            <h4 style="color: #F26522; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;">Get In Touch</h4>
+            <h2 style="color: #111827; font-weight: 800; font-size: 2.5rem;">We're Here to Help</h2>
+            <hr style="width: 60px; height: 3px; background: #F26522; margin: 15px auto; border: none;">
             <p class="text-muted" style="max-width: 600px; margin: 0 auto; font-size: 1.1rem;">
                 Our expert team is available 24/7 to assist you. Reach out via phone, WhatsApp, or drop us a message below.
             </p>
@@ -16,22 +16,22 @@
         <div class="row align-items-center">
             <!-- Support Info -->
             <div class="col-lg-5 mb-5 mb-lg-0" data-aos="fade-right">
-                <div class="support-info-card" style="background: linear-gradient(135deg, #004d40 0%, #00695c 100%); padding: 40px; border-radius: 20px; color: white; box-shadow: 0 20px 40px rgba(0, 77, 64, 0.3);">
+                <div class="support-info-card" style="background: linear-gradient(135deg, #F26522 0%, #d94e0f 100%); padding: 40px; border-radius: 20px; color: white; box-shadow: 0 20px 40px rgba(242, 101, 34, 0.3);">
                     <h3 style="font-weight: 700; margin-bottom: 30px;">Contact Information</h3>
                     
                     <div class="d-flex align-items-center mb-4">
                         <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
-                            <i class="fas fa-phone-alt" style="color: #ffd700; font-size: 1.2rem;"></i>
+                            <i class="fas fa-phone-alt" style="color: #fff; font-size: 1.2rem;"></i>
                         </div>
                         <div>
                             <span style="display: block; opacity: 0.8; font-size: 0.9rem;">Call Us</span>
-                            <a href="tel:09110501995" style="color: white; font-weight: 600; font-size: 1.1rem; text-decoration: none;">09110501995</a>
+                            <a href="tel:09110501995" style="color: white; font-weight: 600; font-size: 1.1rem; text-decoration: none;">09112345678</a>
                         </div>
                     </div>
 
                     <div class="d-flex align-items-center mb-4">
                         <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
-                            <i class="fab fa-whatsapp" style="color: #ffd700; font-size: 1.2rem;"></i>
+                            <i class="fab fa-whatsapp" style="color: #fff; font-size: 1.2rem;"></i>
                         </div>
                         <div>
                             <span style="display: block; opacity: 0.8; font-size: 0.9rem;">WhatsApp Support</span>
@@ -41,11 +41,11 @@
 
                     <div class="d-flex align-items-center mb-5">
                         <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
-                            <i class="fas fa-map-marker-alt" style="color: #ffd700; font-size: 1.2rem;"></i>
+                            <i class="fas fa-map-marker-alt" style="color: #fff; font-size: 1.2rem;"></i>
                         </div>
                         <div>
                             <span style="display: block; opacity: 0.8; font-size: 0.9rem;">Visit Us</span>
-                            <span style="color: white; font-weight: 600; font-size: 1rem;">Sabuwar Kasuwa Street, Opposite Audi Residence, Zuru</span>
+                            <span style="color: white; font-weight: 600; font-size: 1rem;">NO983 Babantude Adelke Street Apapa Lagos</span>
                         </div>
                     </div>
 
@@ -61,7 +61,7 @@
             <!-- Support Form -->
             <div class="col-lg-7" data-aos="fade-left">
                 <div class="support-form-wrapper" style="background: #fff; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); border: 1px solid #eee;">
-                    <h3 style="color: #004d40; font-weight: 700; margin-bottom: 20px;">Send Us a Message</h3>
+                    <h3 style="color: #111827; font-weight: 700; margin-bottom: 20px;">Send Us a Message</h3>
                     <form id="contact-support-form" action="#" method="POST">
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -102,12 +102,12 @@
             font-size: 0.95rem;
         }
         .form-control-custom:focus {
-            border-color: #004d40;
+            border-color: #F26522;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(0, 77, 64, 0.1);
+            box-shadow: 0 0 0 3px rgba(242, 101, 34, 0.1);
         }
         .btn-primary-custom {
-            background: #004d40;
+            background: #F26522;
             color: white;
             padding: 12px 30px;
             border: none;
@@ -119,9 +119,9 @@
             align-items: center;
         }
         .btn-primary-custom:hover {
-            background: #00382e;
+            background: #d94e0f;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 77, 64, 0.3);
+            box-shadow: 0 5px 15px rgba(242, 101, 34, 0.3);
         }
     </style>
 </section>

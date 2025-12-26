@@ -233,6 +233,17 @@ Route::middleware(['auth'])->group(function () {
 
     });
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | API Dashboard & Applications
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('api-dashboard')->group(function () {
+             Route::get('/', [\App\Http\Controllers\Api\ApiDashboardController::class, 'index'])->name('api.dashboard');
+             Route::post('/apply', [\App\Http\Controllers\Api\ApiDashboardController::class, 'apply'])->name('api.apply');
+        });
+
 });
  
 

@@ -1,6 +1,50 @@
 <x-app-layout>
      <title>Arewa Smart - {{ $title ?? 'Dashboard' }}</title>
     <!-- Add space between header and content -->
+    
+    @if(isset($announcement) && $announcement)
+    <div class="notification-container mt-3 mb-2">
+        <div class="scrolling-text-container bg-primary text-white shadow-sm rounded-3 py-2">
+            <div class="scrolling-text">
+                <span class="fw-bold me-3"><i class="fas fa-bullhorn"></i> ANNOUNCEMENT:</span>
+                {{ $announcement->message }}
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @push('styles')
+    <style>
+        .notification-container {
+            overflow: hidden;
+            width: 100%;
+        }
+        .scrolling-text-container {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+        }
+        .scrolling-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: scroll-left 15s linear infinite;
+        }
+        @keyframes scroll-left {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+        /* Pause on hover */
+        .scrolling-text-container:hover .scrolling-text {
+            animation-play-state: paused;
+        }
+    </style>
+    @endpush
+
     <div class="mt-4">
     <!-- User + Wallet Section -->
      <div class="card border-0 shadow-sm rounded-4 mb-3">
@@ -45,7 +89,9 @@
     </div>
 </div>
 
-        <!-- Alerts (kept as in project) -->
+        
+
+       <!-- Alerts (kept as in project) -->
         @include('pages.alart')
 
         <!-- Dashboard widgets and sections -->
@@ -59,10 +105,6 @@
 
         <div class="row">
             @include('pages.dashboard.trans')
-        </div>
-
-        <div class="row">
-            @include('pages.dashboard.kyc')
         </div>
     </div>
 </x-app-layout>

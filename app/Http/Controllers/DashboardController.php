@@ -10,6 +10,7 @@ use App\Models\BonusHistory;
 use App\Models\VirtualAccount;
 use App\Models\Transaction;
 use App\Models\AgentService;
+use App\Models\Announcement;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -18,6 +19,7 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $wallet = Wallet::where('user_id', $user->id)->first();
+        $announcement = Announcement::getActiveAnnouncement();
 
         $virtualAccount = VirtualAccount::where('user_id', $user->id)->first();
         $bonusHistory = BonusHistory::where('user_id', $user->id)
@@ -105,7 +107,8 @@ class DashboardController extends Controller
             'failedTransactions',
             'completedPercentage',
             'pendingPercentage',
-            'failedPercentage'
+            'failedPercentage',
+            'announcement'
         ));
     }
 }
