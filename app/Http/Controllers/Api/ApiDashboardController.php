@@ -16,20 +16,20 @@ class ApiDashboardController extends Controller
         $user = Auth::user();
         $userRole = $user->role; // Get the authenticated user's role
 
-        // Fetch services that are active with their active fields
-        $services = Service::where('is_active', true)
-            ->with(['fields' => function ($query) {
-                $query->where('is_active', true);
-            }])
-            ->get();
 
-        // Check for existing application status
-        $application = DB::table('api_applications')
-            ->where('user_id', $user->id)
-            ->whereIn('status', ['pending', 'approved'])
+
+
+        // Fetch the API service
+        $service = Service::where('name', 'API')
+            ->where('is_active', true)
             ->first();
 
-        return view('api.dashboard', compact('services', 'application', 'userRole'));
+        // Paginate fields if service exists, otherwise empty pagination
+        $fields = $service 
+            ? $service->fields()->where('is_active', true)->paginate(10) 
+            : new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
+
+        return view('api.dashboard', compact('service', 'fields', 'userRole'));
     }
 
     public function apply(Request $request)

@@ -72,7 +72,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($services as $service)
+                                        @if($service)
                                             <tr>
                                                 <td>{{ $service->name }}</td>
                                                 <td>{{ Str::limit($service->description, 50) }}</td>
@@ -89,24 +89,26 @@
                                                         <table class="table table-sm table-bordered">
                                                             <thead>
                                                                 <tr>
-                                                                    <th>Service Type</th>
-                                                                    <th>Description</th>
+                                                                    <th>S/N</th>
+                                                                    <th>Service API</th>
                                                                     <th>Your Price ({{ ucfirst($userRole) }})</th>
+                                                                    <th>Description</th>
                                                                     <th>Status</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                @foreach($service->fields as $field)
+                                                                @foreach($fields as $index => $field)
                                                                     <tr>
+                                                                        <td>{{ $fields->firstItem() + $index }}</td> 
                                                                         <td>{{ $field->field_name }}</td>
-                                                                        <td>{{ $field->description }}</td>
                                                                         <td>{{ number_format($field->getPriceForUserType($userRole), 2) }}</td>
+                                                                        <td>{{ $field->description }}</td>
                                                                         <td>{{ $field->is_active ? 'Active' : 'Inactive' }}</td>
                                                                     </tr>
                                                                 @endforeach
-                                                                @if($service->fields->isEmpty())
+                                                                @if($fields->isEmpty())
                                                                     <tr>
-                                                                        <td colspan="3" class="text-center">No specific services available.</td>
+                                                                        <td colspan="5" class="text-center">No specific services available.</td>
                                                                     </tr>
                                                                 @endif
                                                             </tbody>
@@ -114,13 +116,17 @@
                                                     </div>
                                                 </td>
                                             </tr>
-                                        @empty
+                                        @else
                                             <tr>
                                                 <td colspan="3" class="text-center">No API services available at the moment.</td>
                                             </tr>
-                                        @endforelse
+                                        @endif
                                     </tbody>
                                 </table>
+                            </div>
+                             <!-- Pagination -->
+                            <div class="d-flex justify-content-center mt-3">
+                                {{ $fields->links('vendor.pagination.custom') }}
                             </div>
                         </div>
                     </div>
