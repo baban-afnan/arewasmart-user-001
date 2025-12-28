@@ -360,7 +360,7 @@ class NinValidationController extends Controller
         $s = strtolower(trim((string) $status));
         
         return match ($s) {
-            'successful', 'success', 'resolved', 'approved', 'completed' => 'successful',
+            'successful', 'resolved', 'approved', 'completed' => 'successful',
             'processing', 'in_progress', 'in-progress', 'pending', 'submitted', 'new' => 'processing',
             'failed', 'rejected', 'error', 'declined', 'invalid', 'no record' => 'failed',
             default => 'pending',
