@@ -345,7 +345,10 @@
                                             <td>
                                                 <button type="button" class="btn btn-xs btn-outline-primary"
                                                         data-bs-toggle="modal"
-                                                        data-bs-target="#submissionModal{{ $submission->id }}">
+                                                        data-bs-target="#commentModal"
+                                                        data-comment="{{ $submission->comment ?? 'No comment yet.' }}"
+                                                        data-file-url="{{ $submission->file_url ? \Illuminate\Support\Facades\Storage::url($submission->file_url) : '' }}"
+                                                        data-approved-by="{{ $submission->approved_by ?? '' }}">
                                                     View
                                                 </button>
                                             </td>
@@ -366,67 +369,8 @@
     </div>
 
     <!-- Modals -->
-    @foreach ($submissions as $submission)
-    <div class="modal fade" id="submissionModal{{ $submission->id }}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Submission: {{ $submission->reference }}</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-info">
-                        <strong>Status:</strong> {{ ucfirst($submission->status) }} <br>
-                        <strong>Comment:</strong> {{ $submission->comment ?? 'None' }}
-                        @if($submission->status == 'successful' && $submission->approved_by)
-                            <br><strong>Approved By:</strong> {{ $submission->approved_by }}
-                        @endif
-                    </div>
-
-                    @if($submission->status == 'successful' && $submission->tin_file)
-                        <div class="card mb-3 border-success">
-                            <div class="card-header bg-success text-white">Download Certificate</div>
-                            <div class="card-body">
-                                <a href="{{ asset($submission->tin_file) }}" target="_blank" class="btn btn-sm btn-outline-success">
-                                    <i class="bi bi-download me-1"></i> Download TIN Certificate
-                                </a>
-                            </div>
-                        </div>
-                    @endif
-
-                    <h6 class="fw-bold">Submitted Information</h6>
-                    @php 
-                        $details = json_decode($submission->field, true); 
-                    @endphp
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <strong>Service:</strong><br>
-                            {{ $submission->service_name }} - {{ $submission->field_name }}
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Name/Company:</strong><br>
-                            {{ $submission->business_name ?? ($submission->first_name . ' ' . $submission->last_name) }}
-                        </div>
-                    </div>
-
-                    <h6 class="fw-bold">Uploads</h6>
-                    <div class="row">
-                        @if(isset($details['uploads']['passport']))
-                            <div class="col-4 mb-2">
-                                <a href="{{ asset('storage/'.$details['uploads']['passport']) }}" target="_blank" class="btn btn-sm btn-outline-secondary w-100">Passport</a>
-                            </div>
-                        @endif
-                        @if(isset($details['uploads']['cac_certificate']))
-                            <div class="col-4 mb-2">
-                                <a href="{{ asset('storage/'.$details['uploads']['cac_certificate']) }}" target="_blank" class="btn btn-sm btn-outline-secondary w-100">CAC Cert</a>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endforeach
+    {{-- Comment Modal --}}
+    @include('pages.comment')
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

@@ -71,10 +71,12 @@ class AgentService extends Model
         'country',
         'cac_certificate',
         'company_type',
+        'modification_data',
     ];
 
     protected $casts = [
         'submission_date' => 'datetime',
+        'modification_data' => 'array',
     ];
 
     /** Relationships */

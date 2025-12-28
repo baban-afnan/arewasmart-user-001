@@ -111,7 +111,7 @@
                                                     @if(session('token'))
                                                         <div class="mt-2 p-2 bg-success bg-opacity-10 border border-success rounded d-inline-block">
                                                             <span class="text-success mb-1 fw-medium small text-uppercase me-2">PIN:</span>
-                                                            <span class="mb-1 fw-medium text-dark fs-6 font-monospace">{{ session('token') }}</span>
+                                                            <span class="text-success mb-1 fw-medium small text-uppercase me-2">{{ session('token') }}</span>
                                                         </div>
                                                     @endif
                                                 </td>

@@ -100,6 +100,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/education', [EducationalController::class, 'pin'])->name("education");
         Route::post('/buy-pin', [EducationalController::class, 'buypin'])->name('buypin');
+        Route::get('/education/receipt/{transaction}', [EducationalController::class, 'receipt'])->name('education.receipt');
         Route::get('/get-variation', [EducationalController::class, 'getVariation'])->name('get-variation');
 
         Route::get('/jamb', [EducationalController::class, 'jamb'])->name('jamb');

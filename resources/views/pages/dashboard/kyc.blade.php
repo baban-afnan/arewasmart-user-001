@@ -209,9 +209,18 @@
 					
 
 					<button class="btn btn-primary w-100 py-3 fw-medium" type="submit">
-						<i class="fas fa-check-circle me-2"></i>Complete Registration
+						<i class="fas fa-check-circle me-2"></i>Complete Profile
 					</button>
 				</form>
+
+				<div class="text-center mt-3">
+					<form method="POST" action="{{ route('logout') }}">
+						@csrf
+						<button type="submit" class="btn btn-link text-decoration-none text-danger fw-medium">
+							<i class="fas fa-sign-out-alt me-1"></i>Logout
+						</button>
+					</form>
+				</div>
 			</div>
 		</div>
 	</div>

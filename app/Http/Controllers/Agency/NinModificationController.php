@@ -43,7 +43,7 @@ class NinModificationController extends Controller
         // Base query
         $query = AgentService::with(['serviceField', 'transaction'])
             ->where('user_id', $user->id)
-            ->where('service_type', 'nin_modification');
+            ->where('service_type', 'nin modification');
 
         // Filters
         if ($request->filled('search')) {
@@ -92,11 +92,21 @@ class NinModificationController extends Controller
         $user = Auth::user();
 
         // Validation
-        $validated = $request->validate([
+        $rules = [
             'service_field_id' => 'required|exists:service_fields,id',
             'nin'             => 'required|string|regex:/^[0-9]{11}$/',
-            'description'     => 'required|string|max:500',
-        ]);
+        ];
+
+        if ($request->has('modification_data')) {
+            $rules['modification_data'] = 'required|array';
+            // Basic validation for key fields in modification_data
+            $rules['modification_data.first_name'] = 'required|string';
+            $rules['modification_data.surname'] = 'required|string';
+        } else {
+            $rules['description'] = 'required|string|max:500';
+        }
+
+        $validated = $request->validate($rules);
 
         // Fetch service & field
         $serviceField = ServiceField::with('service')
@@ -167,6 +177,9 @@ class NinModificationController extends Controller
                 ],
             ]);
 
+            // Determine description
+            $description = $validated['description'] ?? "NIN Modification Request (DOB)";
+
             // Create NIN Modification record
             AgentService::create([
                 'reference'          => $transactionRef,
@@ -178,12 +191,13 @@ class NinModificationController extends Controller
                 'service_name'       => $service->name,
                 'service_field_name' => $serviceField->field_name,
                 'nin'                => $validated['nin'],
-                'description'        => $validated['description'],
+                'description'        => $description,
+                'modification_data'  => $request->input('modification_data'),
                 'performed_by'       => $performedBy,
                 'transaction_id'     => $transaction->id,
                 'submission_date'    => now(),
                 'status'             => 'pending',
-                'service_type'       => 'NIN_MODIFICATION',
+                'service_type'       => 'NIN MODIFICATION',
             ]);
 
             // Debit Wallet

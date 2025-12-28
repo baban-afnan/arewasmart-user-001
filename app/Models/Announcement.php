@@ -12,6 +12,8 @@ class Announcement extends Model
     protected $fillable = [
         'message',
         'is_active',
+        'type',
+        'status',
     ];
 
     /**
@@ -21,6 +23,10 @@ class Announcement extends Model
      */
     public static function getActiveAnnouncement()
     {
-        return self::where('is_active', true)->latest()->first();
+        return self::where('type', 'announcement')
+            ->where('status', 'active')
+            ->where('is_active', true)
+            ->latest()
+            ->first();
     }
 }
