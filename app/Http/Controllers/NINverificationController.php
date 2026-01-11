@@ -32,15 +32,18 @@ class NINverificationController extends Controller
         $verificationPrice = 0;
         $standardSlipPrice = 0;
         $premiumSlipPrice = 0;
+        $vninSlipPrice = 0;
 
         if ($service) {
             $verificationField = $service->fields()->where('field_code', '610')->first();
             $standardSlipField = $service->fields()->where('field_code', '611')->first();
             $premiumSlipField = $service->fields()->where('field_code', '612')->first();
+            $vninSlipField = $service->fields()->where('field_code', '616')->first();
 
             $verificationPrice = $verificationField ? $verificationField->getPriceForUserType($user->role) : 0;
             $standardSlipPrice = $standardSlipField ? $standardSlipField->getPriceForUserType($user->role) : 0;
             $premiumSlipPrice = $premiumSlipField ? $premiumSlipField->getPriceForUserType($user->role) : 0;
+            $vninSlipPrice = $vninSlipField ? $vninSlipField->getPriceForUserType($user->role) : 0;
         }
 
         $wallet = Wallet::where('user_id', $user->id)->first();
@@ -50,6 +53,7 @@ class NINverificationController extends Controller
             'verificationPrice' => $verificationPrice,
             'standardSlipPrice' => $standardSlipPrice,
             'premiumSlipPrice' => $premiumSlipPrice,
+            'vninSlipPrice' => $vninSlipPrice,
         ]);
     }
 
@@ -150,9 +154,12 @@ class NINverificationController extends Controller
             curl_close($ch);
 
             $data = json_decode($response, true);
+            $respCode = $data['respCode'] ?? 'UNKNOWN';
 
-            if (isset($data['respCode']) && $data['respCode'] == '00000000') {
-                return $this->processChargeAndReturn(
+            // Handle Response Codes
+            if ($respCode === '00000000') {
+                // Successful -> Charge + Create Transaction + Create Verification
+                return $this->processSuccessTransaction(
                     $wallet,
                     $servicePrice,
                     $user,
@@ -160,13 +167,28 @@ class NINverificationController extends Controller
                     $service,
                     $data
                 );
+            } elseif ($respCode === '99120010') {
+                 // NIN do not exist -> Charge + Create Transaction (No Verification)
+                 return $this->processFailedButChargedTransaction(
+                    $wallet,
+                    $servicePrice,
+                    $user,
+                    $serviceField,
+                    $data
+                );
             } else {
-                return back()->with([
-                    'status' => 'error',
-                    'message' => $data['respDescription'] ?? 'Verification failed.'
-                ]);
+                 // Other errors (99120012, 99120013, etc) -> No Charge + Create Failed Transaction
+                 return $this->processFreeTransactionRecord(
+                    $user,
+                    $serviceField,
+                    $data
+                 );
             }
+
         } catch (\Exception $e) {
+             // System/Network Error -> No Charge + Transaction Log if possible (optional, but good for tracking)
+             // For now, adhering to returning back with error, but we could log a failed transaction here too if needed.
+             // Given the catch block scope, we might not have serviceField context easily if it failed before fetching it.
             return back()->with([
                 'status' => 'error',
                 'message' => 'System Error: ' . $e->getMessage()
@@ -175,14 +197,13 @@ class NINverificationController extends Controller
     }
 
     /**
-     * Process wallet charge, transaction creation and response
+     * Process successful transaction (Charge + Verification Record)
      */
-    private function processChargeAndReturn($wallet, $servicePrice, $user, $serviceField, $service, $ninData)
+    private function processSuccessTransaction($wallet, $servicePrice, $user, $serviceField, $service, $ninData)
     {
         DB::beginTransaction();
 
         try {
-
             $transactionRef = 'Ver-' . (time() % 1000000000) . '-' . mt_rand(100, 999);
             $performedBy = $user->first_name . ' ' . $user->last_name;
 
@@ -198,13 +219,14 @@ class NINverificationController extends Controller
                     'service' => 'verification',
                     'service_field' => $serviceField->field_name,
                     'field_code' => $serviceField->field_code,
-                    'nin' => $ninData['data']['nin'],
+                    'nin' => $ninData['data']['nin'] ?? 'N/A', // Should exist on success
                     'user_role' => $user->role,
                     'price_details' => [
                         'base_price' => $serviceField->base_price,
                         'user_price' => $servicePrice,
                     ],
-                    'source' => 'API'
+                    'source' => 'API',
+                    'api_response' => $ninData
                 ],
             ]);
 
@@ -241,10 +263,111 @@ class NINverificationController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             report($e);
-
             return back()->with([
                 'status' => 'error',
                 'message' => 'Transaction failed: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Process Failed but Charged Transaction (NIN Not Found)
+     */
+    private function processFailedButChargedTransaction($wallet, $servicePrice, $user, $serviceField, $data)
+    {
+        DB::beginTransaction();
+        try {
+            $transactionRef = 'Ver-Fail-' . (time() % 1000000000) . '-' . mt_rand(100, 999);
+            $performedBy = $user->first_name . ' ' . $user->last_name;
+
+            Transaction::create([
+                'transaction_ref' => $transactionRef,
+                'user_id' => $user->id,
+                'amount' => $servicePrice,
+                'description' => "NIN Verification - NIN Not Found",
+                'type' => 'debit',
+                'status' => 'completed', // Completed because we charged them
+                'performed_by'    => $performedBy,
+                'metadata' => [
+                    'service' => 'verification',
+                    'service_field' => $serviceField->field_name,
+                    'result' => 'NIN_NOT_FOUND',
+                    'api_message' => $data['respDescription'] ?? 'NIN do not exist',
+                    'user_role' => $user->role,
+                    'price_details' => [
+                        'base_price' => $serviceField->base_price,
+                        'user_price' => $servicePrice,
+                    ],
+                    'source' => 'API'
+                ],
+            ]);
+
+            // Deduct wallet balance
+            $wallet->decrement('balance', $servicePrice);
+
+            DB::commit();
+
+            return back()->with([
+                'status' => 'error', // Show as error to user
+                'message' => "NIN do not exist. You have been charged NGN " . number_format($servicePrice, 2) . " for this search."
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with([
+                'status' => 'error',
+                'message' => 'Transaction Error: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Process Free Transaction Record (System Error / Param Error)
+     */
+    private function processFreeTransactionRecord($user, $serviceField, $data)
+    {
+        // No Wallet Charge, just record the attempt
+        try {
+            $transactionRef = 'Ver-Err-' . (time() % 1000000000) . '-' . mt_rand(100, 999);
+            $performedBy = $user->first_name . ' ' . $user->last_name;
+
+            Transaction::create([
+                'transaction_ref' => $transactionRef,
+                'user_id' => $user->id,
+                'amount' => 0,
+                'description' => "NIN Verification - Failed: " . ($data['respDescription'] ?? 'Error'),
+                'type' => 'debit', // or 'info'
+                'status' => 'failed',
+                'performed_by'    => $performedBy,
+                'metadata' => [
+                    'service' => 'verification',
+                    'service_field' => $serviceField->field_name,
+                    'result' => 'API_ERROR',
+                    'api_code' => $data['respCode'] ?? 'UNKNOWN',
+                    'api_message' => $data['respDescription'] ?? 'Unknown Error',
+                    'source' => 'API'
+                ],
+            ]);
+
+            $message = $data['respDescription'] ?? 'Verification failed';
+            
+            // Clean up message if needed
+            if (($data['respCode'] ?? '') == '99120012') {
+                $message = 'Parameter error in the interface call.';
+            } elseif (($data['respCode'] ?? '') == '99120013') {
+                $message = 'System Error.';
+            }
+
+            return back()->with([
+                'status' => 'error',
+                'message' => $message 
+            ]);
+
+        } catch (\Exception $e) {
+            // Even if logging fails, ensure user gets the error message
+            return back()->with([
+                'status' => 'error',
+                'message' => $data['respDescription'] ?? 'Verification failed.'
             ]);
         }
     }
@@ -346,6 +469,18 @@ class NINverificationController extends Controller
             
             $repObj = new NIN_PDF_Repository();
             return $repObj->premiumPDF($nin_no);
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function vninSlip($nin_no)
+    {
+        try {
+            $this->chargeForSlip(Auth::user(), '616'); // Charge for VNIN Slip
+            
+            $repObj = new NIN_PDF_Repository();
+            return $repObj->vninPDF($nin_no);
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }

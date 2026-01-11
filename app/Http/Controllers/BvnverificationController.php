@@ -172,8 +172,21 @@ class BvnverificationController extends Controller
                 ]);
             }
 
-            if (isset($decodedData['respCode']) && $decodedData['respCode'] == '00000000') {
-                return $this->processChargeAndReturn(
+            $respCode = $decodedData['respCode'] ?? 'UNKNOWN';
+
+            // Define Charged Error Codes
+            $chargedErrorCodes = [
+                '99120020', // BVN do not existing
+                '99120024', // BVN suspend
+                '99120026', // BIRTH_DATE_INVALID
+                '99120027', // NAME_INVALID
+                '99120028', // GENDER_NULL
+                '99120029', // PHOTO_INVALID
+            ];
+
+            if ($respCode === '00000000') {
+                 // Successful -> Charge + Create Transaction + Create Verification
+                 return $this->processSuccessTransaction(
                     $wallet,
                     $servicePrice,
                     $user,
@@ -181,19 +194,24 @@ class BvnverificationController extends Controller
                     $service,
                     $decodedData
                 );
+            } elseif (in_array($respCode, $chargedErrorCodes)) {
+                // Failed but Chargeable -> Charge + Create Transaction (No Verification)
+                return $this->processFailedButChargedTransaction(
+                    $wallet,
+                    $servicePrice,
+                    $user,
+                    $serviceField,
+                    $decodedData
+                );
             } else {
-                 $errorMessage = $decodedData['respDescription'] ?? 'Verification failed.';
-                 
-                 // Fallback for other error fields if respDescription is missing
-                 if ($errorMessage === 'Verification failed.' && isset($decodedData['message'])) {
-                     $errorMessage = $decodedData['message'];
-                 }
-
-                 return back()->with([
-                    'status' => 'error',
-                    'message' => $errorMessage
-                ]);
+                // Free Errors (99120012, 99120023, 99120025, etc) -> No Charge + Create Failed Transaction
+                return $this->processFreeTransactionRecord(
+                    $user,
+                    $serviceField,
+                    $decodedData
+                );
             }
+
         } catch (\Exception $e) {
              return back()->with([
                 'status' => 'error',
@@ -203,9 +221,9 @@ class BvnverificationController extends Controller
     }
 
     /**
-     * Process wallet charge, transaction creation and response
+     * Process successful transaction (Charge + Verification Record)
      */
-    private function processChargeAndReturn($wallet, $servicePrice, $user, $serviceField, $service, $bvnData)
+    private function processSuccessTransaction($wallet, $servicePrice, $user, $serviceField, $service, $bvnData)
     {
         DB::beginTransaction();
 
@@ -226,13 +244,14 @@ class BvnverificationController extends Controller
                     'service' => 'verification',
                     'service_field' => $serviceField->field_name,
                     'field_code' => $serviceField->field_code,
-                    'bvn' => $bvnData['data']['bvn'],
+                    'bvn' => $bvnData['data']['bvn'] ?? 'N/A',
                     'user_role' => $user->role,
                     'price_details' => [
                         'base_price' => $serviceField->base_price,
                         'user_price' => $servicePrice,
                     ],
-                    'source' => 'API'
+                    'source' => 'API',
+                    'api_response' => $bvnData
                 ],
             ]);
 
@@ -273,6 +292,112 @@ class BvnverificationController extends Controller
             return back()->with([
                 'status' => 'error',
                 'message' => 'Transaction failed: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Process Failed but Charged Transaction (BVN Not Found, Suspended, etc)
+     */
+    private function processFailedButChargedTransaction($wallet, $servicePrice, $user, $serviceField, $data)
+    {
+        DB::beginTransaction();
+        try {
+            $transactionRef = 'Ver-Fail-' . (time() % 1000000000) . '-' . mt_rand(100, 999);
+            $performedBy = $user->first_name . ' ' . $user->last_name;
+
+            Transaction::create([
+                'transaction_ref' => $transactionRef,
+                'user_id' => $user->id,
+                'amount' => $servicePrice,
+                'description' => "BVN Verification - Failed",
+                'type' => 'debit',
+                'status' => 'completed', // Completed because we charged them
+                'performed_by'    => $performedBy,
+                'metadata' => [
+                    'service' => 'verification',
+                    'service_field' => $serviceField->field_name,
+                    'result' => 'BVN_ERROR_CHARGED',
+                    'api_code' => $data['respCode'] ?? 'UNKNOWN',
+                    'api_message' => $data['respDescription'] ?? 'Verification Failed',
+                    'user_role' => $user->role,
+                    'price_details' => [
+                        'base_price' => $serviceField->base_price,
+                        'user_price' => $servicePrice,
+                    ],
+                    'source' => 'API'
+                ],
+            ]);
+
+            // Deduct wallet balance
+            $wallet->decrement('balance', $servicePrice);
+
+            DB::commit();
+
+            // Improve User Message based on code
+            $msg = $data['respDescription'] ?? 'Verification failed';
+            if (($data['respCode'] ?? '') == '99120020') $msg = 'BVN do not existing';
+            if (($data['respCode'] ?? '') == '99120024') $msg = 'BVN suspend';
+
+            return back()->with([
+                'status' => 'error', // Show as error to user
+                'message' => "$msg. You have been charged NGN " . number_format($servicePrice, 2) . " for this search."
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with([
+                'status' => 'error',
+                'message' => 'Transaction Error: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Process Free Transaction Record (System Error / Param Error)
+     */
+    private function processFreeTransactionRecord($user, $serviceField, $data)
+    {
+        // No Wallet Charge, just record the attempt
+        try {
+            $transactionRef = 'Ver-Err-' . (time() % 1000000000) . '-' . mt_rand(100, 999);
+            $performedBy = $user->first_name . ' ' . $user->last_name;
+
+            Transaction::create([
+                'transaction_ref' => $transactionRef,
+                'user_id' => $user->id,
+                'amount' => 0,
+                'description' => "BVN Verification - Failed: " . ($data['respDescription'] ?? 'Error'),
+                'type' => 'debit', // or 'info'
+                'status' => 'failed',
+                'performed_by'    => $performedBy,
+                'metadata' => [
+                    'service' => 'verification',
+                    'service_field' => $serviceField->field_name,
+                    'result' => 'API_ERROR',
+                    'api_code' => $data['respCode'] ?? 'UNKNOWN',
+                    'api_message' => $data['respDescription'] ?? 'Unknown Error',
+                    'source' => 'API'
+                ],
+            ]);
+
+            $message = $data['respDescription'] ?? 'Verification failed';
+            
+            // Clean up message if needed
+            if (($data['respCode'] ?? '') == '99120012') $message = 'Parameters wrong';
+            if (($data['respCode'] ?? '') == '99120023') $message = 'System error';
+            if (($data['respCode'] ?? '') == '99120025') $message = 'BVN_PARAMETER_INVALID';
+
+            return back()->with([
+                'status' => 'error',
+                'message' => $message 
+            ]);
+
+        } catch (\Exception $e) {
+            // Even if logging fails, ensure user gets the error message
+            return back()->with([
+                'status' => 'error',
+                'message' => $data['respDescription'] ?? 'Verification failed.'
             ]);
         }
     }

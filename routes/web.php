@@ -216,6 +216,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{id}/status', [NINverificationController::class, 'updateStatus'])->name('nin.verification.status');
             Route::get('/standardSlip/{id}', [NINverificationController::class, 'standardSlip'])->name('standardSlip');
             Route::get('/premiumSlip/{id}', [NINverificationController::class, 'premiumSlip'])->name('premiumSlip');
+            Route::get('/vninSlip/{id}', [NINverificationController::class, 'vninSlip'])->name('vninSlip');
         });
 
         /*

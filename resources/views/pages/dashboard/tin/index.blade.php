@@ -1,23 +1,23 @@
 <x-app-layout>
-    <title>Arewa Smart - {{ $title ?? 'TIN Registration' }}</title>
+    <title>Arewa Smart - {{ $title ?? 'TIN Verification' }}</title>
     
     <div class="page-body">
         <div class="container-fluid">
             <div class="page-title mb-4">
                 <div class="row">
                     <div class="col-sm-6 col-12">
-                        <h3 class="fw-bold text-primary">TAX IDENTIFICATION NUMBER (TIN)</h3>
+                        <h3 class="fw-bold text-primary">TAX ID Verification (TIN)</h3>
                         <p class="text-muted small mb-0">Register for Individual or Corporate TIN. Validate details first, then download your slip/certificate.</p>
                     </div>
                 </div>
             </div>
 
             <div class="row">
-                <!-- Left Column: Registration Form -->
+                <!-- Left Column: Verification Form -->
                 <div class="col-lg-6 col-xl-6 mb-4">
                     <div class="card shadow-sm border-0 rounded-3 h-100">
                         <div class="card-header bg-white border-bottom py-3">
-                            <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-file-earmark-person me-2"></i>Registration Details</h5>
+                            <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-file-earmark-person me-2"></i>Verification Details</h5>
                         </div>
 
                         <div class="card-body p-4">

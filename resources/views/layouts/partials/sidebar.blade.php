@@ -131,6 +131,7 @@
                     <ul style="{{ request()->routeIs('nin.verification.index') ? 'display: block;' : 'display: none;' }}">
                         <li><a href="{{ route('bvn.verification.index') }}" class="{{ request()->routeIs('bvn.verification.index') ? 'active' : '' }}">Verify BVN</a></li>
                         <li><a href="{{ route('nin.verification.index') }}" class="{{ request()->routeIs('nin.verification.index') ? 'active' : '' }}">Verify NIN</a></li>
+                        <li><a href="{{ route('cac.tin') }}" class="{{ request()->routeIs('cac.tin') ? 'active' : '' }}">Verify TIN</a></li>
                     </ul>
                 </li>
 
@@ -171,7 +172,6 @@
                         <span class="menu-arrow"></span>
                     </a>
                     <ul style="{{ request()->routeIs('affidavit.index') ? 'display: block;' : 'display: none;' }}">
-                         <li><a href="{{ route('cac.tin') }}" class="{{ request()->routeIs('cac.tin') ? 'active' : '' }}">TIN Registration</a></li>
                         <li><a href="{{ route('affidavit.index') }}" class="{{ request()->routeIs('affidavit.index') ? 'active' : '' }}">Affidavit Request</a></li>
                         <li><a href="{{ route('cac.index') }}" class="{{ request()->routeIs('cac.index') ? 'active' : '' }}">CAC Registration</a></li>
                     </ul>

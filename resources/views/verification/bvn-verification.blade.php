@@ -163,12 +163,12 @@
                                         <small class="badge bg-dark bg-opacity-25">₦{{ number_format($premiumSlipPrice ?? 0, 2) }}</small>
                                     </button>
 
-                                    <a href="{{ route('plasticBVN', session('verification')['data']['bvn']) }}" 
-                                       onclick="return confirm('You will be charged ₦{{ number_format($plasticSlipPrice ?? 0, 2) }} for the Plastic Slip. Continue?')"
+                                    {{-- Changed generic link to button for consistent SweetAlert handling --}}
+                                    <button onclick="confirmDownload('{{ route('plasticBVN', session('verification')['data']['bvn']) }}', 'Plastic Slip', {{ $plasticSlipPrice ?? 0 }}, true)"
                                        class="btn btn-info btn-wave text-white">
                                         <i class="bi bi-credit-card-2-front me-1"></i> Plastic <br>
                                         <small class="badge bg-dark bg-opacity-25">₦{{ number_format($plasticSlipPrice ?? 0, 2) }}</small>
-                                    </a>
+                                    </button>
                                 </div>
 
                             @else
@@ -187,38 +187,71 @@
 
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Slip Download Script -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        function confirmDownload(url, type, price) {
-            if (confirm(`You will be charged ₦${price.toLocaleString()} for the ${type}. Do you want to proceed?`)) {
-                // Use AJAX to fetch the view/json
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        if (response.view) {
-                            // Open the view in a new window/tab for printing
-                            var newWindow = window.open('', '_blank');
-                            newWindow.document.write(response.view);
-                            newWindow.document.close();
-                        } else {
-                            alert('Failed to generate slip.');
-                        }
-                    },
-                    error: function(xhr) {
-                        var msg = 'An error occurred.';
-                        if (xhr.responseJSON && xhr.responseJSON.errors) {
-                            // Format errors
-                            msg = Object.values(xhr.responseJSON.errors).join('\n');
-                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
-                             msg = xhr.responseJSON.message;
-                        }
-                        alert(msg);
+        function confirmDownload(url, type, price, isDirectDownload = false) {
+            Swal.fire({
+                title: 'Confirm Download',
+                text: `You will be charged ₦${price.toLocaleString()} for the ${type}. Do you want to proceed?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Proceed!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    
+                    if(isDirectDownload) {
+                        // For plastic slip or direct downloads
+                        window.location.href = url;
+                        return;
                     }
-                });
-            }
+
+                    // Show loading state
+                    Swal.fire({
+                        title: 'Generating Slip...',
+                        text: 'Please wait while we process your request.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Use AJAX to fetch the view/json
+                    $.ajax({
+                        url: url,
+                        type: 'GET',
+                        success: function(response) {
+                            Swal.close(); // Close loading
+                            
+                            if (response.view) {
+                                // Open the view in a new window/tab for printing
+                                var newWindow = window.open('', '_blank');
+                                newWindow.document.write(response.view);
+                                newWindow.document.close();
+                            } else {
+                                Swal.fire('Error', 'Failed to generate slip response.', 'error');
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.close(); // Close loading
+                            var msg = 'An error occurred.';
+                            if (xhr.responseJSON && xhr.responseJSON.errors) {
+                                msg = Object.values(xhr.responseJSON.errors).join('\n');
+                            } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            }
+                            Swal.fire('Failed!', msg, 'error');
+                        }
+                    });
+                }
+            });
         }
     </script>
 

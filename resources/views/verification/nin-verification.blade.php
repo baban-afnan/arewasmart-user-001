@@ -162,6 +162,12 @@
                                         <i class="bi bi-file-earmark-richtext me-1"></i> Premium <br>
                                         <small class="badge bg-dark bg-opacity-25">₦{{ number_format($premiumSlipPrice ?? 0, 2) }}</small>
                                     </button>
+
+                                    <button onclick="confirmDownload('{{ route('vninSlip', session('verification')['data']['nin']) }}', 'VNIN Slip', {{ $vninSlipPrice ?? 0 }})" 
+                                        class="btn btn-info text-white btn-wave">
+                                        <i class="bi bi-file-earmark-spreadsheet me-1"></i> VNIN <br>
+                                        <small class="badge bg-dark bg-opacity-25">₦{{ number_format($vninSlipPrice ?? 0, 2) }}</small>
+                                    </button>
                                 </div>
 
                             @else
@@ -185,10 +191,20 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         function confirmDownload(url, type, price) {
-            if (confirm(`You will be charged ₦${price.toLocaleString()} for the ${type}. Do you want to proceed?`)) {
-                // Redirect to the slip download route
-                window.location.href = url;
-            }
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `You will be charged ₦${price.toLocaleString()} for the ${type}.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, download it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
         }
     </script>
 
