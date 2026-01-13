@@ -291,10 +291,12 @@ class TinRegistrationController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // Refund if wallet was debited but error occurred
-            if (isset($wallet) && isset($servicePrice) && !isset($response)) {
-                $wallet->increment('balance', $servicePrice);
-            }
+            // Refund is automatic via rollBack as the transaction was never committed
+            // Logging the error for debugging
+            Log::error('TIN Validation System Error', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
 
             return back()->with([
                 'status' => 'error',

@@ -1,192 +1,77 @@
 <x-app-layout>
-    <title>Arewa Smart - {{ $title ?? 'Api Services' }}</title>
+    <title>Arewa Smart - {{ $title ?? 'Develper API' }}</title>
     
     <div class="page-body">
         <div class="container-fluid">
-            <div class="page-title mb-3">
-                <div class="row">
-                    <div class="col-sm-6 col-12">
-                        <h3 class="fw-bold text-primary">Api Services</h3>
-                        <p class="text-muted small mb-0">Get the best API services for your business.</p>
+            
+            <!-- Hero Section -->
+            <div class="row align-items-center mb-5 mt-4">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <span class="badge bg-light text-primary border border-primary-subtle rounded-pill px-3 py-2 mb-3 fw-bold">
+                        <i class="bi bi-code-slash me-2"></i>Developer API
+                    </span>
+                    <h1 class="display-4 fw-bold text-dark mb-3">Build Faster with Our <span class="text-primary">Powerful API</span></h1>
+                    <p class="lead text-muted mb-4">
+                        Seamlessly integrate identity verification, bill payments, and other services into your applications. 
+                        Reliable, secure, and developer-friendly.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="https://api.arewasmart.com.ng" target="_blank" class="btn btn-primary btn-lg fw-bold px-4 shadow-sm hover-scale">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Login to Developer Portal
+                        </a>
+                        <a href="https://api.arewasmart.com.ng" target="_blank" class="btn btn-outline-secondary btn-lg fw-bold px-4 hover-scale">
+                            <i class="bi bi-book me-2"></i>Documentation
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                   <img src="{{ asset('assets/img/api-hero-illustration.svg') }}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/8297/8297437.png'" alt="API Integration" class="img-fluid" style="max-height: 350px;"> 
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 feature-card">
+                        <div class="card-body p-4 text-center">
+                            <div class="feature-icon bg-primary bg-opacity-10 text-primary mb-3 mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="bi bi-lightning-charge-fill fs-3"></i>
+                            </div>
+                            <h5 class="fw-bold fs-18">Lightning Fast</h5>
+                            <p class="text-muted small mb-0">Experience sub-second response times optimized for high-volume transactions.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 feature-card">
+                        <div class="card-body p-4 text-center">
+                            <div class="feature-icon bg-success bg-opacity-10 text-success mb-3 mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="bi bi-shield-lock-fill fs-3"></i>
+                            </div>
+                            <h5 class="fw-bold fs-18">Bank-Grade Security</h5>
+                            <p class="text-muted small mb-0">Your data and transactions are protected with industry-standard encryption protocols.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 feature-card">
+                        <div class="card-body p-4 text-center">
+                            <div class="feature-icon bg-info bg-opacity-10 text-info mb-3 mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="bi bi-code-square fs-3"></i>
+                            </div>
+                            <h5 class="fw-bold fs-18">Easy Integration</h5>
+                            <p class="text-muted small mb-0">Well-documented endpoints and SDKs make integration a breeze for any developer.</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-12">
-                    <div class="card mb-4">
-                        <div class="card-header pb-0 header-elements">
-                            <div class="card-header-elements ms-auto">
-                                @if(isset($application) && $application)
-                                    @php
-                                        $statusColor = match($application->status) {
-                                            'approved' => 'success',
-                                            'pending' => 'warning',
-                                            'rejected' => 'danger',
-                                            default => 'secondary',
-                                        };
-                                    @endphp
-                                    <span class="badge bg-{{ $statusColor }}">
-                                        Application Status: {{ ucfirst($application->status) }} check your email for instructions
-                                    </span>
-                                @else
-                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#apiApplyModal">
-                                        Apply for API Access
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-                        
-                        <div class="card-body">
-                            @if (session('success'))
-                                <div class="alert alert-success alert-dismissible" role="alert">
-                                    {{ session('success') }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            @endif
-                            
-                            @if (session('error'))
-                                <div class="alert alert-danger alert-dismissible" role="alert">
-                                    {{ session('error') }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            @endif
-                            
-                            @if ($errors->any())
-                                <div class="alert alert-danger">
-                                    <ul>
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endif
-
-                            <div class="text-nowrap table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Service Name</th>
-                                            <th>Description</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @if($service)
-                                            <tr>
-                                                <td>{{ $service->name }}</td>
-                                                <td>{{ Str::limit($service->description, 50) }}</td>
-                                                <td>
-                                                    <span class="badge bg-{{ $service->is_active ? 'success' : 'danger' }}">
-                                                        {{ $service->is_active ? 'Active' : 'Inactive' }}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td colspan="3" class="p-0">
-                                                    <div class="p-3 bg-lighter">
-                                                        <h6>Available Services</h6>
-                                                        <table class="table table-sm table-bordered">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>S/N</th>
-                                                                    <th>Service API</th>
-                                                                    <th>Your Price ({{ ucfirst($userRole) }})</th>
-                                                                    <th>Description</th>
-                                                                    <th>Status</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                @foreach($fields as $index => $field)
-                                                                    <tr>
-                                                                        <td>{{ $fields->firstItem() + $index }}</td> 
-                                                                        <td>{{ $field->field_name }}</td>
-                                                                        <td>{{ number_format($field->getPriceForUserType($userRole), 2) }}</td>
-                                                                        <td>{{ $field->description }}</td>
-                                                                        <td>{{ $field->is_active ? 'Active' : 'Inactive' }}</td>
-                                                                    </tr>
-                                                                @endforeach
-                                                                @if($fields->isEmpty())
-                                                                    <tr>
-                                                                        <td colspan="5" class="text-center">No specific services available.</td>
-                                                                    </tr>
-                                                                @endif
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @else
-                                            <tr>
-                                                <td colspan="3" class="text-center">No API services available at the moment.</td>
-                                            </tr>
-                                        @endif
-                                    </tbody>
-                                </table>
-                            </div>
-                             <!-- Pagination -->
-                            <div class="d-flex justify-content-center mt-3">
-                                {{ $fields->links('vendor.pagination.custom') }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Apply Modal -->
-    <div class="modal fade" id="apiApplyModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary">
-                    <h5 class="modal-title text-white" id="apiApplyModalLabel">Apply for API Access</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('api.apply') }}" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col mb-3">
-                                <label for="business_name" class="form-label">Business Name</label>
-                                <input type="text" id="business_name" name="business_name" class="form-control" placeholder="My Business Name" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col mb-3">
-                                <label for="website_link" class="form-label">Website Link</label>
-                                <input type="url" id="website_link" name="website_link" class="form-control" placeholder="https://yourbusiness.com" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col mb-3">
-                                <label for="business_nature" class="form-label">Nature of Business</label>
-                                <input type="text" id="business_nature" name="business_nature" class="form-control" placeholder="e.g. VTU Portal, Fintech App" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col mb-3">
-                                <label for="business_description" class="form-label">Business Description</label>
-                                <textarea id="business_description" name="business_description" class="form-control" rows="3" placeholder="Describe your business model and API usage..." required></textarea>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col mb-0">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="terms" id="terms" required>
-                                    <label class="form-check-label" for="terms">
-                                        I agree to the <a href="#">API Terms and Conditions</a>.
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Submit Application</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <style>
+        .hover-scale { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .hover-scale:hover { transform: translateY(-2px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
+        .feature-card { transition: transform 0.3s ease; }
+        .feature-card:hover { transform: translateY(-5px); }
+        .avatar-sm { width: 40px; height: 40px; }
+        .bg-lighter { background-color: #f8f9fa; }
+    </style>
 </x-app-layout>

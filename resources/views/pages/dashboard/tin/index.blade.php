@@ -242,7 +242,7 @@
                                        
 
                                         {{-- Download button --}}
-                                        <form action="{{ route('tin.download') }}" method="POST" class="d-inline" onsubmit="return confirmCharge(this)" data-price="{{ number_format($downloadPrices['individual'] ?? 0, 2) }}">
+                                        <form action="{{ route('tin.download') }}" method="POST" class="d-inline" onsubmit="handleDownload(event, this)" data-price="{{ number_format($downloadPrices['individual'] ?? 0, 2) }}" data-type="Individual Slip">
                                             @csrf
                                             <input type="hidden" name="type" value="individual">
                                             <input type="hidden" name="transaction_ref" value="{{ session('verification')['transaction_ref'] }}">
@@ -257,7 +257,7 @@
 
                                     @if(session('verification')['type'] == 'corporate')
                                         {{-- Download button --}}
-                                        <form action="{{ route('tin.download') }}" method="POST" class="d-inline" onsubmit="return confirmCharge(this)" data-price="{{ number_format($downloadPrices['corporate'] ?? 0, 2) }}">
+                                        <form action="{{ route('tin.download') }}" method="POST" class="d-inline" onsubmit="handleDownload(event, this)" data-price="{{ number_format($downloadPrices['corporate'] ?? 0, 2) }}" data-type="Corporate Certificate">
                                             @csrf
                                             <input type="hidden" name="type" value="corporate">
                                             <input type="hidden" name="transaction_ref" value="{{ session('verification')['transaction_ref'] }}">
@@ -357,14 +357,28 @@
                 }
             });
 
-            // Confirm charge before downloading/opening slip
-            window.confirmCharge = function(form) {
+            // SweetAlert Download Confirmation
+            window.handleDownload = function(e, form) {
+                e.preventDefault();
+                
                 const price = form.getAttribute('data-price') || '0.00';
-                const confirmed = confirm('You will be charged NGN ' + price + ' for this action. Proceed?');
-                if (!confirmed) return false;
-                // Optionally disable the submit button to prevent double submits
-                const btn = form.querySelector('button[type="submit"]');
-                return true;
+                const type = form.getAttribute('data-type') || 'Slip';
+
+                Swal.fire({
+                    title: 'Confirm Download',
+                    text: `You will be charged ₦${price} for the ${type}. Do you want to proceed?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, Download!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Submit the form
+                        form.submit();
+                    }
+                });
             }
         });
     </script>
