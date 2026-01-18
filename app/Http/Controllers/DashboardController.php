@@ -23,7 +23,7 @@ class DashboardController extends Controller
 
         $virtualAccount = VirtualAccount::where('user_id', $user->id)->first();
         $bonusHistory = BonusHistory::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
 
         // Date Filtering Logic
@@ -66,7 +66,7 @@ class DashboardController extends Controller
 
         // 5. Recent 10 Transactions
         $recentTransactions = Transaction::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->take(10)
             ->get();
 

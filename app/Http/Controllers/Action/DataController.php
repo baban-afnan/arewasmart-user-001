@@ -162,26 +162,42 @@ class DataController extends Controller
         $networkKey = $request->network; // e.g., mtn-data
 
         // --- Discount Logic Start ---
+        // Mapping network keys to specific field codes provided by USER
+        $fieldCodeMap = [
+            'mtn-data'      => '104',
+            'airtel-data'   => '105',
+            'glo-data'      => '106',
+            'etisalat-data' => '107',
+        ];
+
+        $targetFieldCode = $fieldCodeMap[$networkKey] ?? $networkKey;
+
         // 1. Find the Service (e.g., Data)
         $service = \App\Models\Service::where('name', 'Data')->first();
         if (!$service) {
              $service = \App\Models\Service::firstOrCreate(['name' => 'Data'], ['status' => 'active']);
         }
 
-        // 2. Find the specific Network Field (e.g., mtn-data)
-        // We search by field_name or field_code matching the network key
+        // 2. Find the specific Network Field using field_code
         $serviceField = \App\Models\ServiceField::where('service_id', $service->id)
-            ->where(function($q) use ($networkKey) {
-                $q->where('field_name', 'LIKE', "%{$networkKey}%")
-                  ->orWhere('field_code', 'LIKE', "%{$networkKey}%");
-            })->first();
+            ->where('field_code', $targetFieldCode)
+            ->first();
+
+        // Fallback for older searches if field_code mapping is not set up in DB yet
+        if (!$serviceField) {
+            $serviceField = \App\Models\ServiceField::where('service_id', $service->id)
+                ->where(function($q) use ($networkKey) {
+                    $q->where('field_name', 'LIKE', "%{$networkKey}%")
+                      ->orWhere('field_code', 'LIKE', "%{$networkKey}%");
+                })->first();
+        }
 
         // 3. Calculate Discount
         $discountPercentage = 0;
         if ($serviceField) {
-            $userType = $user->user_type ?? 'user';
+            $userRole = $user->role ?? 'personal';
             $servicePrice = \App\Models\ServicePrice::where('service_fields_id', $serviceField->id)
-                ->where('user_type', $userType)
+                ->where('user_type', $userRole)
                 ->first();
 
             if ($servicePrice) {

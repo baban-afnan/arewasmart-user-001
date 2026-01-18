@@ -18,7 +18,7 @@ class TransactionController extends Controller
             return redirect()->route('login');
         }
 
-        $query = Transaction::where('user_id', $user->id)->latest();
+        $query = Transaction::where('user_id', $user->id)->orderBy('id', 'desc');
 
         // Filter by Transaction Type (credit, debit, refund)
         if ($request->filled('type')) {

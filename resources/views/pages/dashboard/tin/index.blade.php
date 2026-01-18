@@ -288,6 +288,34 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // AI Voice Notification for Success
+            @if (session('status') === 'success')
+                const speak = () => {
+                    const message = "wow verification is successful Id number is valid";
+                    const utterance = new SpeechSynthesisUtterance(message);
+                    
+                    const voices = window.speechSynthesis.getVoices();
+                    if (voices.length === 0) return false;
+
+                    const femaleVoice = voices.find(voice => 
+                        voice.name.toLowerCase().includes('female') || 
+                        voice.name.toLowerCase().includes('google uk english female') ||
+                        voice.name.toLowerCase().includes('samantha') ||
+                        voice.name.toLowerCase().includes('victoria')
+                    );
+                    
+                    if (femaleVoice) utterance.voice = femaleVoice;
+                    utterance.rate = 1.0;
+                    utterance.pitch = 1.1;
+                    window.speechSynthesis.speak(utterance);
+                    return true;
+                };
+
+                if (!speak()) {
+                    window.speechSynthesis.onvoiceschanged = speak;
+                }
+            @endif
+
             const form = document.getElementById('validationForm');
             const typeSelect = document.getElementById('service_type');
             const hiddenType = document.getElementById('hidden_type');

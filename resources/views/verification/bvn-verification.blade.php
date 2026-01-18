@@ -191,9 +191,39 @@
     <!-- SweetAlert2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Slip Download Script -->
+    <!-- Success Voice & Slip Download Script -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        // AI Voice Notification for Success
+        @if (session('status') === 'success')
+            window.addEventListener('load', () => {
+                const speak = () => {
+                    const message = "wow verification is successful Id number is valid";
+                    const utterance = new SpeechSynthesisUtterance(message);
+                    
+                    const voices = window.speechSynthesis.getVoices();
+                    if (voices.length === 0) return false;
+
+                    const femaleVoice = voices.find(voice => 
+                        voice.name.toLowerCase().includes('female') || 
+                        voice.name.toLowerCase().includes('google uk english female') ||
+                        voice.name.toLowerCase().includes('samantha') ||
+                        voice.name.toLowerCase().includes('victoria')
+                    );
+                    
+                    if (femaleVoice) utterance.voice = femaleVoice;
+                    utterance.rate = 1.0;
+                    utterance.pitch = 1.1;
+                    window.speechSynthesis.speak(utterance);
+                    return true;
+                };
+
+                if (!speak()) {
+                    window.speechSynthesis.onvoiceschanged = speak;
+                }
+            });
+        @endif
+
         function confirmDownload(url, type, price, isDirectDownload = false) {
             Swal.fire({
                 title: 'Confirm Download',

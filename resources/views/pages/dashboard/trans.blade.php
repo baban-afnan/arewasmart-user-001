@@ -30,9 +30,9 @@
                                 <span class="fw-medium text-dark">#{{ substr($transaction->transaction_ref, 0, 8) }}...</span>
                             </td>
                             <td>
-                                @if($transaction->type == 'credit')
+                                @if(in_array($transaction->type, ['credit', 'refund', 'bonus']))
                                     <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1">
-                                        <i class="ti ti-arrow-down-left me-1"></i>Credit
+                                        <i class="ti ti-arrow-down-left me-1"></i>{{ ucfirst($transaction->type) }}
                                     </span>
                                 @else
                                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1">
@@ -42,12 +42,12 @@
                             </td>
                            
                             <td>
-                                <span class="fw-bold {{ $transaction->type == 'credit' ? 'text-success' : 'text-danger' }}">
-                                    {{ $transaction->type == 'credit' ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
+                                <span class="fw-bold {{ in_array($transaction->type, ['credit', 'refund', 'bonus']) ? 'text-success' : 'text-danger' }}">
+                                    {{ in_array($transaction->type, ['credit', 'refund', 'bonus']) ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
                                 </span>
                             </td>
                             <td>
-                                <span class="text-muted small">{{ $transaction->created_at->format('d M Y, h:i A') }}</span>
+                                <span class="text-muted small">{{ $transaction->created_at->format('d M Y') }}</span>
                             </td>
                             <td class="pe-4 text-end">
                                 @if($transaction->status == 'completed' || $transaction->status == 'successful')

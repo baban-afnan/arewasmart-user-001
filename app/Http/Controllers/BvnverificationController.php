@@ -385,7 +385,7 @@ class BvnverificationController extends Controller
             
             // Clean up message if needed
             if (($data['respCode'] ?? '') == '99120012') $message = 'Parameters wrong';
-            if (($data['respCode'] ?? '') == '99120023') $message = 'System error';
+            if (($data['respCode'] ?? '') == '99120023') $message = 'Identity provided is invalid';
             if (($data['respCode'] ?? '') == '99120025') $message = 'BVN_PARAMETER_INVALID';
 
             return back()->with([

@@ -83,12 +83,12 @@ class AirtimeController extends Controller
         $discountPercentage = 0;
         if ($serviceField) {
             // Check for specific price/discount for this user type
-            // Assuming 'role' column exists in users table, or default to 'agent'/'user'
-            $userType = $user->role ?? 'personal'; 
+            // Assuming 'user_type' column exists in users table, or default to 'agent'/'user'
+            $userType = $user->user_type ?? 'personal'; 
             
             // Try to get price from ServicePrice
             $servicePrice = \App\Models\ServicePrice::where('service_fields_id', $serviceField->id)
-                ->where('role', $userType)
+                ->where('user_type', $userType)
                 ->first();
 
             if ($servicePrice) {

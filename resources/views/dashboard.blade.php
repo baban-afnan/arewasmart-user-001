@@ -45,6 +45,20 @@
     </style>
     @endpush
 
+    @php
+        $hour = date('H');
+        $timeGreeting = 'Good morning';
+        if ($hour >= 12 && $hour < 17) {
+            $timeGreeting = 'Good afternoon';
+        } elseif ($hour >= 17) {
+            $timeGreeting = 'Good evening';
+        }
+        
+        $user = Auth::user();
+        $fullName = trim(($user->first_name ?? '') . ' ' . ($user->middle_name ?? '') . ' ' . ($user->last_name ?? ''));
+        $displayName = empty($fullName) ? 'BOSS' : $fullName;
+    @endphp
+
     <div class="mt-4">
     <!-- User + Wallet Section -->
      <div class="card border-0 shadow-sm rounded-4 mb-3">
@@ -60,7 +74,7 @@
             <!-- Welcome Message -->
             <div class="me-auto">
                 <h4 class="fw-semibold text-dark mb-1 welcome-text">
-                    Welcome back, {{ Auth::user()->first_name . ' ' . Auth::user()->surname ?? 'User' }} 👋
+                    Welcome back, {{ Auth::user()->first_name . ' ' . Auth::user()->surname ?? 'User' }}  👋
                 </h4>
                 <small class="text-danger">Your Wallet Id is {{ $wallet->wallet_number ?? 'N/A' }}</small>
             </div>
@@ -107,4 +121,43 @@
             @include('pages.dashboard.trans')
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // AI Voice Greeting for Dashboard
+            const speakGreeting = () => {
+                // Ensure the message is what the user requested:
+                // "Good [Time] [Name/BOSS]. Welcome back! All our services are going smoothly. Enjoy Arewa Smart Idea."
+                const message = "{{ $timeGreeting }} {{ $displayName }}. Welcome back! All our services are going smoothly. Enjoy Arewa Smart Idea.";
+                const utterance = new SpeechSynthesisUtterance(message);
+                
+                const voices = window.speechSynthesis.getVoices();
+                if (voices.length === 0) return false;
+
+                // Try to find a sweet female voice
+                const femaleVoice = voices.find(voice => 
+                    voice.name.toLowerCase().includes('female') || 
+                    voice.name.toLowerCase().includes('google uk english female') ||
+                    voice.name.toLowerCase().includes('samantha') ||
+                    voice.name.toLowerCase().includes('victoria') ||
+                    voice.name.toLowerCase().includes('google us english') 
+                );
+                
+                if (femaleVoice) {
+                    utterance.voice = femaleVoice;
+                }
+                
+                utterance.rate = 0.95; // Slightly slower for a more natural and sweet tone
+                utterance.pitch = 1.1; // Slightly higher pitch for a more pleasant female voice
+                window.speechSynthesis.speak(utterance);
+                return true;
+            };
+
+            // Initial attempt
+            if (!speakGreeting()) {
+                // Wait for voices to load if not ready
+                window.speechSynthesis.onvoiceschanged = speakGreeting;
+            }
+        });
+    </script>
 </x-app-layout>

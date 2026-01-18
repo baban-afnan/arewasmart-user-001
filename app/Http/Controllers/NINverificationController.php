@@ -355,7 +355,7 @@ class NINverificationController extends Controller
             if (($data['respCode'] ?? '') == '99120012') {
                 $message = 'Parameter error in the interface call.';
             } elseif (($data['respCode'] ?? '') == '99120013') {
-                $message = 'System Error.';
+                $message = 'Identity provided is invalid.';
             }
 
             return back()->with([

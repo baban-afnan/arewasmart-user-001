@@ -101,26 +101,25 @@
                                                 <td>
                                                     <div class="d-flex flex-column">
                                                         <span class="fw-semibold">{{ $transaction->created_at->format('d M Y') }}</span>
-                                                        <small class="text-muted">{{ $transaction->created_at->format('h:i A') }}</small>
                                                     </div>
                                                 </td>
                                                 <td><span class="font-monospace small">{{ Str::limit($transaction->transaction_ref, 15) }}</span></td>
                                                 <td>
-                                                    <span class="d-inline-block text-truncate" style="max-width: 250px;" title="{{ $transaction->description }}">
-                                                        {{ $transaction->description }}
+                                                    <span title="{{ $transaction->description }}">
+                                                        {{ Str::limit($transaction->description, 15) }}
                                                     </span>
                                                 </td>
                                                 <td class="text-center">
-                                                    @if($transaction->type == 'credit')
-                                                        <span class="badge bg-success-subtle text-success fw-semibold">Credit</span>
+                                                    @if(in_array($transaction->type, ['credit', 'refund', 'bonus']))
+                                                        <span class="badge bg-success-subtle text-success fw-semibold">{{ ucfirst($transaction->type) }}</span>
                                                     @elseif($transaction->type == 'debit')
                                                         <span class="badge bg-danger-subtle text-danger fw-semibold">Debit</span>
                                                     @else
                                                         <span class="badge bg-info-subtle text-info fw-semibold">{{ ucfirst($transaction->type) }}</span>
                                                     @endif
                                                 </td>
-                                                <td class="text-end fw-bold {{ $transaction->type == 'credit' ? 'text-success' : 'text-danger' }}">
-                                                    {{ $transaction->type == 'credit' ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
+                                                <td class="text-end fw-bold {{ in_array($transaction->type, ['credit', 'refund', 'bonus']) ? 'text-success' : 'text-danger' }}">
+                                                    {{ in_array($transaction->type, ['credit', 'refund', 'bonus']) ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
                                                 </td>
                                                 <td class="text-center">
                                                     <span class="badge bg-{{ $transaction->status == 'completed' || $transaction->status == 'successful' ? 'success' : ($transaction->status == 'failed' ? 'danger' : 'warning') }}-subtle text-{{ $transaction->status == 'completed' || $transaction->status == 'successful' ? 'success' : ($transaction->status == 'failed' ? 'danger' : 'warning') }} fw-semibold">
@@ -171,8 +170,8 @@
                     </div>
                     <div class="modal-body text-start">
                         <div class="mb-3 text-center">
-                            <h2 class="fw-bold {{ $transaction->type == 'credit' ? 'text-success' : 'text-danger' }}">
-                                ₦{{ number_format($transaction->amount, 2) }}
+                            <h2 class="fw-bold {{ in_array($transaction->type, ['credit', 'refund', 'bonus']) ? 'text-success' : 'text-danger' }}">
+                                {{ in_array($transaction->type, ['credit', 'refund', 'bonus']) ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
                             </h2>
                             <span class="badge bg-{{ $transaction->status == 'completed' || $transaction->status == 'successful' ? 'success' : ($transaction->status == 'failed' ? 'danger' : 'warning') }}">
                                 {{ ucfirst($transaction->status) }}
