@@ -86,6 +86,13 @@
                                            class="form-control text-center" placeholder="Enter 11-digit number" required>
                                 </div>
 
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Email Address <span class="text-muted small">(Optional)</span></label>
+                                    <input type="email" id="email" name="email"
+                                           class="form-control text-center" placeholder="Enter email for receipt">
+                                    <small class="text-muted">Receive your JAMB PIN via email</small>
+                                </div>
+
                                 <div class="d-grid mt-4">
                                     <button type="button" class="btn btn-primary btn-lg fw-semibold" id="proceed-btn" disabled
                                         data-bs-toggle="modal" data-bs-target="#pinModal">

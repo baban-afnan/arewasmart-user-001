@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Action;
 
 use App\Helpers\RequestIdHelper;
 use App\Http\Controllers\Controller;
+use App\Mail\JambPurchaseNotification;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use App\Traits\ActiveUsers;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
@@ -403,6 +405,7 @@ class EducationalController extends Controller
             'service'    => 'required|string',
             'profile_id' => 'required|string',
             'mobileno'   => 'required|numeric|digits:11',
+            'email'      => 'nullable|email',
         ]);
 
         $user = Auth::user();
@@ -464,10 +467,10 @@ class EducationalController extends Controller
                 if ($isSuccessful) {
                     $wallet->decrement('balance', $fee);
 
-                    // Extract PIN from various possible locations in response
-                    $purchasedCode = $result['purchased_code'] ?? 
-                                   $result['Pin'] ?? 
-                                   $result['content']['transactions']['purchased_code'] ?? null;
+                    // Extract PIN from API response - check Pin field first (as per API documentation)
+                    $purchasedCode = $result['Pin'] ?? 
+                                   $result['purchased_code'] ?? 
+                                   $result['content']['transactions']['Pin'] ?? null;
                     
                     if (!$purchasedCode && isset($result['cards'][0]['Pin'])) {
                         $purchasedCode = $result['cards'][0]['Pin'];
@@ -490,7 +493,8 @@ class EducationalController extends Controller
                             'profile_id'     => $request->profile_id,
                             'purchased_code' => $finalToken,
                             'phone'          => $request->mobileno,
-                            'api_response'   => $result,
+                            'service_type'   => $description,
+                            'email'          => $request->email ?? null,
                         ]),
                         'performed_by' => $payer_name,
                         'approved_by'  => $this->loginUserId,
@@ -515,6 +519,35 @@ class EducationalController extends Controller
                         'profile_id' => $request->profile_id,
                         'amount' => $fee
                     ]);
+
+                    // Send email notification if email is provided
+                    if ($request->email) {
+                        try {
+                            $emailData = [
+                                'customer_name'    => $payer_name,
+                                'profile_id'       => $request->profile_id,
+                                'pin'              => $finalToken,
+                                'amount'           => $fee,
+                                'reference'        => $requestId,
+                                'service_type'     => $description,
+                                'transaction_date' => now()->format('d M Y, h:i A'),
+                            ];
+
+                            Mail::to($request->email)->send(new JambPurchaseNotification($emailData));
+                            
+                            Log::info('JAMB Purchase Email Sent', [
+                                'email' => $request->email,
+                                'request_id' => $requestId
+                            ]);
+                        } catch (\Exception $e) {
+                            Log::error('JAMB Email Sending Failed', [
+                                'error' => $e->getMessage(),
+                                'email' => $request->email,
+                                'request_id' => $requestId
+                            ]);
+                            // Don't fail the transaction if email fails
+                        }
+                    }
 
                     return redirect()->route('thankyou')->with([
                         'success' => 'JAMB PIN purchase successful!',
