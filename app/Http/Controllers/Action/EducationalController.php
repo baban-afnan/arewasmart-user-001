@@ -296,50 +296,101 @@ class EducationalController extends Controller
         ]);
 
         try {
-            // Map the selected service to the VTPass Service ID
-            // Usually 'jamb' is the serviceID for both UTME and DE
+            // Get variation details to extract the type
+            $variationCode = $request->service; // 'utme' or 'de'
+            $variation = DB::table('data_variations')->where('variation_code', $variationCode)->first();
+            
+            if (!$variation) {
+                Log::error('JAMB Verification Error: Variation not found', [
+                    'variation_code' => $variationCode
+                ]);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Invalid JAMB service selected. Please refresh the page and try again.'
+                ]);
+            }
+
+            // VTPass requires: serviceID, billersCode, and type
             $vtpassServiceId = 'jamb'; 
+            $type = $variationCode; // The variation_code is the type (e.g., 'utme', 'de')
+
+            $requestPayload = [
+                'serviceID'   => $vtpassServiceId,
+                'billersCode' => $request->profile_id,
+                'type'        => $type,
+            ];
+
+            Log::info('JAMB Verification Request', $requestPayload);
 
             $response = Http::withHeaders([
                 'api-key'    => env('API_KEY'),
                 'secret-key' => env('SECRET_KEY'),
-            ])->post(env('BASE_URL', 'https://vtpass.com/api') . '/merchant-verify', [
-                'serviceID'   => $vtpassServiceId,
-                'billersCode' => $request->profile_id,
+            ])->post(env('BASE_URL', 'https://vtpass.com/api') . '/merchant-verify', $requestPayload);
+
+            $data = $response->json();
+            
+            // Log the full response for debugging
+            Log::info('JAMB Verification Response', [
+                'status_code' => $response->status(),
+                'response' => $data
             ]);
 
             if ($response->successful()) {
-                $data = $response->json();
                 if (isset($data['code']) && $data['code'] == '000') {
                     $customerName = $data['content']['Customer_Name'] ?? 'Unknown';
-                    
-                   
-                    
-                    $variationCode = $request->service; // 'jamb' or 'jamb-de'
-                    
-                    // Try to find by variation_code directly
-                    $variation = DB::table('data_variations')->where('variation_code', $variationCode)->first();
-                    
-                    // If not found, try to find by service_id 'jamb' and name like... (fallback)
-                    if (!$variation) {
-                     
-                    }
+                    $amount = $variation->variation_amount;
 
-                    $amount = $variation ? $variation->variation_amount : 0;
+                    Log::info('JAMB Verification Successful', [
+                        'profile_id' => $request->profile_id,
+                        'customer_name' => $customerName
+                    ]);
 
                     return response()->json([
                         'success' => true, 
                         'customer_name' => $customerName,
                         'amount' => $amount
                     ]);
+                } else {
+                    // API returned non-success code
+                    $errorMessage = $data['response_description'] ?? $data['message'] ?? 'Invalid Profile ID';
+                    
+                    Log::error('JAMB Verification Failed', [
+                        'profile_id' => $request->profile_id,
+                        'code' => $data['code'] ?? 'N/A',
+                        'message' => $errorMessage,
+                        'full_response' => $data
+                    ]);
+                    
+                    return response()->json([
+                        'success' => false, 
+                        'message' => $errorMessage
+                    ]);
                 }
+            } else {
+                // HTTP error
+                Log::error('JAMB Verification HTTP Error', [
+                    'status_code' => $response->status(),
+                    'response_body' => $response->body(),
+                    'profile_id' => $request->profile_id
+                ]);
+                
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Service temporarily unavailable. Please try again later.'
+                ]);
             }
-            
-            return response()->json(['success' => false, 'message' => 'Invalid Profile ID or Service unavailable.']);
 
         } catch (\Exception $e) {
-            Log::error('JAMB Verification Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Verification failed.']);
+            Log::error('JAMB Verification Exception', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'profile_id' => $request->profile_id ?? 'N/A'
+            ]);
+            
+            return response()->json([
+                'success' => false, 
+                'message' => 'An error occurred during verification. Please try again.'
+            ]);
         }
     }
 
@@ -361,7 +412,10 @@ class EducationalController extends Controller
             // Get Price
             $variation = DB::table('data_variations')->where('variation_code', $request->service)->first();
             if (!$variation) {
-                return back()->with('error', 'Invalid JAMB service selected.');
+                Log::error('JAMB Purchase Error: Variation not found', [
+                    'variation_code' => $request->service
+                ]);
+                return back()->with('error', 'Invalid JAMB service selected. Please refresh the page and try again.');
             }
 
             $fee = $variation->variation_amount;
@@ -369,30 +423,40 @@ class EducationalController extends Controller
 
             $wallet = Wallet::where('user_id', $this->loginUserId)->first();
             if (!$wallet || $wallet->balance < $fee) {
-                return back()->with('error', 'Insufficient wallet balance.');
+                Log::warning('JAMB Purchase Failed: Insufficient balance', [
+                    'user_id' => $this->loginUserId,
+                    'required' => $fee,
+                    'balance' => $wallet->balance ?? 0
+                ]);
+                return back()->with('error', 'Insufficient wallet balance. Please fund your wallet and try again.');
             }
 
-            // Call API
-            // Note: For JAMB, billersCode is the Profile ID.
-            // ServiceID is 'jamb' for both UTME and DE.
-            // Variation code distinguishes them (e.g. 'jamb' or 'utme', 'jamb-de' or 'de').
-            
-            $apiServiceId = 'jamb'; // Always 'jamb' for VTPass JAMB services
+            // Prepare API request payload
+            $apiServiceId = 'jamb';
+            $requestPayload = [
+                'request_id'     => $requestId,
+                'serviceID'      => $apiServiceId,
+                'billersCode'    => $request->profile_id,
+                'variation_code' => $request->service,
+                'phone'          => $request->mobileno,
+            ];
+
+            Log::info('JAMB Purchase Request', $requestPayload);
 
             $response = Http::withHeaders([
                 'api-key'    => env('API_KEY'),
                 'secret-key' => env('SECRET_KEY'),
-            ])->post(env('MAKE_PAYMENT'), [
-                'request_id'     => $requestId,
-                'serviceID'      => $apiServiceId,
-                'billersCode'    => $request->profile_id,
-                'variation_code' => $request->service, // variation_code
-                'phone'          => $request->mobileno,
+            ])->post(env('MAKE_PAYMENT'), $requestPayload);
+
+            $result = $response->json();
+            
+            // Log the full response
+            Log::info('JAMB Purchase Response', [
+                'status_code' => $response->status(),
+                'response' => $result
             ]);
 
             if ($response->successful()) {
-                $result = $response->json();
-                
                 $successCodes = ['0', '00', '000', '200'];
                 $isSuccessful = (isset($result['code']) && in_array((string)$result['code'], $successCodes)) ||
                                 (isset($result['status']) && strtolower($result['status']) === 'success');
@@ -400,12 +464,16 @@ class EducationalController extends Controller
                 if ($isSuccessful) {
                     $wallet->decrement('balance', $fee);
 
-                    // Extract PIN
-                    $purchasedCode = $result['purchased_code'] ?? null;
+                    // Extract PIN from various possible locations in response
+                    $purchasedCode = $result['purchased_code'] ?? 
+                                   $result['Pin'] ?? 
+                                   $result['content']['transactions']['purchased_code'] ?? null;
+                    
                     if (!$purchasedCode && isset($result['cards'][0]['Pin'])) {
                         $purchasedCode = $result['cards'][0]['Pin'];
                     }
-                    $finalToken = $purchasedCode ?? 'Check History';
+                    
+                    $finalToken = $purchasedCode ?? 'Check Transaction History';
 
                     $payer_name = $user->first_name . ' ' . $user->last_name;
                     $transDescription = "{$description} Purchase - Profile: {$request->profile_id} - PIN: {$finalToken}";
@@ -421,6 +489,7 @@ class EducationalController extends Controller
                         'metadata'        => json_encode([
                             'profile_id'     => $request->profile_id,
                             'purchased_code' => $finalToken,
+                            'phone'          => $request->mobileno,
                             'api_response'   => $result,
                         ]),
                         'performed_by' => $payer_name,
@@ -430,10 +499,8 @@ class EducationalController extends Controller
                     // Report
                     \App\Models\Report::create([
                         'user_id'      => $user->id,
-                        'phone_number' => $request->profile_id, // Saving Profile ID in phone_number col or description? Let's use phone_number for quick ref or the actual phone.
-                        // Actually, let's save the phone number entered.
                         'phone_number' => $request->mobileno,
-                        'network'      => $request->service, // jamb or jamb-de
+                        'network'      => $request->service,
                         'ref'          => $requestId,
                         'amount'       => $fee,
                         'status'       => 'successful',
@@ -441,6 +508,12 @@ class EducationalController extends Controller
                         'description'  => $transDescription,
                         'old_balance'  => $wallet->balance + $fee,
                         'new_balance'  => $wallet->balance,
+                    ]);
+
+                    Log::info('JAMB Purchase Successful', [
+                        'request_id' => $requestId,
+                        'profile_id' => $request->profile_id,
+                        'amount' => $fee
                     ]);
 
                     return redirect()->route('thankyou')->with([
@@ -452,17 +525,40 @@ class EducationalController extends Controller
                         'network' => strtoupper($description)
                     ]);
                 } else {
-                    Log::error('JAMB API Error', ['response' => $result]);
-                    return back()->with('error', 'Purchase failed. ' . ($result['response_description'] ?? 'Try again.'));
+                    // API returned failure code
+                    $errorMessage = $result['response_description'] ?? $result['message'] ?? 'Purchase failed. Please try again.';
+                    
+                    Log::error('JAMB Purchase API Error', [
+                        'request_id' => $requestId,
+                        'profile_id' => $request->profile_id,
+                        'code' => $result['code'] ?? 'N/A',
+                        'message' => $errorMessage,
+                        'full_response' => $result
+                    ]);
+                    
+                    return back()->with('error', 'Purchase failed: ' . $errorMessage);
                 }
             } else {
-                Log::error('JAMB HTTP Error', ['body' => $response->body()]);
-                return back()->with('error', 'Service unavailable.');
+                // HTTP error
+                Log::error('JAMB Purchase HTTP Error', [
+                    'request_id' => $requestId,
+                    'status_code' => $response->status(),
+                    'response_body' => $response->body(),
+                    'profile_id' => $request->profile_id
+                ]);
+                
+                return back()->with('error', 'Service temporarily unavailable. Please try again later.');
             }
 
         } catch (\Exception $e) {
-            Log::error('JAMB Exception: ' . $e->getMessage());
-            return back()->with('error', 'An error occurred.');
+            Log::error('JAMB Purchase Exception', [
+                'request_id' => $requestId ?? 'N/A',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'profile_id' => $request->profile_id ?? 'N/A'
+            ]);
+            
+            return back()->with('error', 'An error occurred during purchase. Please try again or contact support.');
         }
     }
 }
