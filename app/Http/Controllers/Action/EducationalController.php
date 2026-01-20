@@ -303,7 +303,7 @@ class EducationalController extends Controller
             $response = Http::withHeaders([
                 'api-key'    => env('API_KEY'),
                 'secret-key' => env('SECRET_KEY'),
-            ])->post(env('BASE_URL', 'https://sandbox.vtpass.com/api') . '/merchant-verify', [
+            ])->post(env('BASE_URL', 'https://vtpass.com/api') . '/merchant-verify', [
                 'serviceID'   => $vtpassServiceId,
                 'billersCode' => $request->profile_id,
             ]);
@@ -313,10 +313,7 @@ class EducationalController extends Controller
                 if (isset($data['code']) && $data['code'] == '000') {
                     $customerName = $data['content']['Customer_Name'] ?? 'Unknown';
                     
-                    // Fetch price from DB
-                    // The frontend sends 'jamb' or 'jamb-de' as the 'service' (which acts as variation code here)
-                    // We look up the 'data_variations' table using this code.
-                    // If not found, we might default to a known price or error.
+                   
                     
                     $variationCode = $request->service; // 'jamb' or 'jamb-de'
                     
@@ -325,9 +322,7 @@ class EducationalController extends Controller
                     
                     // If not found, try to find by service_id 'jamb' and name like... (fallback)
                     if (!$variation) {
-                         // Fallback: if user sent 'jamb', look for 'utme' maybe? 
-                         // For now, let's assume the DB is seeded with 'jamb' and 'jamb-de' as variation_codes.
-                         // If not, we return 0 and user can't buy.
+                     
                     }
 
                     $amount = $variation ? $variation->variation_amount : 0;
