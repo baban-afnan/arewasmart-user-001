@@ -121,43 +121,5 @@
             @include('pages.dashboard.trans')
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // AI Voice Greeting for Dashboard
-            const speakGreeting = () => {
-                // Ensure the message is what the user requested:
-                // "Good [Time] [Name/BOSS]. Welcome back! All our services are going smoothly. Enjoy Arewa Smart Idea."
-                const message = "{{ $timeGreeting }} {{ $displayName }}. Welcome back! All our services are going smoothly. Enjoy Arewa Smart Idea.";
-                const utterance = new SpeechSynthesisUtterance(message);
-                
-                const voices = window.speechSynthesis.getVoices();
-                if (voices.length === 0) return false;
-
-                // Try to find a sweet female voice
-                const femaleVoice = voices.find(voice => 
-                    voice.name.toLowerCase().includes('female') || 
-                    voice.name.toLowerCase().includes('google uk english female') ||
-                    voice.name.toLowerCase().includes('samantha') ||
-                    voice.name.toLowerCase().includes('victoria') ||
-                    voice.name.toLowerCase().includes('google us english') 
-                );
-                
-                if (femaleVoice) {
-                    utterance.voice = femaleVoice;
-                }
-                
-                utterance.rate = 0.95; // Slightly slower for a more natural and sweet tone
-                utterance.pitch = 1.1; // Slightly higher pitch for a more pleasant female voice
-                window.speechSynthesis.speak(utterance);
-                return true;
-            };
-
-            // Initial attempt
-            if (!speakGreeting()) {
-                // Wait for voices to load if not ready
-                window.speechSynthesis.onvoiceschanged = speakGreeting;
-            }
-        });
-    </script>
+         
 </x-app-layout>

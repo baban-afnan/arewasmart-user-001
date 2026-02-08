@@ -16,20 +16,20 @@ class NIN_PDF_Repository
                 ->first();
 
             $ninData = [
-                "nin" => $verifiedRecord->idno,
-                "fName" => $verifiedRecord->first_name,
-                "sName" => $verifiedRecord->last_name,
-                "mName" => $verifiedRecord->middle_name,
+                "nin" => $verifiedRecord->number_nin,
+                "fName" => $verifiedRecord->firstname,
+                "sName" => $verifiedRecord->surname,
+                "mName" => $verifiedRecord->middlename,
                 "tId" => $verifiedRecord->trackingId,
-                "address" => $verifiedRecord->address,
-                "lga" => $verifiedRecord->lga,
-                "state" => $verifiedRecord->state,
-                "gender" => ($verifiedRecord->gender === 'Male') ? "M" : "F",
+                "address" => $verifiedRecord->residence_address,
+                "lga" => $verifiedRecord->residence_lga,
+                "state" => $verifiedRecord->residence_state,
+                "gender" => $verifiedRecord->gender ?? 'N/A',
                 "birthdate" => $verifiedRecord->birthdate,
-                "photo" => str_replace('data:image/jpg;base64,', '', $verifiedRecord->photo)
+                "photo" => str_replace('data:image/jpg;base64,', '', $verifiedRecord->photo_path)
             ];
 
-            $names = $verifiedRecord->first_name . ' ' . $verifiedRecord->last_name;
+            $names = $verifiedRecord->firstname . ' ' . $verifiedRecord->surname;
             
             // Initialize TCPDF
             $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8');
@@ -110,12 +110,12 @@ class NIN_PDF_Repository
                 "address" => $verifiedRecord->residence_address,
                 "lga" => $verifiedRecord->residence_lga,
                 "state" => $verifiedRecord->residence_state,
-                "gender" => ($verifiedRecord->gender === 'Male') ? "M" : "F",
+                "gender" => $verifiedRecord->gender ?? 'N/A',
                 "birthdate" => $verifiedRecord->birthdate,
                 "photo" => str_replace('data:image/jpg;base64,', '', $verifiedRecord->photo_path)
             ];
 
-            $names = $verifiedRecord->first_name . ' ' . $verifiedRecord->last_name;
+            $names = $verifiedRecord->firstname . ' ' . $verifiedRecord->surname;
 
             // Generate PDF
             $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8');
@@ -218,12 +218,12 @@ class NIN_PDF_Repository
                 "address" => $verifiedRecord->residence_address,
                 "lga" => $verifiedRecord->residence_lga,
                 "state" => $verifiedRecord->residence_state,
-                "gender" => ($verifiedRecord->gender === 'Male') ? "M" : "F",
+                "gender" => $verifiedRecord->gender ?? 'N/A',
                 "birthdate" => $verifiedRecord->birthdate,
                 "photo" => str_replace('data:image/jpg;base64,', '', $verifiedRecord->photo_path)
             ];
 
-            $names = html_entity_decode($verifiedRecord->first_name) . ' ' . html_entity_decode($verifiedRecord->last_name);
+            $names = html_entity_decode($verifiedRecord->firstname) . ' ' . html_entity_decode($verifiedRecord->surname);
 
             // Initialize TCPDF
             $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8');
@@ -430,7 +430,7 @@ class NIN_PDF_Repository
                 "address" => $verifiedRecord->residence_address,
                 "lga" => $verifiedRecord->residence_lga,
                 "state" => $verifiedRecord->residence_state,
-                "gender" => ($verifiedRecord->gender === 'Male') ? "M" : "F",
+                "gender" => $verifiedRecord->gender ?? 'N/A',
                 "birthdate" => $verifiedRecord->birthdate,
                 "photo" => str_replace('data:image/jpg;base64,', '', $verifiedRecord->photo_path),
                 "created_at" => $verifiedRecord->created_at,

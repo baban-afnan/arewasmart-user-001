@@ -88,6 +88,18 @@ class DashboardController extends Controller
         $pendingPercentage = $totalTransactions > 0 ? round(($pendingTransactions / $totalTransactions) * 100) : 0;
         $failedPercentage = $totalTransactions > 0 ? round(($failedTransactions / $totalTransactions) * 100) : 0;
 
+        // 7. Premium Dashboard Metrics
+        $totalVolume = $totalTransactionAmount + $totalFundedAmount;
+        $monthlyCredit = $totalFundedAmount;
+        $monthlyDebit = $totalTransactionAmount;
+        $currentMonth = $startDate->format('F Y');
+
+        // Platform-wide stats (Monthly)
+        $monthlyNewUsers = User::whereBetween('created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])->count();
+        $monthlyTransactingUsers = Transaction::whereBetween('created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
+            ->distinct('user_id')
+            ->count('user_id');
+
         return view('dashboard', compact(
             'user', 
             'wallet', 
@@ -108,7 +120,13 @@ class DashboardController extends Controller
             'completedPercentage',
             'pendingPercentage',
             'failedPercentage',
-            'announcement'
+            'announcement',
+            'totalVolume',
+            'monthlyCredit',
+            'monthlyDebit',
+            'currentMonth',
+            'monthlyNewUsers',
+            'monthlyTransactingUsers'
         ));
     }
 }

@@ -19,12 +19,11 @@ use App\Http\Controllers\SupportController;
 use App\Http\Controllers\Agency\NinValidationController;
 use App\Http\Controllers\NINverificationController;
 use App\Http\Controllers\BvnverificationController;
+use App\Http\Controllers\NINDemoVerificationController;
+use App\Http\Controllers\NINPhoneVerificationController;
 
 
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
 Route::post('/palmpay/webhook', [PaymentWebhookController::class, 'handleWebhook']) ->middleware('throttle:60,1');
 
@@ -35,6 +34,10 @@ Route::post('/validations-webhook', [NinValidationController::class, 'webhook'])
 
 
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('/', function () {
+        return view('welcome');
+    });
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('verified')->name('dashboard');
 
@@ -231,6 +234,33 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/premiumBVN/{id}', [BvnverificationController::class, 'premiumBVN'])->name("premiumBVN");
         Route::get('/plasticBVN/{id}', [BvnverificationController::class, 'plasticBVN'])->name("plasticBVN");
 
+        });
+
+            /*
+        |--------------------------------------------------------------------------
+        | NIN Demographic Verification
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('nin-demo-verification')->group(function () {
+            Route::get('/', [NINDemoVerificationController::class, 'index'])->name('nin.demo.index');
+            Route::post('/', [NINDemoVerificationController::class, 'store'])->name('nin.demo.store');
+            Route::get('/freeSlip/{id}', [NINDemoVerificationController::class, 'freeSlip'])->name('nin.demo.freeSlip');
+            Route::get('/regularSlip/{id}', [NINDemoVerificationController::class, 'regularSlip'])->name('nin.demo.regularSlip');
+            Route::get('/vninSlip/{id}', [NINDemoVerificationController::class, 'vninSlip'])->name('nin.demo.vninSlip');
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | NIN Phone Verification
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('nin-phone-verification')->group(function () {
+            Route::get('/', [NINPhoneVerificationController::class, 'index'])->name('nin.phone.index');
+            Route::post('/', [NINPhoneVerificationController::class, 'store'])->name('nin.phone.store');
+            Route::get('/regularSlip/{id}', [NINPhoneVerificationController::class, 'regularSlip'])->name('nin.phone.regularSlip');
+            Route::get('/standardSlip/{id}', [NINPhoneVerificationController::class, 'standardSlip'])->name('nin.phone.standardSlip');
+            Route::get('/premiumSlip/{id}', [NINPhoneVerificationController::class, 'premiumSlip'])->name('nin.phone.premiumSlip');
+            Route::get('/vninSlip/{id}', [NINPhoneVerificationController::class, 'vninSlip'])->name('nin.phone.vninSlip');
         });
 
 

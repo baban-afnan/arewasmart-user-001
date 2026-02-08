@@ -103,6 +103,7 @@
                     <ul style="{{ request()->routeIs('airtime', 'buy-data', 'electricity', 'cable') ? 'display: block;' : 'display: none;' }}">
                         <li><a href="{{ route('airtime') }}" class="{{ request()->routeIs('airtime') ? 'active' : '' }}">Buy Airtime</a></li>
                         <li><a href="{{ route('buy-data') }}" class="{{ request()->routeIs('buy-data') ? 'active' : '' }}">Buy Data</a></li>
+                         <li><a href="{{ route('buy-data') }}" class="{{ request()->routeIs('buy-data') ? 'active' : '' }}">Buy SME Data</a></li>
                         <li><a href="{{ route('electricity') }}" class="{{ request()->routeIs('electricity') ? 'active' : '' }}">Pay Electric</a></li>
                         <li><a href="{{ route('cable') }}" class="{{ request()->routeIs('cable') ? 'active' : '' }}">Pay Cable TV</a></li>
                     </ul>
@@ -132,6 +133,8 @@
                         <li><a href="{{ route('bvn.verification.index') }}" class="{{ request()->routeIs('bvn.verification.index') ? 'active' : '' }}">Verify BVN</a></li>
                         <li><a href="{{ route('nin.verification.index') }}" class="{{ request()->routeIs('nin.verification.index') ? 'active' : '' }}">Verify NIN</a></li>
                         <li><a href="{{ route('cac.tin') }}" class="{{ request()->routeIs('cac.tin') ? 'active' : '' }}">Verify TIN</a></li>
+                        <li><a href="{{ route('nin.demo.index') }}" class="{{ request()->routeIs('nin.demo.index') ? 'active' : '' }}">NIN Demo</a></li>
+                        <li><a href="{{ route('nin.phone.index') }}" class="{{ request()->routeIs('nin.phone.index') ? 'active' : '' }}">NIN Phone NO</a></li>
                     </ul>
                 </li>
 
