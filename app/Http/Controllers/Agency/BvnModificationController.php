@@ -124,6 +124,9 @@ class BvnModificationController extends Controller
         DB::beginTransaction();
 
         try {
+            // CHARGE WALLET FIRST
+            $wallet->decrement('balance', $totalAmount);
+
             // Handle affidavit upload
             $fileName = null;
             $fileUrl = null;
@@ -136,9 +139,6 @@ class BvnModificationController extends Controller
                 $path = $file->storeAs('uploads/affidavits', $fileName, 'public');
                 $fileUrl = Storage::disk('public')->url($path);
             }
-
-            // Debit wallet
-            $wallet->decrement('balance', $totalAmount);
 
             $transactionRef = 'M1' . date('is') . strtoupper(Str::random(5));
             $performedBy = trim("{$user->first_name} {$user->last_name}");

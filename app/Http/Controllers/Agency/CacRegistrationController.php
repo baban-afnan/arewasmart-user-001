@@ -69,18 +69,10 @@ class CacRegistrationController extends Controller
              return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
         }
 
-        $serviceKey = 'CAC';
-
-        // Validate Service Field ID first to determine requirements
-        $request->validate([
-            'service_field_id' => 'required|exists:service_fields,id',
-        ]);
-
+        // 1. Validation
+        $request->validate(['service_field_id' => 'required|exists:service_fields,id']);
         $serviceField = ServiceField::with(['service', 'prices'])->findOrFail($request->service_field_id);
-        $serviceName = $serviceField->service->name; // Should be 'CAC'
-        $fieldName = $serviceField->field_name; // e.g., 'Business Name'
-
-        // Define Base Rules
+        
         $rules = [
             'business_type' => 'required|string',
             'surname' => 'required|string',
@@ -104,10 +96,6 @@ class CacRegistrationController extends Controller
             'nin_upload' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'signature_upload' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'passport_upload' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        ];
-
-        // Director 2 fields are optional
-        $rules = array_merge($rules, [
             'director2_surname' => 'nullable|string',
             'director2_first_name' => 'nullable|string',
             'director2_phone_number' => 'nullable|string',
@@ -121,8 +109,7 @@ class CacRegistrationController extends Controller
             'director2_nin_upload' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'director2_signature_upload' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'director2_passport_upload' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        ]);
-
+        ];
         $request->validate($rules);
 
         // Determine price
@@ -130,40 +117,35 @@ class CacRegistrationController extends Controller
             ->where('user_type', $user->role)
             ->first()?->price ?? $serviceField->base_price;
 
-        $totalAmount = $servicePrice;
-
         if ($servicePrice === null) {
-            return back()->with(['status' => 'error', 'message' => 'Service price not configured.'])->withInput();
+            return back()->with('error', 'Service price not configured.')->withInput();
         }
 
         $wallet = Wallet::where('user_id', $user->id)->firstOrFail();
-
         if ($wallet->status !== 'active') {
-            return back()->with(['status' => 'error', 'message' => 'Your wallet is not active.'])->withInput();
+            return back()->with('error', 'Your wallet is not active.')->withInput();
         }
 
-        if ($wallet->balance < $totalAmount) {
-            return back()->with(['status' => 'error', 'message' => 'Insufficient balance.'])->withInput();
+        if ($wallet->balance < $servicePrice) {
+            return back()->with('error', 'Insufficient balance.')->withInput();
         }
+
+        $reference = 'CAC' . date('ymd') . strtoupper(substr(uniqid(), -5));
+        $performedBy = trim($user->first_name . ' ' . $user->last_name);
 
         DB::beginTransaction();
 
         try {
-            $reference = 'CAC' . date('ymd') . strtoupper(substr(uniqid(), -5));
-            $performedBy = trim($user->first_name . ' ' . $user->last_name);
+            // 2. Charge Wallet First
+            $wallet->decrement('balance', $servicePrice);
 
-            // Handle Uploads
-            $ninPath = $request->file('nin_upload')->store('uploads/cac/nin', 'public');
-            $signaturePath = $request->file('signature_upload')->store('uploads/cac/signature', 'public');
-            $passportPath = $request->file('passport_upload')->store('uploads/cac/passport', 'public');
-
+            // 3. Handle Uploads
             $uploads = [
-                'nin' => $ninPath,
-                'signature' => $signaturePath,
-                'passport' => $passportPath,
+                'nin' => $request->file('nin_upload')->store('uploads/cac/nin', 'public'),
+                'signature' => $request->file('signature_upload')->store('uploads/cac/signature', 'public'),
+                'passport' => $request->file('passport_upload')->store('uploads/cac/passport', 'public'),
             ];
 
-            // Handle Director 2 Uploads if present
             if ($request->hasFile('director2_nin_upload')) {
                 $uploads['director2_nin'] = $request->file('director2_nin_upload')->store('uploads/cac/nin', 'public');
             }
@@ -174,45 +156,37 @@ class CacRegistrationController extends Controller
                 $uploads['director2_passport'] = $request->file('director2_passport_upload')->store('uploads/cac/passport', 'public');
             }
 
-            // Prepare Data for JSON field
-            $formData = $request->except([
-                '_token', 'nin_upload', 'signature_upload', 'passport_upload',
-                'director2_nin_upload', 'director2_signature_upload', 'director2_passport_upload'
-            ]);
-            $formData['uploads'] = $uploads;
-
-            // Create Transaction
+            // 4. Create Transaction Record
             $transaction = Transaction::create([
                 'transaction_ref' => $reference,
                 'user_id'         => $user->id,
-                'amount'          => $totalAmount,
+                'amount'          => $servicePrice,
                 'performed_by'    => $performedBy,
-                'description'     => "{$serviceName} Registration - {$fieldName}",
+                'description'     => "CAC Registration - {$serviceField->field_name}",
                 'type'            => 'debit',
                 'status'          => 'completed',
-                'metadata'        => [
-                    'service' => $serviceName,
-                    'field' => $fieldName,
-                    'details' => $formData
-                ],
+                'metadata'        => json_encode([
+                    'service' => 'CAC',
+                    'field' => $serviceField->field_name,
+                    'details' => $request->except(['_token']),
+                    'uploads' => $uploads
+                ]),
             ]);
 
-            // Create AgentService
+            // 5. Create AgentService Record
             AgentService::create([
                 'reference'       => $reference,
                 'user_id'         => $user->id,
                 'service_id'      => $serviceField->service_id,
                 'service_field_id'=> $serviceField->id,
-                'field_code'      => $serviceField->field_code, 
-                'service_name'    => $serviceName,
-                'field_name'      => $fieldName,
-                'amount'          => $totalAmount,
+                'service_name'    => 'CAC',
+                'field_name'      => $serviceField->field_name,
+                'amount'          => $servicePrice,
                 'performed_by'    => $performedBy,
                 'transaction_id'  => $transaction->id,
                 'submission_date' => now(),
                 'status'          => 'pending',
                 'service_type'    => 'CAC',
-                'field'           => json_encode($formData), 
                 'first_name'      => $request->first_name,
                 'last_name'       => $request->surname,
                 'middle_name'     => $request->other_name,
@@ -220,9 +194,6 @@ class CacRegistrationController extends Controller
                 'phone_number'    => $request->phone_number,
                 'dob'             => $request->date_of_birth,
                 'gender'          => $request->gender,
-                'passport_url'    => $uploads['passport'] ?? null,
-                'nin_slip_url'    => $uploads['nin'] ?? null,
-                'number'          => $request->phone_number,
                 'state'           => $request->res_state,
                 'lga'             => $request->res_lga,
                 'city'            => $request->res_city,
@@ -230,9 +201,8 @@ class CacRegistrationController extends Controller
                 'street_name'     => $request->res_street,
                 'company_name'    => $request->business_name_1,
                 'company_type'    => $request->business_type,
+                'field'           => json_encode($request->except(['_token'])),
             ]);
-
-            $wallet->decrement('balance', $totalAmount);
 
             DB::commit();
 
@@ -243,6 +213,7 @@ class CacRegistrationController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('CAC Error: ' . $e->getMessage());
             return back()->with(['status' => 'error', 'message' => 'Error: ' . $e->getMessage()])->withInput();
         }
     }

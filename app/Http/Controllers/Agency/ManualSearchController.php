@@ -121,6 +121,9 @@ class ManualSearchController extends Controller
         DB::beginTransaction();
 
         try {
+            // CHARGE WALLET FIRST
+            $wallet->decrement('balance', $servicePrice);
+
             $transactionRef = 'P1' . date('is') . strtoupper(Str::random(5));
             $performedBy = trim($user->first_name . ' ' . $user->last_name);
 
@@ -160,9 +163,6 @@ class ManualSearchController extends Controller
                 'status' => 'pending',
                 'service_type' => 'BVN_SEARCH',
             ]);
-
-            // Deduct from wallet
-            $wallet->decrement('balance', $servicePrice);
 
             DB::commit();
 

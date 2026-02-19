@@ -155,6 +155,9 @@ class NinModificationController extends Controller
         DB::beginTransaction();
 
         try {
+            // CHARGE WALLET FIRST
+            $wallet->decrement('balance', $servicePrice);
+
             // Generate Reference
             $transactionRef = 'M1' . strtoupper(Str::random(10));
             $performedBy = trim($user->first_name . ' ' . $user->last_name);
@@ -202,9 +205,6 @@ class NinModificationController extends Controller
                 'status'             => 'pending',
                 'service_type'       => 'NIN MODIFICATION',
             ]);
-
-            // Debit Wallet
-            $wallet->decrement('balance', $servicePrice);
 
             DB::commit();
 

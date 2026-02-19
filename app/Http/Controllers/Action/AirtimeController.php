@@ -118,69 +118,34 @@ class AirtimeController extends Controller
             return redirect()->back()->with('error', 'Your wallet is not active. Please contact support.');
         }
 
-        // 5. Call Airtime API
+        DB::beginTransaction();
+
         try {
-            $response = Http::withHeaders([
-                'api-key'    => env('API_KEY'),
-                'secret-key' => env('SECRET_KEY'),
-            ])->post(env('MAKE_PAYMENT'), [
-                'request_id' => $requestId,
-                'serviceID'  => $networkKey,
-                'amount'     => $amount, // Send full amount to provider
-                'phone'      => $mobile,
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Airtime API Connection Error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Could not connect to airtime provider. Please try again later.');
-        }
-
-        // 6. Process Response
-        $data = $response->json();
-        $successCodes = ['0', '00', '000', '200'];
-        $isSuccessful = false;
-        
-        if ($response->successful()) {
-             if (isset($data['code']) && in_array((string)$data['code'], $successCodes)) {
-                $isSuccessful = true;
-            } elseif (isset($data['status']) && strtolower($data['status']) === 'success') {
-                $isSuccessful = true;
-            }
-        }
-
-        if ($isSuccessful) {
-            // Deduct Wallet (Payable Amount)
+            // 5. Create Preliminary Records & Charge Wallet
             $oldBalance = $wallet->balance;
             $wallet->decrement('balance', $payableAmount);
             $newBalance = $wallet->balance;
 
-            // Create Transaction Record
-            Transaction::create([
+            // Create Transaction Record (Pending)
+            $transaction = Transaction::create([
                 'transaction_ref' => $requestId,
                 'user_id'         => $user->id,
-                'amount'          => $payableAmount, // Amount deducted
+                'amount'          => $payableAmount,
                 'description'     => "Airtime purchase of ₦{$amount} for {$mobile} ({$networkKey})",
                 'type'            => 'debit',
-                'status'          => 'completed',
-                'metadata'        => json_encode([
-                    'phone'        => $mobile,
-                    'network'      => $networkKey,
-                    'original_amt' => $amount,
-                    'discount'     => $discountAmount,
-                    'api_response' => $data,
-                ]),
-                'performed_by' => $user->first_name . ' ' . $user->last_name,
-                'approved_by'  => $user->id,
+                'status'          => 'pending',
+                'performed_by'    => $user->first_name . ' ' . $user->last_name,
+                'approved_by'     => $user->id,
             ]);
 
-            // Create Report Record (as requested)
-            \App\Models\Report::create([
+            // Create Report Record (Pending)
+            $report = \App\Models\Report::create([
                 'user_id'      => $user->id,
                 'phone_number' => $mobile,
                 'network'      => $networkKey,
                 'ref'          => $requestId,
-                'amount'       => $amount, // Face value
-                'status'       => 'successful',
+                'amount'       => $amount,
+                'status'       => 'pending',
                 'type'         => 'airtime',
                 'description'  => "Airtime purchase for {$mobile}",
                 'old_balance'  => $oldBalance,
@@ -188,16 +153,71 @@ class AirtimeController extends Controller
                 'service_id'   => $serviceField ? $serviceField->id : null,
             ]);
 
-            return redirect()->route('thankyou')->with([
-                'success' => 'Airtime purchase successful!',
-                'ref'     => $requestId,
-                'mobile'  => $mobile,
-                'amount'  => $amount,
-                'paid'    => $payableAmount
+            // 6. Call Airtime API
+            $response = Http::withHeaders([
+                'api-key'    => env('API_KEY'),
+                'secret-key' => env('SECRET_KEY'),
+            ])->post(env('MAKE_PAYMENT'), [
+                'request_id' => $requestId,
+                'serviceID'  => $networkKey,
+                'amount'     => $amount,
+                'phone'      => $mobile,
             ]);
-        }
 
-        Log::error('Airtime API Response Error', ['response' => $data]);
-        return redirect()->back()->with('error', 'Airtime purchase failed. Provider response: ' . ($data['message'] ?? 'Unknown error'));
+            $data = $response->json();
+            $successCodes = ['0', '00', '000', '200'];
+            $isSuccessful = false;
+            
+            if ($response->successful()) {
+                 if (isset($data['code']) && in_array((string)$data['code'], $successCodes)) {
+                    $isSuccessful = true;
+                } elseif (isset($data['status']) && strtolower($data['status']) === 'success') {
+                    $isSuccessful = true;
+                }
+            }
+
+            if ($isSuccessful) {
+                // Finalize Records
+                $transaction->update([
+                    'status'   => 'completed',
+                    'metadata' => json_encode([
+                        'phone'        => $mobile,
+                        'network'      => $networkKey,
+                        'original_amt' => $amount,
+                        'discount'     => $discountAmount,
+                        'api_response' => $data,
+                    ]),
+                ]);
+
+                $report->update(['status' => 'successful']);
+
+                DB::commit();
+
+                return redirect()->route('thankyou')->with([
+                    'success' => 'Airtime purchase successful!',
+                    'ref'     => $requestId,
+                    'mobile'  => $mobile,
+                    'amount'  => $amount,
+                    'paid'    => $payableAmount
+                ]);
+            }
+
+            // API Failed - REFUND
+            $wallet->increment('balance', $payableAmount);
+            $transaction->update(['status' => 'failed']);
+            $report->update([
+                'status'      => 'failed',
+                'description' => "Failed: " . ($data['message'] ?? 'Unknown error'),
+            ]);
+
+            DB::commit();
+            Log::error('Airtime API Response Error', ['response' => $data]);
+            return redirect()->back()->with('error', 'Airtime purchase failed. ' . ($data['message'] ?? 'Unknown error'));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Airtime Purchase Exception: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Something went wrong. Please try again later.');
+        }
     }
 }

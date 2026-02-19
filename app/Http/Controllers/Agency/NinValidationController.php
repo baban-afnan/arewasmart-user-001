@@ -121,60 +121,22 @@ class NinValidationController extends Controller
             return back()->with(['status' => 'error', 'message' => 'Your wallet is not active. Please contact support.'])->withInput();
         }
 
-        // Call API First (Do not charge if this fails)
-        $apiKey = env('NIN_API_KEY');
-        $apiBaseUrl = env('NIN_API_BASE');
-        $apiUrl = $serviceType == 'validation'
-            ? $apiBaseUrl . '/validation'
-            : $apiBaseUrl . '/clearance';
-
-        $payload = [];
-        if ($serviceType == 'validation') {
-            $payload = [
-                'nin' => $request->nin,
-                'error' => $serviceField->field_name,
-                'api' => $apiKey,
-            ];
-        } else {
-            $payload = [
-                'tracking_id' => $request->tracking_id,
-                'token' => $apiKey,
-            ];
-        }
-
-        try {
-            $response = Http::post($apiUrl, $payload);
-            $data = $response->json();
-
-            if (!$response->successful() && (!isset($data['status']) || $data['status'] != 'success')) {
-                return back()->with('error', 'API Submission Failed: ' . ($data['message'] ?? 'Unknown Error'));
-            }
-        } catch (\Exception $e) {
-            Log::error('API Error: ' . $e->getMessage());
-            return back()->with('error', 'Connection Error: Unable to reach service provider.');
-        }
-
         // API Success - Proceed to Charge and Record
         DB::beginTransaction();
 
         try {
-            // Deduct from wallet
-            $wallet->decrement('balance', $servicePrice);
-
+            // CHARGE USER BEFORE API CALL
             $transactionRef = 'TRX-' . strtoupper(Str::random(10));
             $performedBy = $user->first_name . ' ' . $user->last_name;
 
-            // Clean API response for comment
-            $cleanResponse = $this->cleanApiResponse($data);
-
-            // Create transaction
+            // Create PENDING transaction
             $transaction = Transaction::create([
                 'transaction_ref' => $transactionRef,
                 'user_id' => $user->id,
                 'amount' => $servicePrice,
                 'description' => "NIN Agent service for {$serviceField->field_name}",
                 'type' => 'debit',
-                'status' => 'completed',
+                'status' => 'pending',
                 'performed_by' => $performedBy,
                 'metadata' => [
                     'service' => $serviceField->service->name,
@@ -184,10 +146,7 @@ class NinValidationController extends Controller
                 ],
             ]);
 
-            // Determine status from API response
-            $status = $this->normalizeStatus($data['status'] ?? 'processing');
-
-            // Create Agent Service Record
+            // Create PENDING Agent Service Record
             $agentService = AgentService::create([
                 'reference' => 'REF-' . strtoupper(Str::random(10)),
                 'user_id' => $user->id,
@@ -199,12 +158,64 @@ class NinValidationController extends Controller
                 'nin' => $request->nin,
                 'tracking_id' => $request->tracking_id,
                 'amount' => $servicePrice,
-                'status' => $status,
+                'status' => 'processing',
                 'submission_date' => now(),
                 'service_field_name' => $serviceField->field_name,
                 'description' => $request->description ?? $serviceField->field_name,
-                'comment' => $cleanResponse,
                 'performed_by' => $performedBy,
+            ]);
+
+            // Deduct from wallet immediately
+            $wallet->decrement('balance', $servicePrice);
+
+            // Call API (After charging)
+            $apiKey = env('NIN_API_KEY');
+            $apiBaseUrl = env('NIN_API_BASE');
+            $apiUrl = $serviceType == 'validation'
+                ? $apiBaseUrl . '/validation'
+                : $apiBaseUrl . '/clearance';
+
+            $payload = [];
+            if ($serviceType == 'validation') {
+                $payload = [
+                    'nin' => $request->nin,
+                    'error' => $serviceField->field_name,
+                    'api' => $apiKey,
+                ];
+            } else {
+                $payload = [
+                    'tracking_id' => $request->tracking_id,
+                    'token' => $apiKey,
+                ];
+            }
+
+            $response = Http::post($apiUrl, $payload);
+            $data = $response->json();
+
+            if (!$response->successful() || (isset($data['status']) && $data['status'] == 'failed')) {
+                // API Failed - REFUND USER
+                $wallet->increment('balance', $servicePrice);
+                
+                $errorMessage = $data['message'] ?? 'API Submission Failed';
+                
+                $transaction->update(['status' => 'failed']);
+                $agentService->update([
+                    'status' => 'failed',
+                    'comment' => $errorMessage
+                ]);
+
+                DB::commit();
+                return back()->with('error', 'API Submission Failed: ' . $errorMessage . '. Your wallet has been refunded.');
+            }
+
+            // API Success - Finalize records
+            $cleanResponse = $this->cleanApiResponse($data);
+            $status = $this->normalizeStatus($data['status'] ?? 'processing');
+
+            $transaction->update(['status' => 'completed']);
+            $agentService->update([
+                'status' => $status,
+                'comment' => $cleanResponse,
             ]);
 
             DB::commit();
@@ -212,8 +223,8 @@ class NinValidationController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Transaction Error: ' . $e->getMessage());
-            return back()->with('error', 'System Error: Failed to record transaction. Please contact support.');
+            Log::error('NIN Validation Error: ' . $e->getMessage());
+            return back()->with('error', 'System Error: Failed to process request. Please contact support.');
         }
     }
 
@@ -377,8 +388,8 @@ class NinValidationController extends Controller
         $s = strtolower(trim((string) $status));
         
         return match ($s) {
-            'successful', 'success', 'resolved', 'approved', 'completed' => 'successful',
-            'processing', 'in_progress', 'in-progress', 'pending', 'submitted', 'new' => 'processing',
+            'successful', 'success', 'resolved', 'in_progress', 'approved', 'completed' => 'successful',
+            'processing', 'pending', 'submitted', 'new' => 'processing',
             'failed', 'rejected', 'error', 'declined', 'invalid', 'no record' => 'failed',
             default => 'pending',
         };

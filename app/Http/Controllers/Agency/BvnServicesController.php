@@ -142,6 +142,9 @@ class BvnServicesController extends Controller
         DB::beginTransaction();
 
         try {
+            // CHARGE WALLET FIRST
+            $wallet->decrement('balance', $totalAmount);
+
             $reference = 'BVN' . date('is') . strtoupper(substr(uniqid(mt_rand(), true), -5));
             $performedBy = trim($user->first_name . ' ' . $user->last_name);
 
@@ -164,7 +167,7 @@ class BvnServicesController extends Controller
                     'unit_price'  => $servicePrice,
                     'total_amount' => $totalAmount,
                 ],
-                'wallet_before' => $wallet->balance,
+                'wallet_before' => $wallet->balance + $totalAmount, // Reflect balance BEFORE deduction
                 'transaction_time' => now()->toDateTimeString(),
                 'channel' => $isSendVnin ? 'Send VNIN Portal' : 'CRM Dashboard',
             ];
@@ -203,9 +206,6 @@ class BvnServicesController extends Controller
                 'status'          => 'pending',
                 'service_type'    => $serviceName,
             ]);
-
-            //  Deduct wallet after record creation
-            $wallet->decrement('balance', $totalAmount);
 
             DB::commit();
 

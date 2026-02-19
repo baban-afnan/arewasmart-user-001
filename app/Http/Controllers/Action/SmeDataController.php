@@ -161,41 +161,61 @@ class SmeDataController extends Controller
             return redirect()->back()->with('error', 'Your wallet is not active. Please contact support.');
         }
 
-        $requestId = RequestIdHelper::generateRequestId();
+        DB::beginTransaction();
 
-        // Upstream API Call (DataStation)
-        $response = $this->callDataStation($requestId, $plan, $mobileno);
-
-        if (!$response['success']) {
-            return redirect()->back()->with('error', $response['message'] ?? 'Data purchase failed. Please try again later.');
-        }
-
-        // Process Transaction
-        return DB::transaction(function () use ($user, $wallet, $plan, $payableAmount, $mobileno, $requestId, $response, $description) {
-            // Debit Wallet
+        try {
+            // 4. Create Preliminary Record & Charge Wallet
             $wallet->decrement('balance', $payableAmount);
 
-            $transactionRef = $response['transaction_ref'] ?? $requestId;
-            $apiData = $response['data'] ?? [];
-
-            Transaction::create([
-                'transaction_ref' => $transactionRef,
+            // Create Transaction (Pending)
+            $transaction = Transaction::create([
+                'transaction_ref' => $requestId,
                 'user_id'         => $user->id,
                 'amount'          => $payableAmount,
                 'description'     => "SME Data purchase: " . $description,
                 'type'            => 'debit',
-                'status'          => 'completed',
+                'status'          => 'pending',
                 'metadata'        => json_encode([
                     'phone'        => $mobileno,
                     'network'      => $plan->network,
                     'plan_type'    => $plan->plan_type,
                     'data_id'      => $plan->data_id,
-                    'api_response' => $apiData,
                     'request_id'   => $requestId
                 ]),
-                'performed_by' => $user->first_name . ' ' . $user->last_name,
-                'approved_by'  => $user->id,
+                'performed_by'    => $user->first_name . ' ' . $user->last_name,
+                'approved_by'     => $user->id,
             ]);
+
+            // Upstream API Call (DataStation)
+            $response = $this->callDataStation($requestId, $plan, $mobileno);
+
+            if (!$response['success']) {
+                // API Failed - REFUND
+                $wallet->increment('balance', $payableAmount);
+                $transaction->update([
+                    'status'   => 'failed',
+                    'metadata' => json_encode(array_merge(json_decode($transaction->metadata, true), [
+                        'api_error' => $response['message'] ?? 'Unknown API Error'
+                    ]))
+                ]);
+                
+                DB::commit();
+                return redirect()->back()->with('error', $response['message'] ?? 'Data purchase failed. Please try again later.');
+            }
+
+            // API Success - Finalize
+            $transactionRef = $response['transaction_ref'] ?? $requestId;
+            $apiData = $response['data'] ?? [];
+
+            $transaction->update([
+                'status'          => 'completed',
+                'transaction_ref' => $transactionRef,
+                'metadata'        => json_encode(array_merge(json_decode($transaction->metadata, true), [
+                    'api_response' => $apiData
+                ]))
+            ]);
+
+            DB::commit();
 
             return redirect()->route('thankyou')->with([
                 'success'         => 'Data purchase successful!',
@@ -207,7 +227,12 @@ class SmeDataController extends Controller
                 'paid'            => $payableAmount,
                 'type'            => 'data'
             ]);
-        });
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('SME Data Purchase Exception: ' . $e->getMessage());
+            return back()->with('error', 'Something went wrong. Please try again.');
+        }
     }
 
     /**

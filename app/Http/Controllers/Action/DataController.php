@@ -227,8 +227,44 @@ class DataController extends Controller
              return redirect()->back()->with('error', 'Your wallet is not active. Please contact support.');
         }
 
+        DB::beginTransaction();
+
         try {
-             // Make Payment via VTPass
+            // 4. Create Preliminary Records & Charge Wallet
+            $oldBalance = $wallet->balance;
+            $wallet->decrement('balance', $payableAmount);
+            $newBalance = $wallet->balance;
+
+            $payer_name = $user->first_name . ' ' . $user->last_name;
+
+            // Create Transaction Record (Pending)
+            $transaction = Transaction::create([
+                'transaction_ref' => $requestId,
+                'user_id'         => $user->id,
+                'amount'          => $payableAmount,
+                'description'     => "Data purchase of {$description} for {$request->mobileno}",
+                'type'            => 'debit',
+                'status'          => 'pending',
+                'performed_by'    => $payer_name,
+                'approved_by'     => $user->id,
+            ]);
+
+            // Create Report Record (Pending)
+            $report = \App\Models\Report::create([
+                'user_id'      => $user->id,
+                'phone_number' => $request->mobileno,
+                'network'      => $networkKey,
+                'ref'          => $requestId,
+                'amount'       => $amount,
+                'status'       => 'pending',
+                'type'         => 'data',
+                'description'  => "Data purchase: {$description}",
+                'old_balance'  => $oldBalance,
+                'new_balance'  => $newBalance,
+                'service_id'   => $serviceField ? $serviceField->id : null,
+            ]);
+
+            // 5. Make Payment via VTPass
             $response = Http::withHeaders([
                 'api-key'    => env('API_KEY'),
                 'secret-key' => env('SECRET_KEY'),
@@ -249,45 +285,21 @@ class DataController extends Controller
                                 (isset($data['status']) && strtolower($data['status']) === 'success');
 
                 if ($isSuccessful) {
-                    $oldBalance = $wallet->balance;
-                    $wallet->decrement('balance', $payableAmount);
-                    $newBalance = $wallet->balance;
-
-                    $payer_name = $user->first_name . ' ' . $user->last_name;
-
-                    // Create Transaction
-                    Transaction::create([
-                        'transaction_ref' => $requestId,
-                        'user_id'         => $user->id,
-                        'amount'          => $payableAmount,
-                        'description'     => "Data purchase of {$description} for {$request->mobileno}",
-                        'type'            => 'debit',
-                        'status'          => 'completed',
-                        'metadata'        => json_encode([
+                    // Finalize Records
+                    $transaction->update([
+                        'status'   => 'completed',
+                        'metadata' => json_encode([
                             'phone'        => $request->mobileno,
                             'network'      => $networkKey,
                             'original_amt' => $amount,
                             'discount'     => $discountAmount,
                             'api_response' => $data,
                         ]),
-                        'performed_by' => $payer_name,
-                        'approved_by'  => $user->id,
                     ]);
 
-                    // Create Report (Save phone number here)
-                    \App\Models\Report::create([
-                        'user_id'      => $user->id,
-                        'phone_number' => $request->mobileno,
-                        'network'      => $networkKey,
-                        'ref'          => $requestId,
-                        'amount'       => $amount, // Face value
-                        'status'       => 'successful',
-                        'type'         => 'data',
-                        'description'  => "Data purchase: {$description}",
-                        'old_balance'  => $oldBalance,
-                        'new_balance'  => $newBalance,
-                        'service_id'   => $serviceField ? $serviceField->id : null,
-                    ]);
+                    $report->update(['status' => 'successful']);
+
+                    DB::commit();
 
                     return redirect()->route('thankyou')->with([
                         'success' => 'Data purchase successful!',
@@ -300,13 +312,25 @@ class DataController extends Controller
                 }
 
                 Log::error('Data API Response Error', ['response' => $data]);
-                return back()->with('error', 'Data purchase failed. Please try again.');
+                $errorMsg = $data['message'] ?? 'Data purchase failed. Please try again.';
+            } else {
+                Log::error('Data API HTTP Error', ['status' => $response->status(), 'body' => $response->body()]);
+                $errorMsg = 'Data purchase failed due to service error.';
             }
 
-            Log::error('Data API HTTP Error', ['status' => $response->status(), 'body' => $response->body()]);
-            return back()->with('error', 'Data purchase failed. Please try again.');
+            // API Failed - REFUND
+            $wallet->increment('balance', $payableAmount);
+            $transaction->update(['status' => 'failed']);
+            $report->update([
+                'status'      => 'failed',
+                'description' => "Failed: " . (isset($data['message']) ? $data['message'] : 'API Error'),
+            ]);
+
+            DB::commit();
+            return back()->with('error', $errorMsg);
 
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Data purchase exception: ' . $e->getMessage());
             return back()->with('error', 'Something went wrong. Please try again.');
         }

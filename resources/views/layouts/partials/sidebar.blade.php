@@ -103,7 +103,7 @@
                     <ul style="{{ request()->routeIs('airtime', 'buy-data', 'electricity', 'cable') ? 'display: block;' : 'display: none;' }}">
                         <li><a href="{{ route('airtime') }}" class="{{ request()->routeIs('airtime') ? 'active' : '' }}">Buy Airtime</a></li>
                         <li><a href="{{ route('buy-data') }}" class="{{ request()->routeIs('buy-data') ? 'active' : '' }}">Buy Data</a></li>
-                         <li><a href="{{ route('buy-data') }}" class="{{ request()->routeIs('buy-data') ? 'active' : '' }}">Buy SME Data</a></li>
+                         <li><a href="{{ route('buy-sme-data') }}" class="{{ request()->routeIs('buy-sme-data') ? 'active' : '' }}">Buy SME Data</a></li>
                         <li><a href="{{ route('electricity') }}" class="{{ request()->routeIs('electricity') ? 'active' : '' }}">Pay Electric</a></li>
                         <li><a href="{{ route('cable') }}" class="{{ request()->routeIs('cable') ? 'active' : '' }}">Pay Cable TV</a></li>
                     </ul>

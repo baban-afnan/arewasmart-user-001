@@ -146,6 +146,9 @@ class BvnUserController extends Controller
         DB::beginTransaction();
 
         try {
+            // CHARGE WALLET FIRST
+            $wallet->decrement('balance', $servicePrice);
+
             $transactionRef = 'A1' . date('is') . strtoupper(Str::random(5));
             $performedBy = trim("{$user->first_name} {$user->last_name}");
 
@@ -177,9 +180,6 @@ class BvnUserController extends Controller
                 'submission_date' => now(),
                 'status' => 'pending',
             ]);
-
-            // Deduct wallet balance
-            $wallet->decrement('balance', $servicePrice);
 
             DB::commit();
 

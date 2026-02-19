@@ -150,35 +150,51 @@ class EducationalController extends Controller
 
         $requestId = RequestIdHelper::generateRequestId();
 
+        DB::beginTransaction();
+
         try {
-            // Get the selected variation details
-            $variation = DB::table('data_variations')->where('variation_code', $request->type)->first();
+            // 4. Create Preliminary Records & Charge Wallet
+            $oldBalance = $wallet->balance;
+            $wallet->decrement('balance', $fee);
+            $newBalance = $wallet->balance;
 
-            if (!$variation) {
-                return back()->with('error', 'Invalid educational pin type selected.');
-            }
+            $payer_name = $user->first_name . ' ' . $user->last_name;
 
-            $fee = $variation->variation_amount;
-            $description = $variation->name ?? 'Educational Pin';
+            // Create Transaction Record (Pending)
+            $transaction = Transaction::create([
+                'transaction_ref' => $requestId,
+                'user_id'         => $this->loginUserId,
+                'amount'          => $fee,
+                'description'     => "Educational pin purchase ({$description}) (Pending)",
+                'type'            => 'debit',
+                'status'          => 'pending',
+                'performed_by'    => $payer_name,
+                'approved_by'     => $this->loginUserId,
+            ]);
 
-            $wallet = Wallet::where('user_id', $this->loginUserId)->first();
-            if (!$wallet || $wallet->balance < $fee) {
-                return back()->with('error', 'Insufficient wallet balance for this transaction.');
-            }
+            // Create Report Record (Pending)
+            $report = \App\Models\Report::create([
+                'user_id'      => $user->id,
+                'phone_number' => $request->mobileno,
+                'network'      => $request->service,
+                'ref'          => $requestId,
+                'amount'       => $fee,
+                'status'       => 'pending',
+                'type'         => 'education',
+                'description'  => "Educational pin purchase ({$description}) (Pending)",
+                'old_balance'  => $oldBalance,
+                'new_balance'  => $newBalance,
+                'service_id'   => $variation->id ?? null,
+            ]);
 
-            // Wallet status check
-            if (($wallet->status ?? 'inactive') !== 'active') {
-                return back()->with('error', 'Your wallet is not active. Please contact support.');
-            }
-
-            // Call VTpass API
+            // 5. Call VTpass API
             $response = Http::withHeaders([
                 'api-key'    => env('API_KEY'),
                 'secret-key' => env('SECRET_KEY'),
             ])->post(env('MAKE_PAYMENT'), [
                 'request_id'     => $requestId,
                 'serviceID'      => $request->service,
-                'billersCode'    => '0123456789', // Dummy biller code for WAEC/Result Checker
+                'billersCode'    => '0123456789',
                 'variation_code' => $request->type,
                 'phone'          => $request->mobileno,
             ]);
@@ -192,79 +208,61 @@ class EducationalController extends Controller
                                 (isset($result['status']) && strtolower($result['status']) === 'success');
 
                 if ($isSuccessful) {
-                    // Deduct wallet balance
-                    $wallet->decrement('balance', $fee);
-
                     // Extract Purchased Code (PIN)
-                    // VTpass usually returns it in 'purchased_code' or inside 'cards' array
                     $purchasedCode = $result['purchased_code'] ?? null;
-                    
-                    if (!$purchasedCode && isset($result['cards']) && is_array($result['cards']) && count($result['cards']) > 0) {
-                         $purchasedCode = $result['cards'][0]['Pin'] ?? null;
+                    if (!$purchasedCode && isset($result['cards'][0]['Pin'])) {
+                         $purchasedCode = $result['cards'][0]['Pin'];
                     }
                     
-                    // Fallback if code is not found but transaction is successful
-                    $finalToken = $purchasedCode ?? 'Check Transaction History';
-
-                    $payer_name = $user->first_name . ' ' . $user->last_name;
+                    $finalToken = $purchasedCode ?? 'Check History';
                     $transDescription = "Educational pin purchase ({$description}) - PIN: {$finalToken}";
 
-                    // Save transaction record
-                    Transaction::create([
-                        'transaction_ref' => $requestId,
-                        'user_id'         => $this->loginUserId,
-                        'amount'          => $fee,
-                        'description'     => $transDescription,
-                        'type'            => 'debit',
-                        'status'          => 'completed',
-                        'metadata'         => json_encode([
+                    // Finalize Records
+                    $transaction->update([
+                        'status'      => 'completed',
+                        'description' => $transDescription,
+                        'metadata'    => json_encode([
                             'phone'          => $request->mobileno,
                             'service'        => $request->service,
                             'purchased_code' => $finalToken,
-                            'payer_name'     => $payer_name,
-                            'payer_email'    => $user->email,
-                            'payer_phone'    => $user->phone_number,
-                            'gateway'        => 'Wallet',
                             'api_response'   => $result,
                         ]),
-                        'performed_by' => $payer_name,
-                        'approved_by'  => $this->loginUserId,
                     ]);
 
-                    // Create Report
-                    \App\Models\Report::create([
-                        'user_id'      => $user->id,
-                        'phone_number' => $request->mobileno,
-                        'network'      => $request->service, // e.g. waec
-                        'ref'          => $requestId,
-                        'amount'       => $fee,
-                        'status'       => 'successful',
-                        'type'         => 'education',
-                        'description'  => $transDescription,
-                        'old_balance'  => $wallet->balance + $fee,
-                        'new_balance'  => $wallet->balance,
+                    $report->update([
+                        'status'      => 'successful',
+                        'description' => $transDescription,
                     ]);
+
+                    DB::commit();
 
                     return redirect()->route('thankyou')->with([
                         'success' => 'Educational pin purchase successful!',
                         'ref'     => $requestId,
                         'mobile'  => $request->mobileno,
                         'amount'  => $fee,
-                        'token'   => $finalToken, // Pass the PIN as 'token' for thankyou page
-                        'network' => strtoupper($request->service) // Display name
+                        'token'   => $finalToken,
+                        'network' => strtoupper($request->service)
                     ]);
-                } else {
-                    Log::error('VTpass Educational Pin API Error', ['response' => $result]);
-                    return back()->with('error', 'Purchase failed. ' . ($result['response_description'] ?? 'Please try again later.'));
                 }
+
+                Log::error('VTpass Educational Pin API Error', ['response' => $result]);
+                $errorMsg = 'Purchase failed. ' . ($result['response_description'] ?? 'Try again.');
             } else {
-                Log::error('VTpass Educational Pin HTTP Error', [
-                    'status' => $response->status(),
-                    'body'   => $response->body(),
-                ]);
-                return back()->with('error', 'Service temporarily unavailable. Try again later.');
+                Log::error('VTpass Educational Pin HTTP Error', ['status' => $response->status(), 'body' => $response->body()]);
+                $errorMsg = 'Service temporarily unavailable.';
             }
+
+            // API Failed - REFUND
+            $wallet->increment('balance', $fee);
+            $transaction->update(['status' => 'failed']);
+            $report->update(['status' => 'failed', 'description' => "Failed: " . (isset($result['response_description']) ? $result['response_description'] : 'API Error')]);
+
+            DB::commit();
+            return back()->with('error', $errorMsg);
+
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Educational Pin Purchase Exception', ['error' => $e->getMessage()]);
             return back()->with('error', 'Something went wrong. Please try again.');
         }
@@ -433,35 +431,49 @@ class EducationalController extends Controller
 
         $requestId = RequestIdHelper::generateRequestId();
 
+        DB::beginTransaction();
+
         try {
-            // Get Price
-            $variation = DB::table('data_variations')->where('variation_code', $request->service)->first();
-            if (!$variation) {
-                Log::error('JAMB Purchase Error: Variation not found', [
-                    'variation_code' => $request->service
-                ]);
-                return back()->with('error', 'Invalid JAMB service selected. Please refresh the page and try again.');
-            }
+            // 4. Create Preliminary Records & Charge Wallet
+            $oldBalance = $wallet->balance;
+            $wallet->decrement('balance', $fee);
+            $newBalance = $wallet->balance;
 
-            $fee = $variation->variation_amount;
-            $description = $variation->name ?? 'JAMB PIN';
+            $payer_name = $user->first_name . ' ' . $user->last_name;
 
-            $wallet = Wallet::where('user_id', $this->loginUserId)->first();
-            if (!$wallet || $wallet->balance < $fee) {
-                Log::warning('JAMB Purchase Failed: Insufficient balance', [
-                    'user_id' => $this->loginUserId,
-                    'required' => $fee,
-                    'balance' => $wallet->balance ?? 0
-                ]);
-                return back()->with('error', 'Insufficient wallet balance. Please fund your wallet and try again.');
-            }
+            // Create Transaction Record (Pending)
+            $transaction = Transaction::create([
+                'transaction_ref' => $requestId,
+                'user_id'         => $this->loginUserId,
+                'amount'          => $fee,
+                'description'     => "JAMB PIN Purchase (Pending) - Profile: {$request->profile_id}",
+                'type'            => 'debit',
+                'status'          => 'pending',
+                'metadata'        => json_encode([
+                    'profile_id'     => $request->profile_id,
+                    'phone'          => $request->mobileno,
+                    'service_type'   => $description,
+                    'email'          => $request->email ?? null,
+                ]),
+                'performed_by'    => $payer_name,
+                'approved_by'     => $this->loginUserId,
+            ]);
 
-            // Wallet status check
-            if (($wallet->status ?? 'inactive') !== 'active') {
-                return back()->with('error', 'Your wallet is not active. Please contact support.');
-            }
+            // Create Report Record (Pending)
+            $report = \App\Models\Report::create([
+                'user_id'      => $user->id,
+                'phone_number' => $request->mobileno,
+                'network'      => $request->service,
+                'ref'          => $requestId,
+                'amount'       => $fee,
+                'status'       => 'pending',
+                'type'         => 'jamb',
+                'description'  => "JAMB Purchase (Pending) - Profile: {$request->profile_id}",
+                'old_balance'  => $oldBalance,
+                'new_balance'  => $newBalance,
+            ]);
 
-            // Prepare API request payload
+            // 5. Prepare API request payload
             $apiServiceId = 'jamb';
             $requestPayload = [
                 'request_id'     => $requestId,
@@ -471,20 +483,12 @@ class EducationalController extends Controller
                 'phone'          => $request->mobileno,
             ];
 
-            Log::info('JAMB Purchase Request', $requestPayload);
-
             $response = Http::withHeaders([
                 'api-key'    => env('API_KEY'),
                 'secret-key' => env('SECRET_KEY'),
             ])->post(env('MAKE_PAYMENT'), $requestPayload);
 
             $result = $response->json();
-            
-            // Log the full response
-            Log::info('JAMB Purchase Response', [
-                'status_code' => $response->status(),
-                'response' => $result
-            ]);
 
             if ($response->successful()) {
                 $successCodes = ['0', '00', '000', '200'];
@@ -492,62 +496,34 @@ class EducationalController extends Controller
                                 (isset($result['status']) && strtolower($result['status']) === 'success');
 
                 if ($isSuccessful) {
-                    $wallet->decrement('balance', $fee);
-
-                    // Extract PIN from API response - check Pin field first (as per API documentation)
                     $purchasedCode = $result['Pin'] ?? 
                                    $result['purchased_code'] ?? 
                                    $result['content']['transactions']['Pin'] ?? null;
-                    
                     if (!$purchasedCode && isset($result['cards'][0]['Pin'])) {
                         $purchasedCode = $result['cards'][0]['Pin'];
                     }
                     
-                    $finalToken = $purchasedCode ?? 'Check Transaction History';
-
-                    $payer_name = $user->first_name . ' ' . $user->last_name;
+                    $finalToken = $purchasedCode ?? 'Check History';
                     $transDescription = "{$description} Purchase - Profile: {$request->profile_id} - PIN: {$finalToken}";
 
-                    // Transaction
-                    Transaction::create([
-                        'transaction_ref' => $requestId,
-                        'user_id'         => $this->loginUserId,
-                        'amount'          => $fee,
-                        'description'     => $transDescription,
-                        'type'            => 'debit',
-                        'status'          => 'completed',
-                        'metadata'        => json_encode([
-                            'profile_id'     => $request->profile_id,
+                    // Finalize Records
+                    $transaction->update([
+                        'status'      => 'completed',
+                        'description' => $transDescription,
+                        'metadata'    => json_encode(array_merge(json_decode($transaction->metadata, true), [
                             'purchased_code' => $finalToken,
-                            'phone'          => $request->mobileno,
-                            'service_type'   => $description,
-                            'email'          => $request->email ?? null,
-                        ]),
-                        'performed_by' => $payer_name,
-                        'approved_by'  => $this->loginUserId,
+                            'api_response'   => $result
+                        ])),
                     ]);
 
-                    // Report
-                    \App\Models\Report::create([
-                        'user_id'      => $user->id,
-                        'phone_number' => $request->mobileno,
-                        'network'      => $request->service,
-                        'ref'          => $requestId,
-                        'amount'       => $fee,
-                        'status'       => 'successful',
-                        'type'         => 'jamb',
-                        'description'  => $transDescription,
-                        'old_balance'  => $wallet->balance + $fee,
-                        'new_balance'  => $wallet->balance,
+                    $report->update([
+                        'status'      => 'successful',
+                        'description' => $transDescription,
                     ]);
 
-                    Log::info('JAMB Purchase Successful', [
-                        'request_id' => $requestId,
-                        'profile_id' => $request->profile_id,
-                        'amount' => $fee
-                    ]);
+                    DB::commit();
 
-                    // Send email notification if email is provided
+                    // Send email notification non-blocking
                     if ($request->email) {
                         try {
                             $emailData = [
@@ -559,21 +535,8 @@ class EducationalController extends Controller
                                 'service_type'     => $description,
                                 'transaction_date' => now()->format('d M Y, h:i A'),
                             ];
-
                             Mail::to($request->email)->send(new JambPurchaseNotification($emailData));
-                            
-                            Log::info('JAMB Purchase Email Sent', [
-                                'email' => $request->email,
-                                'request_id' => $requestId
-                            ]);
-                        } catch (\Exception $e) {
-                            Log::error('JAMB Email Sending Failed', [
-                                'error' => $e->getMessage(),
-                                'email' => $request->email,
-                                'request_id' => $requestId
-                            ]);
-                            // Don't fail the transaction if email fails
-                        }
+                        } catch (\Exception $e) { Log::error('JAMB Email Failed: ' . $e->getMessage()); }
                     }
 
                     return redirect()->route('thankyou')->with([
@@ -584,41 +547,25 @@ class EducationalController extends Controller
                         'token'   => $finalToken,
                         'network' => strtoupper($description)
                     ]);
-                } else {
-                    // API returned failure code
-                    $errorMessage = $result['response_description'] ?? $result['message'] ?? 'Purchase failed. Please try again.';
-                    
-                    Log::error('JAMB Purchase API Error', [
-                        'request_id' => $requestId,
-                        'profile_id' => $request->profile_id,
-                        'code' => $result['code'] ?? 'N/A',
-                        'message' => $errorMessage,
-                        'full_response' => $result
-                    ]);
-                    
-                    return back()->with('error', 'Purchase failed: ' . $errorMessage);
                 }
-            } else {
-                // HTTP error
-                Log::error('JAMB Purchase HTTP Error', [
-                    'request_id' => $requestId,
-                    'status_code' => $response->status(),
-                    'response_body' => $response->body(),
-                    'profile_id' => $request->profile_id
-                ]);
                 
-                return back()->with('error', 'Service temporarily unavailable. Please try again later.');
+                $errorMsg = $result['response_description'] ?? 'Purchase failed. Try again.';
+            } else {
+                $errorMsg = 'Service unavailable. Try again later.';
             }
 
+            // API Failed - REFUND
+            $wallet->increment('balance', $fee);
+            $transaction->update(['status' => 'failed']);
+            $report->update(['status' => 'failed', 'description' => "Failed: " . (isset($result['response_description']) ? $result['response_description'] : 'API Error')]);
+
+            DB::commit();
+            return back()->with('error', 'Purchase failed: ' . $errorMsg);
+
         } catch (\Exception $e) {
-            Log::error('JAMB Purchase Exception', [
-                'request_id' => $requestId ?? 'N/A',
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'profile_id' => $request->profile_id ?? 'N/A'
-            ]);
-            
-            return back()->with('error', 'An error occurred during purchase. Please try again or contact support.');
+            DB::rollBack();
+            Log::error('JAMB Purchase Exception: ' . $e->getMessage());
+            return back()->with('error', 'An error occurred during purchase.');
         }
     }
 }

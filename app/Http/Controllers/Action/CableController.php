@@ -158,13 +158,10 @@ class CableController extends Controller
             'subscription_type' => 'required|string|in:change,renew',
             'phone'             => 'required|numeric|digits:11',
             'amount'            => 'required|numeric',
-            // variation_code is required if type is 'change'
             'variation_code'    => 'nullable|string',
         ]);
 
         $user = Auth::user();
-
-        // 0. Preliminary Account Status Check
         if (($user->status ?? 'inactive') !== 'active') {
              return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
         }
@@ -177,12 +174,48 @@ class CableController extends Controller
             return back()->with('error', 'Insufficient wallet balance.');
         }
 
-        // 0. Preliminary Wallet Status Check
         if (($wallet->status ?? 'inactive') !== 'active') {
              return redirect()->back()->with('error', 'Your wallet is not active. Please contact support.');
         }
 
+        DB::beginTransaction();
+
         try {
+            // 1. Charge Wallet First
+            $oldBalance = $wallet->balance;
+            $wallet->decrement('balance', $amount);
+            $newBalance = $wallet->balance;
+
+            // 2. Create Preliminary Records (Pending)
+            $serviceName = strtoupper($request->service_id);
+            $subType = ucfirst($request->subscription_type);
+            $description = "{$serviceName} Subscription ({$subType}) (Pending) - IUC: {$request->billersCode}";
+
+            $transaction = Transaction::create([
+                'transaction_ref' => $requestId,
+                'user_id'         => $user->id,
+                'amount'          => $amount,
+                'description'     => $description,
+                'type'            => 'debit',
+                'status'          => 'pending',
+                'performed_by'    => $user->first_name . ' ' . $user->last_name,
+                'approved_by'     => $user->id,
+            ]);
+
+            $report = Report::create([
+                'user_id'      => $user->id,
+                'phone_number' => $request->billersCode,
+                'network'      => $request->service_id,
+                'ref'          => $requestId,
+                'amount'       => $amount,
+                'status'       => 'pending',
+                'type'         => 'cable',
+                'description'  => $description,
+                'old_balance'  => $oldBalance,
+                'new_balance'  => $newBalance,
+            ]);
+
+            // 3. Prepare and Call API
             $payload = [
                 'request_id'        => $requestId,
                 'serviceID'         => $request->service_id,
@@ -194,12 +227,12 @@ class CableController extends Controller
 
             if ($request->subscription_type === 'change') {
                 if (!$request->variation_code) {
+                    DB::rollBack();
                     return back()->with('error', 'Please select a plan for bouquet change.');
                 }
                 $payload['variation_code'] = $request->variation_code;
             }
 
-            // Call VTPass API
             $response = Http::withHeaders([
                 'api-key'    => env('API_KEY'),
                 'secret-key' => env('SECRET_KEY'),
@@ -207,72 +240,64 @@ class CableController extends Controller
 
             if ($response->successful()) {
                 $result = $response->json();
-                
                 $successCodes = ['0', '00', '000', '200'];
                 $isSuccessful = (isset($result['code']) && in_array((string)$result['code'], $successCodes)) ||
                                 (isset($result['status']) && strtolower($result['status']) === 'success');
 
                 if ($isSuccessful) {
-                    $wallet->decrement('balance', $amount);
-
-                    $serviceName = strtoupper($request->service_id);
-                    $subType = ucfirst($request->subscription_type);
-                    $description = "{$serviceName} Subscription ({$subType}) - IUC: {$request->billersCode}";
-
-                    // Transaction Record
-                    Transaction::create([
-                        'transaction_ref' => $requestId,
-                        'user_id'         => $user->id,
-                        'amount'          => $amount,
-                        'description'     => $description,
-                        'type'            => 'debit',
-                        'status'          => 'completed',
-                        'metadata'        => json_encode([
+                    $finalDescription = "{$serviceName} Subscription ({$subType}) - IUC: {$request->billersCode}";
+                    
+                    $transaction->update([
+                        'status'      => 'completed',
+                        'description' => $finalDescription,
+                        'metadata'    => json_encode([
                             'service_id'   => $request->service_id,
                             'billersCode'  => $request->billersCode,
                             'sub_type'     => $request->subscription_type,
                             'variation'    => $request->variation_code,
                             'api_response' => $result,
                         ]),
-                        'performed_by' => $user->first_name . ' ' . $user->last_name,
-                        'approved_by'  => $user->id,
                     ]);
 
-                    // Report Record
-                    Report::create([
-                        'user_id'      => $user->id,
-                        'phone_number' => $request->billersCode,
-                        'network'      => $request->service_id,
-                        'ref'          => $requestId,
-                        'amount'       => $amount,
-                        'status'       => 'successful',
-                        'type'         => 'cable',
-                        'description'  => $description,
-                        'old_balance'  => $wallet->balance + $amount,
-                        'new_balance'  => $wallet->balance,
+                    $report->update([
+                        'status'      => 'successful',
+                        'description' => $finalDescription,
                     ]);
+
+                    DB::commit();
 
                     return redirect()->route('thankyou')->with([
                         'success' => 'Cable subscription successful!',
                         'ref'     => $requestId,
                         'mobile'  => $request->billersCode,
                         'amount'  => $amount,
-                        'token'   => 'Subscription Active', // No token for cable usually
+                        'token'   => 'Subscription Active',
                         'network' => $serviceName
                     ]);
-
-                } else {
-                    Log::error('Cable API Error', ['response' => $result]);
-                    return back()->with('error', 'Subscription failed. ' . ($result['response_description'] ?? 'Try again.'));
                 }
+
+                Log::error('Cable API Error', ['response' => $result]);
+                $errorMsg = 'Subscription failed. ' . ($result['response_description'] ?? 'Try again.');
             } else {
                 Log::error('Cable HTTP Error', ['body' => $response->body()]);
-                return back()->with('error', 'Service unavailable.');
+                $errorMsg = 'Service unavailable.';
             }
 
+            // 4. API Failed - REFUND
+            $wallet->increment('balance', $amount);
+            $transaction->update(['status' => 'failed']);
+            $report->update([
+                'status'      => 'failed',
+                'description' => "Failed: " . ($result['response_description'] ?? $errorMsg),
+            ]);
+
+            DB::commit();
+            return back()->with('error', $errorMsg);
+
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Cable Exception: ' . $e->getMessage());
-            return back()->with('error', 'An error occurred.');
+            return back()->with('error', 'An error occurred. Your wallet was protected.');
         }
     }
 }
