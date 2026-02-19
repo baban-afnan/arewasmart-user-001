@@ -130,16 +130,16 @@
            <a href="javascript:void(0);" class="text-light text-decoration-none footer-social install-app-btn" title="Install Application">
             <i class="ti ti-download fs-18"></i>
           </a>
-          <a href="#" target="_blank" class="text-light text-decoration-none footer-social">
+          <a href="https://www.facebook.com/arewasmartidea" target="_blank" class="text-light text-decoration-none footer-social">
             <i class="ti ti-brand-facebook fs-18"></i>
           </a>
-          <a href="#" target="_blank" class="text-light text-decoration-none footer-social">
+          <a href="https://www.twitter.com/arewasmartidea" target="_blank" class="text-light text-decoration-none footer-social">
             <i class="ti ti-brand-twitter fs-18"></i>
           </a>
-          <a href="#" target="_blank" class="text-light text-decoration-none footer-social">
+          <a href="https://wa.me/2348064333983" target="_blank" class="text-light text-decoration-none footer-social">
             <i class="ti ti-brand-whatsapp fs-18"></i>
           </a>
-          <a href="#" class="text-light text-decoration-none footer-social">
+          <a href="mailto:arewasmart001@gmail.com" class="text-light text-decoration-none footer-social" title="Send us an email">
             <i class="ti ti-mail fs-18"></i>
           </a>
         </div>
