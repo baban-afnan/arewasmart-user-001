@@ -38,6 +38,26 @@
                 </div>
                 <small id="emailError" class="text-danger d-none">Please enter a valid email address.</small>
             </div>
+            {{-- Referral Code Field (Optional) --}}
+            <div class="mb-3 w-100" style="max-width: 400px;">
+                <label class="form-label" for="referral_code">Referral Code (Optional)</label>
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="referral_code" 
+                        name="referral_code" 
+                        value="{{ old('referral_code', request()->query('ref')) }}" 
+                        class="form-control border-end-0 @error('referral_code') is-invalid @enderror"
+                        placeholder="Enter referral code">
+                    <span class="input-group-text border-start-0">
+                        <i class="ti ti-user-plus"></i>
+                    </span>
+                    @error('referral_code')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
 
             {{-- Password Field --}}
             <div class="mb-3 w-100" style="max-width: 400px;">

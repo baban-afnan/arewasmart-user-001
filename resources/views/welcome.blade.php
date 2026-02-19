@@ -92,7 +92,6 @@
                 transform: translateY(-2px);
             }
 
-
             /* WhatsApp Float */
             .whatsapp-float {
                 position: fixed;
@@ -251,6 +250,136 @@
                 padding-left: 10px;
             }
 
+            /* Header Mobile Fixes - IMPROVED */
+            header {
+                background: #fff;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+                width: 100%;
+            }
+
+            .header-container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px 20px;
+                position: relative;
+            }
+
+            .logo {
+                display: flex;
+                align-items: center;
+                z-index: 1001;
+            }
+
+            .mobile-menu {
+                display: none;
+                font-size: 24px;
+                cursor: pointer;
+                color: var(--primary-color);
+                z-index: 1001;
+            }
+
+            nav ul {
+                display: flex;
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                align-items: center;
+            }
+
+            nav ul li {
+                margin-left: 25px;
+            }
+
+            nav ul li a {
+                color: #333;
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.3s ease;
+            }
+
+            nav ul li a:hover {
+                color: var(--primary-color);
+            }
+
+            /* Install App Button - Always Visible */
+            .install-app-btn {
+                display: inline-block !important;
+                background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
+                color: white !important;
+                padding: 8px 15px !important;
+                border-radius: 20px;
+                transition: all 0.3s ease;
+            }
+
+            .install-app-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(242, 101, 34, 0.3);
+                color: white !important;
+            }
+
+            /* Mobile Menu Styles */
+            @media (max-width: 991px) {
+                .mobile-menu {
+                    display: block !important;
+                }
+
+                nav ul {
+                    position: fixed;
+                    top: 0;
+                    right: -100%;
+                    width: 280px;
+                    height: 100vh;
+                    background: white;
+                    flex-direction: column;
+                    padding: 80px 20px 30px;
+                    transition: right 0.3s ease;
+                    box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+                    z-index: 1000;
+                    align-items: flex-start;
+                }
+
+                nav ul.active {
+                    right: 0;
+                }
+
+                nav ul li {
+                    margin: 15px 0;
+                    width: 100%;
+                }
+
+                nav ul li a {
+                    display: block;
+                    padding: 10px 15px;
+                    width: 100%;
+                }
+
+                nav ul li a.btn-primary {
+                    margin-top: 10px;
+                    text-align: center;
+                }
+
+                .install-app-btn {
+                    display: inline-block !important;
+                    width: auto !important;
+                }
+            }
+
+            /* Small phones */
+            @media (max-width: 480px) {
+                .install-app-btn {
+                    padding: 6px 12px !important;
+                    font-size: 14px;
+                }
+                
+                .btn-primary {
+                    padding: 8px 15px !important;
+                    font-size: 14px;
+                }
+            }
         </style>
     </head>
 
@@ -259,30 +388,19 @@
             <div class="page-loader"></div>
         </div>
 
-    <!-- Top Bar -->
-    <div class="top-bar d-none d-md-block">
-        <div class="container d-flex justify-content-between align-items-center">
-            <div class="contact-info">
-                <span class="me-4"><i class="fas fa-map-marker-alt"></i> NO983 Babantude Adelke Street Apapa Lagos</span>
-                <span><i class="fas fa-phone-alt"></i> 09112345678</span>
-            </div>
-            <div class="social-icons">
-                <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
-                <a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Header -->
+    <!-- Header - FIXED -->
     <header>
         <div class="container header-container">
             <a href="#" class="logo">
-            <img src="{{ asset('assets/img/logo/logo.png') }}" alt="Arewa Smart Idea Logo" style="height: 40px; margin-right: 10px;">
+                <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Arewa Smart Idea Logo" style="height: 40px; margin-right: 120px;">
             </a>
+            
+            <!-- Mobile Menu Toggle - Positioned on the right -->
             <div class="mobile-menu">
-            <i class="fas fa-bars"></i>
+                <i class="fas fa-bars"></i>
             </div>
+            
+            <!-- Navigation Menu -->
             <nav>
                 <ul>
                     <li><a href="#home">Home</a></li>
@@ -291,12 +409,14 @@
                     <li><a href="#support">Support</a></li>
                     <li><a href="#about-us">About US</a></li>
                     <li><a href="https://api.arewasmart.com.ng/">API</a></li>
+                    <li><a href="javascript:void(0);" class="install-app-btn" title="Install Application">📱 Install App</a></li>
                     <li><a href="{{route ('login')}}" class="btn btn-primary text-white">Get Started</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
+    <!-- Rest of your content remains the same -->
     <!-- Hero Section -->
     <section class="hero" id="home" style="background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(50, 0, 0, 0.6)), 
          url('{{ asset('assets/img/landing/user5.png') }}') no-repeat center center/cover; min-height: 100vh; display: flex; align-items: center;">
@@ -638,7 +758,7 @@
     </div>
 
 
-    <!-- Data Protection Modal (Hidden by default, triggered by "Read Full Policy") -->
+    <!-- Data Protection Modal -->
     <div class="modal fade data-protection-modal" id="dataProtectionModal" tabindex="-1" aria-labelledby="dataProtectionModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -700,7 +820,7 @@
                             <li>Request access to your personal data held by us.</li>
                             <li>Request correction of inaccurate or incomplete data.</li>
                             <li>Request deletion of your data (Right to be Forgotten).</li>
-                            <li>Objec to the processing of your data for marketing purposes.</li>
+                            <li>Object to the processing of your data for marketing purposes.</li>
                         </ul>
                     </div>
 
@@ -729,16 +849,49 @@
 
 
     <script>
-        // Mobile menu toggle
-        document.querySelector('.mobile-menu').addEventListener('click', function() {
-            document.querySelector('nav ul').classList.toggle('active');
-        });
-        
-        // Close mobile menu when clicking on a link
-        document.querySelectorAll('nav ul li a').forEach(link => {
-            link.addEventListener('click', function() {
-                document.querySelector('nav ul').classList.remove('active');
-            });
+        // Mobile menu toggle - IMPROVED
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenu = document.querySelector('.mobile-menu');
+            const navMenu = document.querySelector('nav ul');
+            
+            if (mobileMenu && navMenu) {
+                mobileMenu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    navMenu.classList.toggle('active');
+                    
+                    // Toggle menu icon
+                    const icon = this.querySelector('i');
+                    if (icon.classList.contains('fa-bars')) {
+                        icon.classList.remove('fa-bars');
+                        icon.classList.add('fa-times');
+                    } else {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                });
+                
+                // Close menu when clicking on a link
+                document.querySelectorAll('nav ul li a').forEach(link => {
+                    link.addEventListener('click', function() {
+                        navMenu.classList.remove('active');
+                        const icon = mobileMenu.querySelector('i');
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    });
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!navMenu.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        navMenu.classList.remove('active');
+                        const icon = mobileMenu.querySelector('i');
+                        if (icon) {
+                            icon.classList.remove('fa-times');
+                            icon.classList.add('fa-bars');
+                        }
+                    }
+                });
+            }
         });
         
         // Add scroll effect to header
@@ -760,11 +913,8 @@
         }
 
         function acceptPrivacyPolicy() {
-            // Optional: Store consent in cookies or local storage
             localStorage.setItem('arewa_privacy_accepted', 'true');
-            // Hide Banner
             document.getElementById('privacyBanner').style.display = 'none';
-            // If in modal, close it
             var modalEl = document.getElementById('dataProtectionModal');
             var modal = bootstrap.Modal.getInstance(modalEl);
             if(modal) modal.hide();
@@ -776,21 +926,110 @@
 
         // Auto-show banner for first time visitors
         document.addEventListener('DOMContentLoaded', function() {
-            // Show banner if not accepted
-             if (!localStorage.getItem('arewa_privacy_accepted')) {
+            if (!localStorage.getItem('arewa_privacy_accepted')) {
                 document.getElementById('privacyBanner').style.display = 'block';
             }
+            
+            // Ensure install button is visible by default
+            document.querySelectorAll('.install-app-btn').forEach(btn => {
+                btn.style.display = 'inline-block';
+            });
         });
     </script>
     <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
     <script> AOS.init({ duration: 1000, once: true }) </script>
 
-    <!-- WhatsApp Floating Button -->
-    <a href="https://wa.me/2349110501995" class="whatsapp-float" target="_blank" title="Chat with us on WhatsApp">
-        <i class="fab fa-whatsapp"></i>
-    </a>
+    <script>
+        // PWA Implementation for Landing Page
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered', reg))
+                    .catch(err => console.log('Service Worker registration failed', err));
+            });
+        }
+
+        let deferredPrompt;
+        const installBtns = document.querySelectorAll('.install-app-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Make sure buttons are visible
+            installBtns.forEach(btn => {
+                btn.style.display = 'inline-block';
+                btn.style.opacity = '1';
+                btn.style.visibility = 'visible';
+            });
+
+            const lastPrompt = localStorage.getItem('pwa_install_prompt_last');
+            const now = new Date().getTime();
+            const twentyFourHours = 24 * 60 * 60 * 1000;
+
+            if (!lastPrompt || (now - lastPrompt > twentyFourHours)) {
+                setTimeout(() => {
+                    Swal.fire({
+                        title: 'Install Arewa Smart?',
+                        text: 'Install our application on your device for a better experience and quick access!',
+                        icon: 'info',
+                        showCancelButton: true,
+                        confirmButtonColor: '#F26522',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, Install now',
+                        cancelButtonText: 'Maybe later'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            triggerInstall();
+                        }
+                        localStorage.setItem('pwa_install_prompt_last', now);
+                    });
+                }, 3000);
+            }
+        });
+
+        installBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (deferredPrompt) {
+                    triggerInstall();
+                } else {
+                    Swal.fire({
+                        title: 'Installation Ready?',
+                        text: 'To install this app, please use Google Chrome or Microsoft Edge. If you are already using them, wait a few seconds or ensure your connection is stable.',
+                        icon: 'info',
+                        confirmButtonColor: '#F26522'
+                    });
+                }
+            });
+        });
+
+        function triggerInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        window.addEventListener('appinstalled', (evt) => {
+            Swal.fire({
+                title: 'Installed!',
+                text: 'Application has been successfully installed.',
+                icon: 'success',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        });
+    </script>
+
 
 </body>
 </html>

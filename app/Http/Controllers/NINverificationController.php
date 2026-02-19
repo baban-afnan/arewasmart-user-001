@@ -25,6 +25,11 @@ class NINverificationController extends Controller
     {
         $user = auth()->user();
 
+        // 0. Preliminary Status Checks
+        if ($user->status !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently {$user->status}. Access denied.");
+        }
+
         // Get Verification Service
         $service = Service::where('name', 'Verification')->first();
         
@@ -63,6 +68,11 @@ class NINverificationController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+
+        // 0. Preliminary Status Checks
+        if ($user->status !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently {$user->status}. Access denied.");
+        }
 
         $validated = $request->validate([
             'number_nin' => 'required|string|size:11|regex:/^[0-9]{11}$/',
@@ -453,7 +463,13 @@ class NINverificationController extends Controller
     public function standardSlip($nin_no)
     {
         try {
-            $this->chargeForSlip(Auth::user(), '611'); // Charge for Standard Slip
+            $user = Auth::user();
+            // 0. Preliminary Status Checks
+            if ($user->status !== 'active') {
+                 return back()->with('error', "Your account is currently {$user->status}. Access denied.");
+            }
+
+            $this->chargeForSlip($user, '611'); // Charge for Standard Slip
             
             $repObj = new NIN_PDF_Repository();
             return $repObj->standardPDF($nin_no);
@@ -465,7 +481,13 @@ class NINverificationController extends Controller
     public function premiumSlip($nin_no)
     {
         try {
-            $this->chargeForSlip(Auth::user(), '612'); // Charge for Premium Slip
+            $user = Auth::user();
+            // 0. Preliminary Status Checks
+            if ($user->status !== 'active') {
+                 return back()->with('error', "Your account is currently {$user->status}. Access denied.");
+            }
+
+            $this->chargeForSlip($user, '612'); // Charge for Premium Slip
             
             $repObj = new NIN_PDF_Repository();
             return $repObj->premiumPDF($nin_no);
@@ -477,7 +499,13 @@ class NINverificationController extends Controller
     public function vninSlip($nin_no)
     {
         try {
-            $this->chargeForSlip(Auth::user(), '616'); // Charge for VNIN Slip
+            $user = Auth::user();
+            // 0. Preliminary Status Checks
+            if ($user->status !== 'active') {
+                 return back()->with('error', "Your account is currently {$user->status}. Access denied.");
+            }
+
+            $this->chargeForSlip($user, '616'); // Charge for VNIN Slip
             
             $repObj = new NIN_PDF_Repository();
             return $repObj->vninPDF($nin_no);

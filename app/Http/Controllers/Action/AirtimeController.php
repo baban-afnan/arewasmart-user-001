@@ -62,6 +62,11 @@ class AirtimeController extends Controller
         $mobile  = $request->mobileno;
         $amount  = $request->amount;
         $requestId = RequestIdHelper::generateRequestId();
+        
+        // 0. Preliminary Status Checks
+        if ($user->status !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently {$user->status}. Access denied.");
+        }
 
         // 1. Find the Airtime Service
         $service = Service::where('name', 'Airtime')->first();
@@ -107,6 +112,10 @@ class AirtimeController extends Controller
         $wallet = Wallet::where('user_id', $user->id)->first();
         if (!$wallet || $wallet->balance < $payableAmount) {
             return redirect()->back()->with('error', 'Insufficient wallet balance! You need ₦' . number_format($payableAmount, 2));
+        }
+
+        if ($wallet->status !== 'active') {
+            return redirect()->back()->with('error', 'Your wallet is not active. Please contact support.');
         }
 
         // 5. Call Airtime API

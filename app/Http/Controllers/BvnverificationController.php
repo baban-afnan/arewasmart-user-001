@@ -26,6 +26,11 @@ class BvnverificationController extends Controller
     {
         $user = auth()->user();
 
+        // 0. Preliminary Status Checks
+        if ($user->status !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently {$user->status}. Access denied.");
+        }
+
         // Get Verification Service
         $service = Service::where('name', 'Verification')->first();
         
@@ -64,6 +69,11 @@ class BvnverificationController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+
+        // 0. Preliminary Status Checks
+        if ($user->status !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently {$user->status}. Access denied.");
+        }
 
         $validated = $request->validate([
             'bvn' => 'required|string|size:11|regex:/^[0-9]{11}$/',
@@ -484,7 +494,16 @@ class BvnverificationController extends Controller
     public function standardBVN($bvn_no)
     {
         try {
-            $this->chargeForSlip(Auth::user(), '601'); // Charge for Standard Slip
+            $user = Auth::user();
+            // 0. Preliminary Status Checks
+            if ($user->status !== 'active') {
+                 return response()->json([
+                    "message" => "Error",
+                    "errors" => array("Access Denied" => "Your account is currently {$user->status}. Access denied.")
+                ], 403);
+            }
+
+            $this->chargeForSlip($user, '601'); // Charge for Standard Slip
             
             if (Verification::where('idno', $bvn_no)->exists()) {
                 $veridiedRecord = Verification::where('idno', $bvn_no)
@@ -510,7 +529,16 @@ class BvnverificationController extends Controller
     public function premiumBVN($bvn_no)
     {
         try {
-            $this->chargeForSlip(Auth::user(), '602'); // Charge for Premium Slip
+            $user = Auth::user();
+            // 0. Preliminary Status Checks
+            if ($user->status !== 'active') {
+                 return response()->json([
+                    "message" => "Error",
+                    "errors" => array("Access Denied" => "Your account is currently {$user->status}. Access denied.")
+                ], 403);
+            }
+
+            $this->chargeForSlip($user, '602'); // Charge for Premium Slip
 
             if (Verification::where('idno', $bvn_no)->exists()) {
                 $veridiedRecord = Verification::where('idno', $bvn_no)
@@ -536,7 +564,13 @@ class BvnverificationController extends Controller
     public function plasticBVN($bvn_no)
     {
          try {
-            $this->chargeForSlip(Auth::user(), '603'); // Charge for Plastic Slip
+            $user = Auth::user();
+            // 0. Preliminary Status Checks
+            if ($user->status !== 'active') {
+                 return back()->with('error', "Your account is currently {$user->status}. Access denied.");
+            }
+
+            $this->chargeForSlip($user, '603'); // Charge for Plastic Slip
             
             $repObj = new BVN_PDF_Repository();
             return $repObj->plasticPDF($bvn_no);

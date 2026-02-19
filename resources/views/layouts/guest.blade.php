@@ -37,12 +37,12 @@
                                  </div>
                                 <div class="authentication-card w-100">
                                     <div class="authen-overlay-item border w-100">
-                                        <h1 class="text-white fs-20 fw-semibold text-center">Transform Your Business Journey with Smart Solutions! 🚀</h1>
+                                        <h1 class="text-white fs-20 fw-semibold text-center">Happy Ramadan to all the Muslim Ummah around the globe! 🌙✨</h1>
                                         <div class="my-4 mx-auto authen-overlay-img">
                                             <img src="{{ asset('assets/img/landing/user3.png') }}" alt="Img">
                                         </div>
                                         <div>
-                                            <p class="text-white fs-20 fw-semibold text-center">Efficiently manage your workforce, streamline <br> operations effortlessly.</p>
+                                            <p class="text-white fs-20 fw-semibold text-center">May Allah accept our fasting, prayers, charity, and all acts of ibadah, and grant us Jannah. <br>Ramadan Mubarak! 🤲🌙</p>
                                         </div>
                                     </div>
                                 </div>

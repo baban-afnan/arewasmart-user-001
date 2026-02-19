@@ -90,6 +90,9 @@ class NinModificationController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+        if (($user->status ?? 'inactive') !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
 
         // Validation
         $rules = [

@@ -19,7 +19,7 @@
                     ['modal' => '#agentEnrolmentModal', 'icon' => 'ti-user-plus', 'color' => 'bg-secondary', 'name' => 'BVN Agent'],
                     ['route' => route('nin-modification'), 'icon' => 'ti-user-plus', 'color' => 'bg-info', 'name' => 'NIN Modification'],
                     ['route' => route('nin-validation'), 'icon' => 'ti-user-plus', 'color' => 'bg-warning', 'name' => 'Validation & IPE'],
-                    ['route' => route('affidavit.index'), 'icon' => 'ti-home-plus', 'color' => 'bg-danger', 'name' => 'Affidavit'],
+                    ['route' => route('website.index'), 'icon' => 'ti-home-plus', 'color' => 'bg-danger', 'name' => 'Buy Website'],
                     ['route' => route('cac.index'), 'icon' => 'ti-user-plus', 'color' => 'bg-success', 'name' => 'CAC Reg'],
                     ['route' => route('enrolment.report'), 'icon' => 'ti-user-plus', 'color' => 'bg-secondary', 'name' => 'Enrolment Report'],
                     ['modal' => '#verifyModal', 'icon' => 'ti-id-badge', 'color' => 'bg-info', 'name' => 'Verify NIN/DEMO'],
@@ -264,7 +264,7 @@
 
       <!-- HEADER -->
       <div class="modal-header bg-primary text-white py-3 justify-content-center position-relative">
-        <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="verifyModalLabelBvn">
+        <h5 class="modal-title fw-bold d-flex align-items-center gap-2 text-white" id="verifyModalLabelBvn">
           <i class="ti ti-id-badge fs-3"></i>
           Buy direct plans or SME data
         </h5>
@@ -282,8 +282,9 @@
                     'color' => 'success',
                     'name' => 'Direct Data Plans'
                 ],
+                
                 [
-                    'route' => route('buy-data'),
+                    'route' => route('buy-sme-data'),
                     'icon' => 'ti-world',
                     'color' => 'info',
                     'name' => 'SME Data Plans'

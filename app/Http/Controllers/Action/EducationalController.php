@@ -143,6 +143,11 @@ class EducationalController extends Controller
             return redirect()->route('login')->with('error', 'Please log in first.');
         }
 
+        // 0. Preliminary Account Status Check
+        if (($user->status ?? 'inactive') !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
+
         $requestId = RequestIdHelper::generateRequestId();
 
         try {
@@ -159,6 +164,11 @@ class EducationalController extends Controller
             $wallet = Wallet::where('user_id', $this->loginUserId)->first();
             if (!$wallet || $wallet->balance < $fee) {
                 return back()->with('error', 'Insufficient wallet balance for this transaction.');
+            }
+
+            // Wallet status check
+            if (($wallet->status ?? 'inactive') !== 'active') {
+                return back()->with('error', 'Your wallet is not active. Please contact support.');
             }
 
             // Call VTpass API
@@ -297,6 +307,12 @@ class EducationalController extends Controller
             'profile_id' => 'required|string',
         ]);
 
+        $user = Auth::user();
+        // 0. Preliminary Status Checks
+        if (($user->status ?? 'inactive') !== 'active') {
+            return response()->json(['success' => false, 'message' => "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied."]);
+        }
+
         try {
             // Get variation details to extract the type
             $variationCode = $request->service; // 'utme' or 'de'
@@ -409,6 +425,12 @@ class EducationalController extends Controller
         ]);
 
         $user = Auth::user();
+
+        // 0. Preliminary Account Status Check
+        if (($user->status ?? 'inactive') !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
+
         $requestId = RequestIdHelper::generateRequestId();
 
         try {
@@ -432,6 +454,11 @@ class EducationalController extends Controller
                     'balance' => $wallet->balance ?? 0
                 ]);
                 return back()->with('error', 'Insufficient wallet balance. Please fund your wallet and try again.');
+            }
+
+            // Wallet status check
+            if (($wallet->status ?? 'inactive') !== 'active') {
+                return back()->with('error', 'Your wallet is not active. Please contact support.');
             }
 
             // Prepare API request payload

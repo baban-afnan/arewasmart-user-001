@@ -21,23 +21,22 @@ use App\Http\Controllers\NINverificationController;
 use App\Http\Controllers\BvnverificationController;
 use App\Http\Controllers\NINDemoVerificationController;
 use App\Http\Controllers\NINPhoneVerificationController;
+use App\Http\Controllers\Action\SmeDataController;
+use App\Http\Controllers\WebsiteController;
 
 
 
 
 Route::post('/palmpay/webhook', [PaymentWebhookController::class, 'handleWebhook']) ->middleware('throttle:60,1');
-
-// Webhooks (public, validate signature in controller)
-// In routes/api.php
-   
 Route::post('/validations-webhook', [NinValidationController::class, 'webhook'])->name('validations.webhook');
+Route::get('/', function () {return view('welcome');});
+// Webhooks (public, validate signature in controller)
 
 
-Route::middleware(['auth'])->group(function () {
 
-    Route::get('/', function () {
-        return view('welcome');
-    });
+    Route::middleware(['auth'])->group(function () {
+
+    
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('verified')->name('dashboard');
 
@@ -95,11 +94,17 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/verify-pin', [DataController::class, 'verifyPin'])->name('verify.pin');
 
 
-        Route::get('/sme-data', [DataController::class, 'sme_data'])->name('sme-data');
-        Route::get('/fetch-data-type', [DataController::class, 'fetchDataType']);
-        Route::get('/fetch-data-plan', [DataController::class, 'fetchDataPlan']);
-        Route::get('/fetch-sme-data-bundles-price', [DataController::class, 'fetchSmeBundlePrice']);
-        Route::post('/buy-sme-data', [DataController::class, 'buySMEdata'])->name('buy-sme-data');
+         // SME Data (New Service)
+        Route::prefix('sme-data')->group(function () {
+            Route::get('/', [SmeDataController::class, 'index'])->name('buy-sme-data');
+            Route::post('/buy', [SmeDataController::class, 'buySMEdata'])->name('buy-sme-data.submit');
+            
+            // SME Data AJAX Routes
+            Route::get('/fetch-data-type', [SmeDataController::class, 'fetchDataType']);
+            Route::get('/fetch-data-plan', [SmeDataController::class, 'fetchDataPlan']);
+            Route::get('/fetch-sme-data-bundles-price', [SmeDataController::class, 'fetchSmeBundlePrice']);
+        });
+
 
         Route::get('/education', [EducationalController::class, 'pin'])->name("education");
         Route::post('/buy-pin', [EducationalController::class, 'buypin'])->name('buypin');
@@ -276,6 +281,12 @@ Route::middleware(['auth'])->group(function () {
              Route::get('/', [\App\Http\Controllers\Api\ApiDashboardController::class, 'index'])->name('api.dashboard');
              Route::post('/apply', [\App\Http\Controllers\Api\ApiDashboardController::class, 'apply'])->name('api.apply');
         });
+
+        // Buy Website Service
+        Route::get('/buy-website', [WebsiteController::class, 'index'])->name('website.index');
+
+        // Referral System
+        Route::get('/referrals', [App\Http\Controllers\ReferralController::class, 'index'])->name('referrals.index');
 
 });
  

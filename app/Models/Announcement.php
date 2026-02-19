@@ -14,6 +14,9 @@ class Announcement extends Model
         'is_active',
         'type',
         'status',
+        'image',
+        'discount',
+        'service_name',
     ];
 
     /**
@@ -28,5 +31,19 @@ class Announcement extends Model
             ->where('is_active', true)
             ->latest()
             ->first();
+    }
+
+    /**
+     * Get the active adverts.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function getActiveAdverts()
+    {
+        return self::where('type', 'advert')
+            ->where('status', 'active')
+            ->where('is_active', true)
+            ->latest()
+            ->get();
     }
 }

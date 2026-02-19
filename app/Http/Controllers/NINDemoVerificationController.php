@@ -25,6 +25,11 @@ class NINDemoVerificationController extends Controller
     {
         $user = auth()->user();
 
+        // 0. Preliminary Status Checks
+        if ($user->status !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently {$user->status}. Access denied.");
+        }
+
         // Get Verification Service using ServiceManager
         // Service code V100, and slip codes V101, V102
         $service = ServiceManager::getServiceWithFields('Verification', [
@@ -78,6 +83,11 @@ class NINDemoVerificationController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+
+        // 0. Preliminary Status Checks
+        if ($user->status !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently {$user->status}. Access denied.");
+        }
 
         $validated = $request->validate([
             'firstName' => 'required|string',
@@ -463,7 +473,13 @@ class NINDemoVerificationController extends Controller
     public function regularSlip($nin_no)
     {
         try {
-            $this->chargeForSlip(Auth::user(), 'V102');
+            $user = Auth::user();
+            // 0. Preliminary Status Checks
+            if ($user->status !== 'active') {
+                 return back()->with('error', "Your account is currently {$user->status}. Access denied.");
+            }
+
+            $this->chargeForSlip($user, 'V102');
             $repObj = new NIN_PDF_Repository();
             return $repObj->regularPDF($nin_no);
         } catch (\Exception $e) {
@@ -474,7 +490,13 @@ class NINDemoVerificationController extends Controller
     public function standardSlip($nin_no)
     {
         try {
-            $this->chargeForSlip(Auth::user(), '611');
+            $user = Auth::user();
+            // 0. Preliminary Status Checks
+            if ($user->status !== 'active') {
+                 return back()->with('error', "Your account is currently {$user->status}. Access denied.");
+            }
+
+            $this->chargeForSlip($user, '611');
             $repObj = new NIN_PDF_Repository();
             return $repObj->standardPDF($nin_no);
         } catch (\Exception $e) {
@@ -485,7 +507,13 @@ class NINDemoVerificationController extends Controller
     public function premiumSlip($nin_no)
     {
         try {
-            $this->chargeForSlip(Auth::user(), '612');
+            $user = Auth::user();
+            // 0. Preliminary Status Checks
+            if ($user->status !== 'active') {
+                 return back()->with('error', "Your account is currently {$user->status}. Access denied.");
+            }
+
+            $this->chargeForSlip($user, '612');
             $repObj = new NIN_PDF_Repository();
             return $repObj->premiumPDF($nin_no);
         } catch (\Exception $e) {
@@ -496,7 +524,13 @@ class NINDemoVerificationController extends Controller
     public function vninSlip($nin_no)
     {
         try {
-            $this->chargeForSlip(Auth::user(), '613');
+            $user = Auth::user();
+            // 0. Preliminary Status Checks
+            if ($user->status !== 'active') {
+                 return back()->with('error', "Your account is currently {$user->status}. Access denied.");
+            }
+
+            $this->chargeForSlip($user, '613');
             $repObj = new NIN_PDF_Repository();
             return $repObj->vninPDF($nin_no);
         } catch (\Exception $e) {

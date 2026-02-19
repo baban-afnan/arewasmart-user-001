@@ -66,8 +66,9 @@
             <div class="financial-card shadow-sm h-100 p-3" style="background: var(--info-gradient);">
                 <div class="d-flex justify-content-between align-items-start position-relative z-1">
                     <div>
-                        <p class="stats-label mb-1" style="color: rgba(255,255,255,0.8);">Total Referrals</p>
-                        <h3 class="stats-value mb-0 text-white">{{ number_format($totalReferrals ?? 0) }}</h3>
+                        <p class="stats-label mb-1" style="color: rgba(255,255,255,0.8);">Referral Earnings</p>
+                        <h3 class="stats-value mb-0 text-white">₦{{ number_format($totalReferralEarnings ?? 0, 2) }}</h3>
+                        <small class="text-white opacity-75">{{ number_format($totalReferrals ?? 0) }} Invitations</small>
                     </div>
                     <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3 d-flex align-items-center justify-content-center">
                         <i class="ti ti-users fs-24 text-white"></i>

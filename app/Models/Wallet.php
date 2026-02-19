@@ -17,6 +17,7 @@ class Wallet extends Model
         'available_balance',
         'wallet_number',
         'currency',
+        'bonus',
         'status',
         'last_activity',
     ];

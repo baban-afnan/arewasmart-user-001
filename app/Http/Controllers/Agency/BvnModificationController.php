@@ -72,6 +72,9 @@ class BvnModificationController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
+        if (($user->status ?? 'inactive') !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
 
         $validated = $request->validate([
             'enrolment_bank' => 'required|exists:services,id',
@@ -208,7 +211,12 @@ class BvnModificationController extends Controller
     // AJAX endpoint: fetch active service fields for a given service
     public function getServiceFields($serviceId)
     {
-        $role = auth()->user()->role ?? 'user';
+        $user = auth()->user();
+        if (($user->status ?? 'inactive') !== 'active') {
+            return response()->json(['error' => 'Your account is ' . ($user->status ?? 'inactive') . '. Access denied.'], 403);
+        }
+
+        $role = $user->role ?? 'user';
 
         $fields = ServiceField::where('service_id', $serviceId)
             ->where('is_active', 1)

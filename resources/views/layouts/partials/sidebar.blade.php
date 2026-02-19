@@ -180,8 +180,20 @@
                     </ul>
                 </li>
 
+                  <li>
+                    <a href="{{ route('website.index') }}" class="{{ request()->routeIs('website.index') ? 'active' : '' }}">
+                        <i class="ti ti-world"></i><span>Own a website</span>
+                    </a>
+                </li>
+
                 <!-- Account Section -->
                 <li class="menu-title"><span>Account</span></li>
+
+                <li>
+                    <a href="{{ route('referrals.index') }}" class="{{ request()->routeIs('referrals.index') ? 'active' : '' }}">
+                        <i class="ti ti-user-plus"></i><span>Referral</span>
+                    </a>
+                </li>
                 
                 <li>
                     <a href="{{route ('profile.edit')}}" class="{{ request()->routeIs('profile.edit') ? 'active' : '' }}">
@@ -191,7 +203,7 @@
 
                 <li>
                     <a href="{{ route('api.dashboard') }}" class="menu-link">
-                        <i class="menu-icon tf-icons ti ti-settings"></i><span>Smart API</span>
+                        <i class="menu-icon tf-icons ti ti-world"></i><span>Smart API</span>
                     </a>
                 </li>
                 

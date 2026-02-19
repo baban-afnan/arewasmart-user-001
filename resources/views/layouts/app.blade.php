@@ -14,6 +14,10 @@
 
     <!-- Apple Touch Icon -->
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/img/logo/logo.png') }}">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#007bff">
 
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('assets/img/logo/logo.png') }}" type="image/x-icon" />
@@ -123,6 +127,9 @@
       <!-- Right Side: Social & Quick Links -->
       <div class="col-md-6 text-center text-md-end">
         <div class="d-inline-flex align-items-center gap-3">
+           <a href="javascript:void(0);" class="text-light text-decoration-none footer-social install-app-btn" title="Install Application">
+            <i class="ti ti-download fs-18"></i>
+          </a>
           <a href="#" target="_blank" class="text-light text-decoration-none footer-social">
             <i class="ti ti-brand-facebook fs-18"></i>
           </a>
@@ -218,5 +225,97 @@
     </script>
 
     @stack('scripts')
+
+    <script>
+        // PWA Implementation
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered', reg))
+                    .catch(err => console.log('Service Worker registration failed', err));
+            });
+        }
+
+        let deferredPrompt;
+        const installBtns = document.querySelectorAll('.install-app-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            
+            // Show all install buttons
+            installBtns.forEach(btn => btn.style.display = 'inline-flex');
+
+            // Check if we should show SweetAlert (once every 24 hours)
+            const lastPrompt = localStorage.getItem('pwa_install_prompt_last');
+            const now = new Date().getTime();
+            const twentyFourHours = 24 * 60 * 60 * 1000;
+
+            if (!lastPrompt || (now - lastPrompt > twentyFourHours)) {
+                setTimeout(() => {
+                    Swal.fire({
+                        title: 'Install Arewa Smart?',
+                        text: 'Install our application on your device for a better experience and quick access!',
+                        icon: 'info',
+                        showCancelButton: true,
+                        confirmButtonColor: '#F26522',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, Install now',
+                        cancelButtonText: 'Maybe later'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            triggerInstall();
+                        }
+                        // Update last prompt time regardless of choice
+                        localStorage.setItem('pwa_install_prompt_last', now);
+                    });
+                }, 3000); // 3-second delay after load
+            }
+        });
+
+        installBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (deferredPrompt) {
+                    triggerInstall();
+                } else {
+                    Swal.fire({
+                        title: 'Installation Ready?',
+                        text: 'To install this app, please use Google Chrome or Microsoft Edge. If you are already using them, wait a few seconds or ensure your connection is stable.',
+                        icon: 'info',
+                        confirmButtonColor: '#F26522'
+                    });
+                }
+            });
+        });
+
+        function triggerInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                        installBtns.forEach(btn => btn.style.display = 'none');
+                    } else {
+                        console.log('User dismissed the install prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('App was installed');
+            installBtns.forEach(btn => btn.style.display = 'none');
+            Swal.fire({
+                title: 'Installed!',
+                text: 'Application has been successfully installed.',
+                icon: 'success',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        });
+    </script>
 </body>
 </html>

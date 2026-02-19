@@ -81,6 +81,9 @@ class ManualSearchController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+        if (($user->status ?? 'inactive') !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
 
         $validated = $request->validate([
             'service_field_id' => 'required|exists:service_fields,id',
@@ -190,6 +193,10 @@ class ManualSearchController extends Controller
         ]);
 
         $user = Auth::user();
+        if (($user->status ?? 'inactive') !== 'active') {
+            return response()->json(['success' => false, 'message' => "Your account is " . ($user->status ?? 'inactive') . ". Access denied."]);
+        }
+
         $field = ServiceField::findOrFail($request->field_id);
         $price = $field->getPriceForUserType($user->role);
 

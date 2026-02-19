@@ -158,15 +158,6 @@
 										<label for="bvn">BVN Number</label>
 									</div>
 								</div>
-								
-								<div class="col-md-6">
-									<div class="form-floating">
-										<input type="text" class="form-control" id="nin" name="nin"
-											value="{{ old('nin', Auth::user()->nin ?? '') }}" required maxlength="11"
-											placeholder="NIN">
-										<label for="nin">NIN Number</label>
-									</div>
-								</div>
 							</div>
 						</div>
 					</div>
@@ -228,7 +219,7 @@
 <!-- /Force Profile Modal -->
 
     @push('scripts')
-        @if(!Auth::user()->bvn || !Auth::user()->phone_no || !Auth::user()->nin || !Auth::user()->lga || !Auth::user()->pin)
+        @if(!Auth::user()->bvn || !Auth::user()->phone_no || !Auth::user()->lga || !Auth::user()->pin)
             <script>
 
 				const lgas = {

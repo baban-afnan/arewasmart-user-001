@@ -145,6 +145,12 @@ class DataController extends Controller
 
         $requestId = RequestIdHelper::generateRequestId();
         $user      = Auth::user();
+
+        // 0. Preliminary Account Status Check
+        if (($user->status ?? 'inactive') !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
+
         $wallet    = Wallet::where('user_id', $user->id)->first();
 
         if (!$wallet) {
@@ -214,6 +220,11 @@ class DataController extends Controller
 
         if ($wallet->balance < $payableAmount) {
             return back()->with('error', 'Insufficient wallet balance! You need ₦' . number_format($payableAmount, 2));
+        }
+
+        // 0. Preliminary Wallet Status Check
+        if (($wallet->status ?? 'inactive') !== 'active') {
+             return redirect()->back()->with('error', 'Your wallet is not active. Please contact support.');
         }
 
         try {

@@ -64,6 +64,11 @@ class DashboardController extends Controller
         
         $totalReferrals = $referralQuery->count();
 
+        // 4b. Total Referral Earnings
+        $totalReferralEarnings = BonusHistory::where('user_id', $user->id)
+            ->where('type', 'referral')
+            ->sum('amount');
+
         // 5. Recent 10 Transactions
         $recentTransactions = Transaction::where('user_id', $user->id)
             ->orderBy('id', 'desc')
@@ -100,6 +105,8 @@ class DashboardController extends Controller
             ->distinct('user_id')
             ->count('user_id');
 
+        $adverts = Announcement::getActiveAdverts();
+
         return view('dashboard', compact(
             'user', 
             'wallet', 
@@ -109,6 +116,7 @@ class DashboardController extends Controller
             'totalAgencyRequests',
             'totalFundedAmount',
             'totalReferrals',
+            'totalReferralEarnings',
             'isFiltered',
             'startDate',
             'endDate',
@@ -121,6 +129,7 @@ class DashboardController extends Controller
             'pendingPercentage',
             'failedPercentage',
             'announcement',
+            'adverts',
             'totalVolume',
             'monthlyCredit',
             'monthlyDebit',

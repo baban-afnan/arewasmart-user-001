@@ -38,11 +38,18 @@ class ElectricityController extends Controller
         return view('utilities.buy-electricity', compact('wallet', 'history'));
     }
 
+
     /**
      * Verify Meter Number
      */
     public function verifyMeter(Request $request)
     {
+        $user = Auth::user();
+        // 0. Preliminary Status Checks
+        if (($user->status ?? 'inactive') !== 'active') {
+            return response()->json(['success' => false, 'message' => "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied."]);
+        }
+
         $request->validate([
             'service_id'   => 'required|string',
             'meter_type'   => 'required|string|in:prepaid,postpaid',
@@ -95,6 +102,12 @@ class ElectricityController extends Controller
         ]);
 
         $user = Auth::user();
+        
+        // 0. Preliminary Status Checks
+        if (($user->status ?? 'inactive') !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
+
         $requestId = RequestIdHelper::generateRequestId();
 
         try {
@@ -103,6 +116,10 @@ class ElectricityController extends Controller
 
             if (!$wallet || $wallet->balance < $amount) {
                 return back()->with('error', 'Insufficient wallet balance.');
+            }
+
+            if (($wallet->status ?? 'inactive') !== 'active') {
+                return back()->with('error', 'Your wallet is not active. Please contact support.');
             }
 
             // Call VTPass API

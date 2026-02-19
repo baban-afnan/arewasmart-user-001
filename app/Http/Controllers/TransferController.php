@@ -21,6 +21,11 @@ class TransferController extends Controller
 
     public function verifyUser(Request $request)
     {
+        $user = Auth::user();
+        if (($user->status ?? 'inactive') !== 'active') {
+            return response()->json(['success' => false, 'message' => "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied."]);
+        }
+
         $request->validate([
             'wallet_id' => 'required|string',
         ]);
@@ -49,6 +54,10 @@ class TransferController extends Controller
         ]);
 
         $user = Auth::user();
+        // 0. Preliminary Status Checks
+        if ($user->status !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently {$user->status}. Access denied.");
+        }
         $senderWallet = $user->wallet;
         $amount = $request->amount;
         

@@ -80,6 +80,9 @@ class BvnUserController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+        if (($user->status ?? 'inactive') !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
 
         // Validate inputs
         $validated = $request->validate([
@@ -133,6 +136,11 @@ class BvnUserController extends Controller
                 'status' => 'error',
                 'message' => 'Insufficient wallet balance.'
             ]);
+        }
+
+        // Wallet status check
+        if (($wallet->status ?? 'inactive') !== 'active') {
+            return back()->with(['status' => 'error', 'message' => 'Your wallet is not active. Please contact support.'])->withInput();
         }
 
         DB::beginTransaction();

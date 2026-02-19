@@ -78,6 +78,10 @@ class BvnServicesController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+        if (($user->status ?? 'inactive') !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
+
         $routeName = $request->route()->getName();
         $isSendVnin = ($routeName === 'send-vnin.store');
         $serviceKey = $isSendVnin ? 'sendvnin' : 'CRM';

@@ -87,6 +87,10 @@ class NinValidationController extends Controller
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+        if (($user->status ?? 'inactive') !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
         $validated = $request->validate([
             'service_field' => 'required',
             'nin' => 'required_if:service_type,validation|nullable|digits:11',
@@ -110,6 +114,11 @@ class NinValidationController extends Controller
 
         if (!$wallet || $wallet->balance < $servicePrice) {
             return back()->with('error', 'Insufficient wallet balance.');
+        }
+
+        // Wallet status check
+        if (($wallet->status ?? 'inactive') !== 'active') {
+            return back()->with(['status' => 'error', 'message' => 'Your wallet is not active. Please contact support.'])->withInput();
         }
 
         // Call API First (Do not charge if this fails)
@@ -210,6 +219,14 @@ class NinValidationController extends Controller
 
     public function checkStatus(Request $request, $id = null)
     {
+        $user = Auth::user();
+        if (($user->status ?? 'inactive') !== 'active') {
+            if ($request->wantsJson() || $request->is('api/*')) {
+                return response()->json(['success' => false, 'message' => "Your account is " . ($user->status ?? 'inactive') . ". Access denied."]);
+            }
+            return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
+
         try {
             if ($id) {
                 $agentService = AgentService::findOrFail($id);

@@ -102,6 +102,12 @@ class CableController extends Controller
      */
     public function verifyIuc(Request $request)
     {
+        $user = Auth::user();
+        // 0. Preliminary Status Checks
+        if (($user->status ?? 'inactive') !== 'active') {
+             return response()->json(['success' => false, 'message' => "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied."]);
+        }
+
         $request->validate([
             'service_id' => 'required|string',
             'billersCode' => 'required|string',
@@ -157,12 +163,23 @@ class CableController extends Controller
         ]);
 
         $user = Auth::user();
+
+        // 0. Preliminary Account Status Check
+        if (($user->status ?? 'inactive') !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
+
         $requestId = RequestIdHelper::generateRequestId();
         $amount = $request->amount;
 
         $wallet = Wallet::where('user_id', $user->id)->first();
         if (!$wallet || $wallet->balance < $amount) {
             return back()->with('error', 'Insufficient wallet balance.');
+        }
+
+        // 0. Preliminary Wallet Status Check
+        if (($wallet->status ?? 'inactive') !== 'active') {
+             return redirect()->back()->with('error', 'Your wallet is not active. Please contact support.');
         }
 
         try {

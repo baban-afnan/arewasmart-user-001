@@ -74,16 +74,23 @@
             <!-- Welcome Message -->
             <div class="me-auto">
                 <h4 class="fw-semibold text-dark mb-1 welcome-text">
-                    Welcome back, {{ Auth::user()->first_name . ' ' . Auth::user()->surname ?? 'User' }}  👋
+                     {{ $timeGreeting}}, {{ Auth::user()->first_name . ' ' . Auth::user()->surname ?? 'User' }}  👋
                 </h4>
-                <small class="text-danger">Your Wallet Id is {{ $wallet->wallet_number ?? 'N/A' }}</small>
-            </div>
-
+                <div class="d-flex align-items-center gap-2 flex-wrap funding-info">
+                        @if($virtualAccount)
+                            <span class="text-muted d-none d-sm-inline">|</span>
+                            <small class="text-success fw-bold">
+                                <i class="ti ti-building-bank me-1"></i>
+                                {{ $virtualAccount->bankName }}: <strong>{{ $virtualAccount->accountNo }}</strong>
+                            </small>
+                        @endif
+                    </div>
+                </div>
             <!-- Wallet Info -->
             <div class="d-flex align-items-center gap-2 ms-2">
                 <span class="fw-medium text-muted small mb-0">Balance:</span>
 
-                <h5 id="wallet-balance" class="mb-0 text-success fw-bold balance-text">
+                <h3 id="wallet-balance" class="mb-0 @if(($wallet->status ?? 'inactive') == 'active') text-success @else text-danger @endif fw-extrabold balance-text me-2">
                     ₦{{ number_format($wallet->balance ?? 0, 2) }}
                 </h5>
 
@@ -107,9 +114,12 @@
 
        <!-- Alerts (kept as in project) -->
         @include('pages.alart')
+      
+
+      
 
         <!-- Dashboard widgets and sections -->
-        <div class="row mt-3">
+        <div class="row mt-3 d-none d-lg-flex">
             @include('pages.dashboard.wedget')
         </div>
 
@@ -117,8 +127,13 @@
             @include('pages.dashboard.services')
         </div>
 
-        <div class="row">
+        <div class="row d-none d-lg-flex">
             @include('pages.dashboard.trans')
+        </div>
+
+           <!-- advert section for mobile Users -->
+        <div class="row">
+         @include('pages.dashboard.advert')
         </div>
     </div>
          

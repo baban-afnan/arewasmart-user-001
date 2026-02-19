@@ -121,18 +121,15 @@ class RegisteredUserController extends Controller
      */
     private function addBonus(int $referral_id, float $referral_bonus, int $referred_user_id): void
     {
-        $wallet = Wallet::where('user_id', $referral_id)->first();
-
-        if ($wallet) {
-            $wallet->bonus = ($wallet->bonus ?? 0) + $referral_bonus;
-            $wallet->save();
-
-            BonusHistory::create([
-                'user_id'          => $referral_id,
-                'referred_user_id' => $referred_user_id,
-                'amount'           => $referral_bonus,
-                'type'             => 'referral',
-            ]);
-        }
+        // We no longer credit the wallet immediately. 
+        // Bonus remains 'pending' until the referred user completes 5 transactions.
+        
+        BonusHistory::create([
+            'user_id'          => $referral_id,
+            'referred_user_id' => $referred_user_id,
+            'amount'           => $referral_bonus,
+            'type'             => 'referral',
+            'status'           => 'pending',
+        ]);
     }
 }

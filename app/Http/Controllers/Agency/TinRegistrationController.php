@@ -75,6 +75,9 @@ class TinRegistrationController extends Controller
     public function validateTin(Request $request)
     {
         $user = Auth::user();
+        if (($user->status ?? 'inactive') !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
 
         $request->validate([
             'type' => 'required|in:individual,corporate',
@@ -311,6 +314,9 @@ class TinRegistrationController extends Controller
     public function downloadSlip(Request $request)
     {
         $user = Auth::user();
+        if (($user->status ?? 'inactive') !== 'active') {
+             return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
 
         $request->validate([
             'transaction_ref' => 'required|string',
@@ -458,6 +464,10 @@ class TinRegistrationController extends Controller
         ]);
 
         $user = Auth::user();
+        if (($user->status ?? 'inactive') !== 'active') {
+            return response()->json(['success' => false, 'message' => "Your account is " . ($user->status ?? 'inactive') . ". Access denied."]);
+        }
+
         $field = ServiceField::where('field_code', $request->field_code)
             ->where('is_active', true)
             ->firstOrFail();
@@ -490,6 +500,10 @@ class TinRegistrationController extends Controller
         ]);
 
         $user = Auth::user();
+        if (($user->status ?? 'inactive') !== 'active') {
+            return response()->json(['success' => false, 'message' => "Your account is " . ($user->status ?? 'inactive') . ". Access denied."]);
+        }
+
         $field = ServiceField::where('field_code', $request->field_code)
             ->where('is_active', true)
             ->firstOrFail();

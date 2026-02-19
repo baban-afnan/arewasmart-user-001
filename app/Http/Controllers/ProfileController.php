@@ -56,7 +56,6 @@ class ProfileController extends Controller
             'state' => 'required|string|max:255',
             'address' => 'required|string|max:500',
             'bvn' => 'required|digits:11|unique:users,bvn,' . $user->id,
-            'nin' => 'required|digits:11|unique:users,nin,' . $user->id,
             'pin' => 'required|digits:5',
             'termsCheck' => 'required|string|max:500', 
         ], [
@@ -74,7 +73,6 @@ class ProfileController extends Controller
                 'state' => $validated['state'],
                 'address' => $validated['address'],
                 'bvn' => $validated['bvn'],
-                'nin' => $validated['nin'],
                 'pin' => bcrypt($validated['pin']), 
                 'profile_completed' => true, 
             ]);
@@ -167,7 +165,7 @@ class ProfileController extends Controller
         // Define required fields that must be filled
         $requiredFields = [
             'first_name', 'last_name', 'phone_no', 'lga', 
-            'state', 'address', 'bvn', 'nin'
+            'state', 'address', 'bvn'
         ];
 
         foreach ($requiredFields as $field) {

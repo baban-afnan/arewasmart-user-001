@@ -25,7 +25,7 @@ class WalletController extends Controller
         $wallet = Wallet::where('user_id', $userId)->first();
 
         $walletData = [
-            'wallet_balance'    => $wallet->wallet_balance ?? 0,
+            'balance'           => $wallet->balance ?? 0,
             'bonus'             => $wallet->bonus ?? 0,
             'status'            => $wallet->status ?? 'inactive',
             'available_balance' => $wallet->available_balance ?? 0,
@@ -82,8 +82,7 @@ class WalletController extends Controller
             $bonusAmount = $wallet->bonus;
 
             // Update wallet balances
-            $wallet->wallet_balance += $bonusAmount;
-            $wallet->available_balance += $bonusAmount;
+            $wallet->balance += $bonusAmount;
             $wallet->bonus = 0;
             $wallet->save();
 

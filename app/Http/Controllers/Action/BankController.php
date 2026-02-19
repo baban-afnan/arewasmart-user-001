@@ -32,6 +32,11 @@ class BankController extends Controller
 
     public function verifyBankAccount(Request $request)
     {
+        $user = Auth::user();
+        if (($user->status ?? 'inactive') !== 'active') {
+            return response()->json(['success' => false, 'message' => "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied."]);
+        }
+
         // Retrieve the query parameters
         $accountNumber = $request->query('acctno');
         $bankCode = $request->query('bankCode');

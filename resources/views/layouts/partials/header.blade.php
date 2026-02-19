@@ -113,16 +113,19 @@
                                     <h4>Applications</h4>
                                 </div>
                                 <div class="card-body">                                            
-                                    <a href="{{ route('dashboard') }}" class="d-block pb-2">
+                                    <a href="{{ route('dashboard') }}" class="d-block pb-2 border-bottom mb-2 text-dark">
                                         <span class="avatar avatar-md bg-transparent-dark me-2"><i class="ti ti-layout-dashboard text-gray-9"></i></span>Dashboard
                                     </a>                                        
-                                    <a href="{{ route('wallet') }}" class="d-block py-2">
+                                    <a href="{{ route('wallet') }}" class="d-block py-2 text-dark border-bottom mb-2">
                                         <span class="avatar avatar-md bg-transparent-dark me-2"><i class="ti ti-wallet text-gray-9"></i></span>Wallet
                                     </a>                                        
+                                    <a href="javascript:void(0);" class="d-block py-2 install-app-btn text-dark" title="Install Application">
+                                        <span class="avatar avatar-md bg-transparent-dark me-2"><i class="ti ti-download text-gray-9"></i></span>Install App
+                                    </a>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                          </div>
+                            </div>
                     
                     <!-- Chat (Placeholder) -->
                     <div class="me-1">
