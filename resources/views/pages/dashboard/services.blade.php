@@ -1,357 +1,571 @@
-<!-- Services Section -->
-<section class="py-4">
-    <div class="container">
-        <div class="row service-grid justify-content-center">
-
-            <!-- Service Box (Reusable Template) -->
-            @php
-                $services = [
-                    ['route' => route('wallet'), 'icon' => 'ti-wallet', 'color' => 'bg-primary', 'name' => 'Wallet'],
-                    ['route' => route('airtime'), 'icon' => 'ti-phone-call', 'color' => 'bg-info', 'name' => 'Airtime'],
-                    ['modal' => '#dataplans', 'icon' => 'ti-world', 'color' => 'bg-warning', 'name' => 'Data'],
-                    ['route' => route('electricity'), 'icon' => 'ti-bolt', 'color' => 'bg-danger', 'name' => 'Electricity'],
-                    ['route' => route('education'), 'icon' => 'ti-home', 'color' => 'bg-success', 'name' => 'Educational Pin'],
-                    ['route' => route('jamb'), 'icon' => 'ti-home', 'color' => 'bg-secondary', 'name' => 'Jamb Pin'],
-                    ['route' => route('bvn-crm'), 'icon' => 'ti-user-plus', 'color' => 'bg-info', 'name' => 'CRM'],
-                    ['route' => route('send-vnin'), 'icon' => 'ti-user-plus', 'color' => 'bg-warning', 'name' => 'Vnin/Fas'],
-                    ['route' => route('modification'), 'icon' => 'ti-user-plus', 'color' => 'bg-danger', 'name' => 'BVN Modification'],
-                    ['route' => route('phone.search.index'), 'icon' => 'ti-user-plus', 'color' => 'bg-success', 'name' => 'Search BVN'],
-                    ['modal' => '#agentEnrolmentModal', 'icon' => 'ti-user-plus', 'color' => 'bg-secondary', 'name' => 'BVN Agent'],
-                    ['route' => route('nin-modification'), 'icon' => 'ti-user-plus', 'color' => 'bg-info', 'name' => 'NIN Modification'],
-                    ['route' => route('nin-validation'), 'icon' => 'ti-user-plus', 'color' => 'bg-warning', 'name' => 'Validation & IPE'],
-                    ['route' => route('website.index'), 'icon' => 'ti-home-plus', 'color' => 'bg-danger', 'name' => 'Buy Website'],
-                    ['route' => route('cac.index'), 'icon' => 'ti-user-plus', 'color' => 'bg-success', 'name' => 'CAC Reg'],
-                    ['route' => route('enrolment.report'), 'icon' => 'ti-user-plus', 'color' => 'bg-secondary', 'name' => 'Enrolment Report'],
-                    ['modal' => '#verifyModal', 'icon' => 'ti-id-badge', 'color' => 'bg-info', 'name' => 'Verify NIN/DEMO'],
-                    ['modal' => '#verifyModalbvn', 'icon' => 'ti-message', 'color' => 'bg-secondary', 'name' => 'Verify (BVN/TIN)'],
-                ];
-            @endphp
-
-            @foreach ($services as $sv)
-                <div class="col-4 col-md-2 d-flex">
-                    <a 
-                        @if(isset($sv['route'])) href="{{ $sv['route'] }}" 
-                        @elseif(isset($sv['modal'])) href="#" data-bs-toggle="modal" data-bs-target="{{ $sv['modal'] }}"
-                        @else href="#"
-                        @endif
-                        class="w-100"
-                    >
-                        <div class="card flex-fill shadow-sm text-center border-0 rounded-3 service-card">
-                            <div class="card-body p-3 d-flex flex-column align-items-center">
-                                <span class="avatar rounded-circle {{ $sv['color'] }} mb-2 p-3">
-                                    <i class="ti {{ $sv['icon'] }} text-white fs-18"></i>
-                                </span>
-                                <h6 class="fs-13 fw-semibold text-default mb-0">{{ $sv['name'] }}</h6>
-                            </div>
-                        </div>
-                    </a>
+<!-- Quick Services Section -->
+<section class="py-3 py-md-4">
+    <div class="container px-0 px-sm-3">
+        <div class="card border-0 shadow-sm mobile-flush rounded-4 overflow-hidden">
+            <div class="card-body p-3 p-md-4">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <i class="fas fa-bolt text-warning"></i>
+                    <h5 class="fw-bold mb-0">Quick Services</h5>
                 </div>
-            @endforeach
+                <p class="text-muted small mb-3 mb-md-4">Instant access to popular payments</p>
 
+                @php
+                    $services = [
+                        ['route' => route('wallet'), 'icon' => 'ti-wallet', 'color' => 'primary', 'name' => 'Wallet'],
+                        ['route' => route('airtime'), 'icon' => 'ti-phone-call', 'color' => 'info', 'name' => 'Airtime'],
+                        ['modal' => '#dataplans', 'icon' => 'ti-world', 'color' => 'warning', 'name' => 'Data'],
+                        ['route' => route('electricity'), 'icon' => 'ti-bolt', 'color' => 'danger', 'name' => 'Electricity'],
+                        ['route' => route('education'), 'icon' => 'ti-school', 'color' => 'success', 'name' => 'Education'],
+                        ['route' => route('jamb'), 'icon' => 'ti-certificate', 'color' => 'secondary', 'name' => 'Jamb Pin'],
+                        ['route' => route('bvn-crm'), 'icon' => 'ti-users', 'color' => 'info', 'name' => 'CRM'],
+                        ['route' => route('send-vnin'), 'icon' => 'ti-fingerprint', 'color' => 'warning', 'name' => 'Vnin/Fas'],
+                        ['route' => route('modification'), 'icon' => 'ti-user-edit', 'color' => 'danger', 'name' => 'BVN Mod'],
+                        ['route' => route('phone.search.index'), 'icon' => 'ti-search', 'color' => 'success', 'name' => 'Search BVN'],
+                        ['modal' => '#agentEnrolmentModal', 'icon' => 'ti-user-plus', 'color' => 'secondary', 'name' => 'BVN Agent'],
+                        ['route' => route('nin-modification'), 'icon' => 'ti-id', 'color' => 'info', 'name' => 'NIN Mod'],
+                        ['route' => route('nin-validation'), 'icon' => 'ti-checkbox', 'color' => 'warning', 'name' => 'Validation'],
+                        ['route' => route('website.index'), 'icon' => 'ti-browser', 'color' => 'danger', 'name' => 'Website'],
+                        ['route' => route('cac.index'), 'icon' => 'ti-briefcase', 'color' => 'success', 'name' => 'CAC Reg'],
+                        ['route' => route('enrolment.report'), 'icon' => 'ti-file-text', 'color' => 'secondary', 'name' => 'Report'],
+                        ['modal' => '#verifyModal', 'icon' => 'ti-id-badge', 'color' => 'info', 'name' => 'Verify NIN'],
+                        ['modal' => '#verifyModalbvn', 'icon' => 'ti-shield-check', 'color' => 'secondary', 'name' => 'Verify BVN'],
+                    ];
+                @endphp
+
+                <div class="row row-cols-3 row-cols-md-4 row-cols-lg-6 g-2 g-md-3 text-center">
+                    @foreach ($services as $sv)
+                        <div class="col">
+                            <a 
+                                @if(isset($sv['route'])) href="{{ $sv['route'] }}" 
+                                @elseif(isset($sv['modal'])) href="#" data-bs-toggle="modal" data-bs-target="{{ $sv['modal'] }}"
+                                @else href="#"
+                                @endif
+                                class="text-decoration-none service-item"
+                            >
+                                <div class="service-content p-2 p-md-3">
+                                    <div class="service-icon mb-2 mx-auto bg-{{ $sv['color'] }}-soft">
+                                        <i class="ti {{ $sv['icon'] }} fs-15 fs-md-4 text-{{ $sv['color'] }}"></i>
+                                    </div>
+                                    <span class="service-name text-dark">{{ $sv['name'] }}</span>
+                                </div>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
         </div>
     </div>
 </section>
-<!-- /Services Section -->
+<!-- /Quick Services Section -->
 
-<!-- Agent Enrolment Modal -->
+<!-- Agent Enrolment Modal - Enhanced -->
 <div class="modal fade" id="agentEnrolmentModal" tabindex="-1" aria-labelledby="agentEnrolmentModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content rounded-4 shadow-lg border-0">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content border-0 rounded-4 overflow-hidden">
+            
+            <!-- Header with gradient -->
+            <div class="modal-header bg-gradient-primary text-white p-4 border-0 position-relative">
+                <div class="pe-4">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="agentEnrolmentModalLabel">
+                        <span class="badge bg-white text-primary p-2 rounded-3">
+                            <i class="ti ti-id-badge fs-1"></i>
+                        </span>
+                        Become a Certified BVN Agent
+                    </h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
-      <!-- HEADER -->
-      <div class="modal-header bg-primary text-white py-3">
-        <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="agentEnrolmentModalLabel">
-          <i class="ti ti-id-badge fs-3"></i>
-          Become a Certified BVN Agent
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
+            <!-- Body -->
+            <div class="modal-body p-4">
+                <!-- Hero Section -->
+                <div class="text-center mb-4">
+                    <div class="display-6 mb-2">🌟</div>
+                    <p class="lead fs-1 fw-medium mb-0">Join thousands of trusted agents across Nigeria</p>
+                    <p class="text-primary fw-semibold">Start earning instantly!</p>
+                </div>
 
-      <!-- BODY -->
-      <div class="modal-body p-4">
-
-        <!-- INTRO -->
-        <div class="mb-4 p-3 bg-light rounded-3 border">
-          <p class="mb-4 text-secondary fs-12">
-            Join thousands of trusted agents across Nigeria and start earning instantly.  
-            As a certified <strong>BVN Enrollment Agent</strong>, you provide essential identity services, support your community, and make steady income every day.
-          </p>
-        </div>
-
-        <!-- REQUIREMENTS -->
-        <h6 class="fw-bold mb-2 text-primary d-flex align-items-center gap-2">
-          <i class="ti ti-file-check fs-5"></i> Requirements
-        </h6>
-
-        <ul class="list-group mb-4 shadow-sm">
-          <li class="list-group-item">✔✔ Valid BVN, active bank account & government-issued ID card</li>
-          <li class="list-group-item">✔✔ A working phone number and email (unused on any BVN enrolment account)</li>
-          <li class="list-group-item">✔✔ A business location or shop (optional but highly recommended)</li>
-          <li class="list-group-item">✔✔ Minimum activation balance of <strong>₦10,000</strong> in your wallet</li>
-        </ul>
-
-        <!-- BENEFITS -->
-        <h6 class="fw-bold mb-2 text-success d-flex align-items-center gap-2">
-          <i class="ti ti-gift fs-5"></i> Benefits of Becoming an Agent
-        </h6>
-
-        <ul class="list-group mb-4 shadow-sm">
-          <li class="list-group-item">✔✔ Earn attractive commissions on every successful BVN enrollment</li>
-          <li class="list-group-item">✔✔ Become a trusted and verified financial identity service provider</li>
-          <li class="list-group-item">✔✔ Access more exclusive, high-value financial services</li>
-          <li class="list-group-item">✔✔ Priority customer support from Arewa Smart</li>
-          <li class="list-group-item">✔✔ 48h Bvn approval on submitted enrollment </li>
-          <li class="list-group-item">✔✔ Real time Bvn enrollment report and provinant dashboard for enrolment support</li>
-          <li class="list-group-item">✔✔ Build your own agent network and grow a sustainable income stream</li>
-          <li class="list-group-item">✔✔ Get Agent ID card and Certificate for Security verification and authentications</li>
-        </ul>
-
-        <div class="alert alert-success text-center fw-semibold py-3 rounded-3">
-          🌟 <strong>You’re one step away!</strong> Start your enrollment today and unlock a world of opportunities.
-        </div>
-
-      </div>
-
-      <!-- FOOTER -->
-      <div class="modal-footer p-3">
-        <a href="{{route ('bvn.index')}}" class="btn btn-primary w-100 fw-semibold">
-          Start Registration
-          <i class="ti ti-arrow-right ms-1"></i>
-        </a>
-      </div>
-
-    </div>
-  </div>
-</div>
-<!-- /Agent Enrolment Modal -->
-
-
-<!-- Verify Modal -->
-<div class="modal fade" id="verifyModal" tabindex="-1" aria-labelledby="verifyModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 shadow-lg border-0 overflow-hidden">
-
-      <!-- HEADER -->
-      <div class="modal-header bg-primary text-white py-3 justify-content-center position-relative">
-        <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="verifyModalLabel">
-          <i class="ti ti-id-badge fs-3"></i>
-          NIN / DEMO / PHONE NO. Verification
-        </h5>
-        <button type="button" class="btn-close btn-close-white position-absolute end-0 top-0 m-3" data-bs-dismiss="modal"></button>
-      </div>
-
-      <!-- BODY -->
-      <div class="modal-body p-4 bg-light">
-
-        @php
-            $verifyServices = [
-                [
-                    'route' => route('nin.phone.index'),
-                    'icon' => 'ti-fingerprint',
-                    'color' => 'success',
-                    'name' => 'NIN Phone NO.'
-                ],
-                [
-                    'route' => route('nin.verification.index'),
-                    'icon' => 'ti-credit-card',
-                    'color' => 'primary',
-                    'name' => 'Verify NIN'
-                ],
-                [
-                    'route' => route('nin.demo.index'),
-                    'icon' => 'ti-file-certificate',
-                    'color' => 'danger',
-                    'name' => 'Verify NIN Demo'
-                ],
-            ];
-        @endphp
-
-        <div class="row g-3 justify-content-center">
-            @foreach ($verifyServices as $sv)
-                <div class="col-4 d-flex">
-                    <a href="{{ $sv['route'] }}" class="w-100 text-decoration-none">
-                        <div class="card h-100 border-0 shadow-sm service-card">
-                            <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
-                                <span class="avatar rounded-circle bg-white text-{{ $sv['color'] }} shadow-sm mb-3 p-3">
-                                    <i class="ti {{ $sv['icon'] }} fs-2"></i>
-                                </span>
-                                <h6 class="fs-13 fw-bold text-dark mb-0">{{ $sv['name'] }}</h6>
+                <!-- Requirements Card -->
+                <div class="card border-0 bg-light mb-4">
+                    <div class="card-body p-3">
+                        <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                            <span class="badge bg-danger rounded-3 p-2">
+                                <i class="ti ti-checklist fs-1 text-white"></i>
+                            </span>
+                            Requirements
+                        </h6>
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <div class="d-flex align-items-start gap-2 mb-2">
+                                    <i class="ti ti-check text-success fs-5 flex-shrink-0"></i>
+                                    <span class="small">Valid BVN, active bank account & government-issued ID</span>
+                                </div>
+                                <div class="d-flex align-items-start gap-2 mb-2">
+                                    <i class="ti ti-check text-success fs-5 flex-shrink-0"></i>
+                                    <span class="small">Working phone & email (unused on any BVN enrolment)</span>
+                                </div>
+                                <div class="d-flex align-items-start gap-2 mb-2">
+                                    <i class="ti ti-check text-success fs-5 flex-shrink-0"></i>
+                                    <span class="small">Business location (optional but recommended)</span>
+                                </div>
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="ti ti-check text-success fs-5 flex-shrink-0"></i>
+                                    <span class="small">Minimum ₦10,000 activation balance in wallet</span>
+                                </div>
                             </div>
                         </div>
-                    </a>
+                    </div>
                 </div>
-            @endforeach
-        </div>
-      </div>
 
-      <!-- FOOTER -->
-      <div class="modal-footer p-3 justify-content-center border-top-0">
-        <button type="button" class="btn btn-outline-danger px-5 rounded-pill fw-semibold" data-bs-dismiss="modal">Close</button>
-      </div>
-
-    </div>
-  </div>
-</div>
-<!-- /Verify Modal -->
-
-<!-- Verify Modal (BVN/TIN only) -->
-<div class="modal fade" id="verifyModalbvn" tabindex="-1" aria-labelledby="verifyModalLabelBvn" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 shadow-lg border-0 overflow-hidden">
-
-      <!-- HEADER -->
-      <div class="modal-header bg-primary text-white py-3 justify-content-center position-relative">
-        <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="verifyModalLabelBvn">
-          <i class="ti ti-id-badge fs-3"></i>
-          BVN / TIN Verification
-        </h5>
-        <button type="button" class="btn-close btn-close-white position-absolute end-0 top-0 m-3" data-bs-dismiss="modal"></button>
-      </div>
-
-      <!-- BODY -->
-      <div class="modal-body p-4 bg-light">
-
-        @php
-            $verifyServicesBvn = [
-                [
-                    'route' => route('bvn.verification.index'),
-                    'icon' => 'ti-fingerprint',
-                    'color' => 'success',
-                    'name' => 'Verify BVN'
-                ],
-                [
-                    'route' => route('cac.tin'),
-                    'icon' => 'ti-file-certificate',
-                    'color' => 'danger',
-                    'name' => 'Verify TIN'
-                ],
-            ];
-        @endphp
-
-        <div class="row g-3 justify-content-center">
-            @foreach ($verifyServicesBvn as $sv)
-                <div class="col-4 d-flex">
-                    <a href="{{ $sv['route'] }}" class="w-100 text-decoration-none">
-                        <div class="card h-100 border-0 shadow-sm service-card">
-                            <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
-                                <span class="avatar rounded-circle bg-white text-{{ $sv['color'] }} shadow-sm mb-3 p-3">
-                                    <i class="ti {{ $sv['icon'] }} fs-2"></i>
-                                </span>
-                                <h6 class="fs-13 fw-bold text-dark mb-0">{{ $sv['name'] }}</h6>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            @endforeach
-        </div>
-      </div>
-
-      <!-- FOOTER -->
-      <div class="modal-footer p-3 justify-content-center border-top-0">
-        <button type="button" class="btn btn-outline-danger px-5 rounded-pill fw-semibold" data-bs-dismiss="modal">Close</button>
-      </div>
-
-    </div>
-  </div>
-</div>
-<!-- /Verify Modal (BVN/TIN only) -->
-
-
-<!-- Buy data plans for sme and data -->
-<div class="modal fade" id="dataplans" tabindex="-1" aria-labelledby="verifyModalLabelBvn" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 shadow-lg border-0 overflow-hidden">
-
-      <!-- HEADER -->
-      <div class="modal-header bg-primary text-white py-3 justify-content-center position-relative">
-        <h5 class="modal-title fw-bold d-flex align-items-center gap-2 text-white" id="verifyModalLabelBvn">
-          <i class="ti ti-id-badge fs-3"></i>
-          Buy direct plans or SME data
-        </h5>
-        <button type="button" class="btn-close btn-close-white position-absolute end-0 top-0 m-3" data-bs-dismiss="modal"></button>
-      </div>
-
-      <!-- BODY -->
-      <div class="modal-body p-4 bg-light">
-
-        @php
-            $verifyServicesBvn = [
-                [
-                    'route' => route('buy-data'),
-                    'icon' => 'ti-world',
-                    'color' => 'success',
-                    'name' => 'Direct Data Plans'
-                ],
+                <!-- Benefits Grid -->
+                <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                    <span class="badge bg-success rounded-3 p-2">
+                        <i class="ti ti-gift fs-6 text-white"></i>
+                    </span>
+                    Agent Benefits
+                </h6>
                 
-                [
-                    'route' => route('buy-sme-data'),
-                    'icon' => 'ti-world',
-                    'color' => 'info',
-                    'name' => 'SME Data Plans'
-                ],
-            ];
-        @endphp
-
-        <div class="row g-3 justify-content-center">
-            @foreach ($verifyServicesBvn as $sv)
-                <div class="col-4 d-flex">
-                    <a href="{{ $sv['route'] }}" class="w-100 text-decoration-none">
-                        <div class="card h-100 border-0 shadow-sm service-card">
-                            <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
-                                <span class="avatar rounded-circle bg-white text-{{ $sv['color'] }} shadow-sm mb-3 p-3">
-                                    <i class="ti {{ $sv['icon'] }} fs-2"></i>
-                                </span>
-                                <h6 class="fs-13 fw-bold text-dark mb-0">{{ $sv['name'] }}</h6>
-                            </div>
+                <div class="row g-2 mb-4">
+                    <div class="col-6">
+                        <div class="benefit-item p-2">
+                            <i class="ti ti-coin text-warning fs-5"></i>
+                            <span class="small d-block mt-1">Attractive commissions</span>
                         </div>
-                    </a>
+                    </div>
+                    <div class="col-6">
+                        <div class="benefit-item p-2">
+                            <i class="ti ti-shield text-primary fs-5"></i>
+                            <span class="small d-block mt-1">Verified service provider</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="benefit-item p-2">
+                            <i class="ti ti-rocket text-danger fs-5"></i>
+                            <span class="small d-block mt-1">Priority support</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="benefit-item p-2">
+                            <i class="ti ti-clock text-info fs-5"></i>
+                            <span class="small d-block mt-1">48h BVN approval</span>
+                        </div>
+                    </div>
                 </div>
-            @endforeach
+
+                <!-- CTA Alert -->
+                <div class="alert alert-success text-center py-3 mb-0 rounded-3">
+                    <i class="ti ti-star-filled me-1"></i>
+                    <strong>Start your enrollment today!</strong>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer p-3 border-0 bg-light">
+                <a href="{{ route('bvn.index') }}" class="btn btn-primary w-100 py-3 fw-semibold rounded-3">
+                    Start Registration
+                    <i class="ti ti-arrow-right ms-2"></i>
+                </a>
+            </div>
         </div>
-      </div>
-
-      <!-- FOOTER -->
-      <div class="modal-footer p-3 justify-content-center border-top-0">
-        <button type="button" class="btn btn-outline-danger px-5 rounded-pill fw-semibold" data-bs-dismiss="modal">Close</button>
-      </div>
-
     </div>
-  </div>
 </div>
-<!-- /Buy data plans for sme and data -->
 
+<!-- Verify Modal - Enhanced -->
+<div class="modal fade" id="verifyModal" tabindex="-1" aria-labelledby="verifyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 overflow-hidden">
+            
+            <div class="modal-header bg-primary text-white p-3 border-0">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="verifyModalLabel">
+                    <i class="ti ti-id-badge fs-1"></i>
+                    Identity Verification
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <div class="text-center mb-4">
+                    <span class="badge bg-primary-soft text-primary p-3 rounded-4 mb-2">
+                        <i class="ti ti-fingerprint fs-1"></i>
+                    </span>
+                    <h6 class="fw-bold">Choose Verification Type</h6>
+                </div>
+
+                @php
+                    $verifyServices = [
+                        [
+                            'route' => route('nin.phone.index'),
+                            'icon' => 'ti-phone',
+                            'color' => 'success',
+                            'name' => 'NIN Phone No.',
+                            'desc' => 'Verify phone with NIN'
+                        ],
+                        [
+                            'route' => route('nin.verification.index'),
+                            'icon' => 'ti-id',
+                            'color' => 'primary',
+                            'name' => 'Verify NIN',
+                            'desc' => 'NIN validation'
+                        ],
+                        [
+                            'route' => route('nin.demo.index'),
+                            'icon' => 'ti-file-text',
+                            'color' => 'warning',
+                            'name' => 'NIN Demo',
+                            'desc' => 'Demo verification'
+                        ],
+                    ];
+                @endphp
+
+                <div class="row g-3">
+                    @foreach ($verifyServices as $sv)
+                        <div class="col-4">
+                            <a href="{{ $sv['route'] }}" class="text-decoration-none">
+                                <div class="card border-0 bg-light-soft h-100">
+                                    <div class="card-body p-2 text-center">
+                                        <span class="badge bg-{{ $sv['color'] }}-soft text-{{ $sv['color'] }} p-2 rounded-3 mb-2">
+                                            <i class="ti {{ $sv['icon'] }} fs-1"></i>
+                                        </span>
+                                        <h6 class="small fw-bold mb-0">{{ $sv['name'] }}</h6>
+                                        <small class="text-muted d-none d-md-block">{{ $sv['desc'] }}</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 p-3 justify-content-center">
+                <button type="button" class="btn btn-light px-4 rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Verify BVN/TIN Modal - Enhanced -->
+<div class="modal fade" id="verifyModalbvn" tabindex="-1" aria-labelledby="verifyModalLabelBvn" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 overflow-hidden">
+            
+            <div class="modal-header bg-primary text-white p-3 border-0">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="verifyModalLabelBvn">
+                    <i class="ti ti-shield fs-1"></i>
+                    BVN / TIN Verification
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <div class="text-center mb-4">
+                    <span class="badge bg-primary-soft text-primary p-3 rounded-4 mb-2">
+                        <i class="ti ti-file-certificate fs-1"></i>
+                    </span>
+                    <h6 class="fw-bold">Select Verification Service</h6>
+                </div>
+
+                @php
+                    $verifyServicesBvn = [
+                        [
+                            'route' => route('bvn.verification.index'),
+                            'icon' => 'ti-fingerprint',
+                            'color' => 'success',
+                            'name' => 'Verify BVN',
+                            'desc' => 'Bank Verification Number'
+                        ],
+                        [
+                            'route' => route('cac.tin'),
+                            'icon' => 'ti-building',
+                            'color' => 'danger',
+                            'name' => 'Verify TIN',
+                            'desc' => 'Tax Identification Number'
+                        ],
+                    ];
+                @endphp
+
+                <div class="row g-3 justify-content-center">
+                    @foreach ($verifyServicesBvn as $sv)
+                        <div class="col-6">
+                            <a href="{{ $sv['route'] }}" class="text-decoration-none">
+                                <div class="card border-0 bg-light-soft">
+                                    <div class="card-body p-3 text-center">
+                                        <span class="badge bg-{{ $sv['color'] }}-soft text-{{ $sv['color'] }} p-3 rounded-4 mb-2">
+                                            <i class="ti {{ $sv['icon'] }} fs-2"></i>
+                                        </span>
+                                        <h6 class="fw-bold mb-1">{{ $sv['name'] }}</h6>
+                                        <small class="text-muted">{{ $sv['desc'] }}</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 p-3 justify-content-center">
+                <button type="button" class="btn btn-light px-4 rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Plans Modal - Enhanced -->
+<div class="modal fade" id="dataplans" tabindex="-1" aria-labelledby="dataplansLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 overflow-hidden">
+            
+            <div class="modal-header bg-primary text-white p-3 border-0">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="dataplansLabel">
+                    <i class="ti ti-world fs-1"></i>
+                    Data Plans
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <div class="text-center mb-4">
+                    <span class="badge bg-primary-soft text-primary p-3 rounded-4 mb-2">
+                        <i class="ti ti-wifi fs-1"></i>
+                    </span>
+                    <h6 class="fw-bold">Choose Data Plan Type</h6>
+                </div>
+
+                @php
+                    $dataPlans = [
+                        [
+                            'route' => route('buy-data'),
+                            'icon' => 'ti-world',
+                            'color' => 'success',
+                            'name' => 'Direct Data',
+                            'desc' => 'Regular data plans'
+                        ],
+                        [
+                            'route' => route('buy-sme-data'),
+                            'icon' => 'ti-building',
+                            'color' => 'info',
+                            'name' => 'SME Data',
+                            'desc' => 'Business data plans'
+                        ],
+                    ];
+                @endphp
+
+                <div class="row g-3">
+                    @foreach ($dataPlans as $plan)
+                        <div class="col-6">
+                            <a href="{{ $plan['route'] }}" class="text-decoration-none">
+                                <div class="card border-0 bg-light-soft">
+                                    <div class="card-body p-3 text-center">
+                                        <span class="badge bg-{{ $plan['color'] }}-soft text-{{ $plan['color'] }} p-3 rounded-4 mb-2">
+                                            <i class="ti {{ $plan['icon'] }} fs-2"></i>
+                                        </span>
+                                        <h6 class="fw-bold mb-1">{{ $plan['name'] }}</h6>
+                                        <small class="text-muted">{{ $plan['desc'] }}</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 p-3 justify-content-center">
+                <button type="button" class="btn btn-light px-4 rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <style>
-
-  /* Arewa Smart Dashboard Service Styling */
-.service-card {
-    transition: 0.2s ease;
-    border-radius: 14px !important;
+/* Premium Quick Services Styling */
+:root {
+    --service-icon-size: 60px;
+    --service-icon-size-md: 70px;
+    --service-icon-size-sm: 50px;
+    --transition-smooth: all 0.3s ease;
 }
 
-.service-card:hover {
-    transform: translateY(-3px);
+/* Service Items */
+.service-item {
+    display: block;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* Reduce service box size on phones */
-@media (max-width: 576px) {
-    .service-card .card-body {
-        padding: 0.7rem !important;
+.service-content {
+    transition: var(--transition-smooth);
+    border-radius: 16px;
+}
+
+.service-icon {
+    width: var(--service-icon-size-sm);
+    height: var(--service-icon-size-sm);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-smooth);
+    flex-shrink: 0;
+}
+
+.service-icon i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Icon Backgrounds */
+.bg-primary-soft { background-color: rgba(13, 110, 253, 0.1); }
+.bg-info-soft { background-color: rgba(13, 202, 240, 0.1); }
+.bg-warning-soft { background-color: rgba(255, 193, 7, 0.1); }
+.bg-danger-soft { background-color: rgba(220, 53, 69, 0.1); }
+.bg-success-soft { background-color: rgba(25, 135, 84, 0.1); }
+.bg-secondary-soft { background-color: rgba(108, 117, 125, 0.1); }
+.bg-light-soft { background-color: rgba(248, 249, 250, 0.8); }
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.service-name {
+    font-size: 12px;
+    font-weight: 500;
+    display: block;
+    line-height: 1.2;
+}
+
+/* Modal Benefits Grid */
+.benefit-item {
+    background: #f8f9fa;
+    border-radius: 12px;
+    text-align: center;
+    transition: var(--transition-smooth);
+}
+
+.benefit-item:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+/* Active/Tap States */
+.service-item:active .service-content {
+    transform: scale(0.95);
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Hover Effects - Desktop */
+@media (min-width: 768px) {
+    .service-item:hover .service-content {
+        transform: translateY(-3px);
     }
-    .service-card h6 {
-        font-size: 12px !important;
+    
+    .service-item:hover .service-icon {
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
-    .service-card .avatar {
-        padding: 0.4rem !important;
-    }
-    .service-card i {
-        font-size: 14px !important;
+    
+    .benefit-item {
+        padding: 12px !important;
     }
 }
 
-/* Perfect grid spacing */
-.service-grid {
-    row-gap: 14px;
+/* Tablet */
+@media (min-width: 576px) and (max-width: 767px) {
+    .service-icon {
+        width: var(--service-icon-size);
+        height: var(--service-icon-size);
+    }
+    
+    .service-name {
+        font-size: 13px;
+    }
 }
 
+/* Mobile First - Optimized */
+@media (max-width: 575px) {
+    .mobile-flush {
+        border-radius: 0 !important;
+        margin-left: -12px;
+        margin-right: -12px;
+    }
+    
+    .service-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+    }
+    
+    .service-icon i {
+        font-size: 20px !important;
+    }
+    
+    .service-name {
+        font-size: 10px;
+        letter-spacing: -0.2px;
+    }
+    
+    .service-content {
+        padding: 8px 4px !important;
+    }
+    
+    /* Modal mobile optimizations */
+    .modal-dialog {
+        margin: 10px;
+    }
+    
+    .benefit-item {
+        padding: 8px !important;
+    }
+    
+    .benefit-item i {
+        font-size: 18px !important;
+    }
+    
+    .benefit-item span {
+        font-size: 11px !important;
+    }
+}
+
+/* Small phones */
+@media (max-width: 360px) {
+    .service-name {
+        font-size: 9px;
+    }
+    
+    .service-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .service-icon i {
+        font-size: 18px !important;
+    }
+}
+
+/* Modal Animations */
+.modal.fade .modal-dialog {
+    transform: scale(0.95);
+    transition: transform 0.2s ease-out;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1);
+}
+
+/* Custom Scrollbar */
+.modal-dialog-scrollable .modal-body::-webkit-scrollbar {
+    width: 5px;
+}
+
+.modal-dialog-scrollable .modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.modal-dialog-scrollable .modal-body::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.modal-dialog-scrollable .modal-body::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
 </style>
