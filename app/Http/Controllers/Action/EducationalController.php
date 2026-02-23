@@ -74,18 +74,12 @@ class EducationalController extends Controller
     /**
      * Fetch variations dynamically from VTpass and store in DB
      */
-    /**
-     * Fetch variations dynamically from VTpass and store in DB
-     */
     public function getVariation(Request $request)
     {
         try {
             // Determine serviceID based on type
             $type = $request->type;
             $url = env('VARIATION_URL') . $type;
-
-            // Special handling for JAMB if needed, but usually VTPass uses 'jamb' as serviceID for variations too
-            // If type is 'jamb', URL is .../service-variations?serviceID=jamb
 
             $response = Http::withHeaders([
                 'api-key'    => env('API_KEY'),
@@ -148,6 +142,26 @@ class EducationalController extends Controller
              return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
         }
 
+        // Get user's wallet
+        $wallet = Wallet::where('user_id', $user->id)->first();
+        if (!$wallet) {
+            return redirect()->back()->with('error', 'Wallet not found. Please contact support.');
+        }
+
+        // Get variation details
+        $variation = DB::table('data_variations')->where('variation_code', $request->type)->first();
+        if (!$variation) {
+            return redirect()->back()->with('error', 'Invalid variation selected.');
+        }
+
+        $fee = $variation->variation_amount;
+        $description = $variation->name ?? $request->service;
+
+        // Check if user has sufficient balance
+        if ($wallet->balance < $fee) {
+            return redirect()->back()->with('error', 'Insufficient wallet balance.');
+        }
+
         $requestId = RequestIdHelper::generateRequestId();
 
         DB::beginTransaction();
@@ -163,13 +177,13 @@ class EducationalController extends Controller
             // Create Transaction Record (Pending)
             $transaction = Transaction::create([
                 'transaction_ref' => $requestId,
-                'user_id'         => $this->loginUserId,
+                'user_id'         => $user->id,
                 'amount'          => $fee,
                 'description'     => "Educational pin purchase ({$description}) (Pending)",
                 'type'            => 'debit',
                 'status'          => 'pending',
                 'performed_by'    => $payer_name,
-                'approved_by'     => $this->loginUserId,
+                'approved_by'     => $user->id,
             ]);
 
             // Create Report Record (Pending)
@@ -306,7 +320,12 @@ class EducationalController extends Controller
         ]);
 
         $user = Auth::user();
+        
         // 0. Preliminary Status Checks
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Please log in first.']);
+        }
+        
         if (($user->status ?? 'inactive') !== 'active') {
             return response()->json(['success' => false, 'message' => "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied."]);
         }
@@ -424,9 +443,33 @@ class EducationalController extends Controller
 
         $user = Auth::user();
 
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Please log in first.');
+        }
+
         // 0. Preliminary Account Status Check
         if (($user->status ?? 'inactive') !== 'active') {
              return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
+
+        // Get user's wallet
+        $wallet = Wallet::where('user_id', $user->id)->first();
+        if (!$wallet) {
+            return redirect()->back()->with('error', 'Wallet not found. Please contact support.');
+        }
+
+        // Get variation details
+        $variation = DB::table('data_variations')->where('variation_code', $request->service)->first();
+        if (!$variation) {
+            return redirect()->back()->with('error', 'Invalid JAMB service selected.');
+        }
+
+        $fee = $variation->variation_amount;
+        $description = $variation->name ?? 'JAMB';
+
+        // Check if user has sufficient balance
+        if ($wallet->balance < $fee) {
+            return redirect()->back()->with('error', 'Insufficient wallet balance.');
         }
 
         $requestId = RequestIdHelper::generateRequestId();
@@ -444,7 +487,7 @@ class EducationalController extends Controller
             // Create Transaction Record (Pending)
             $transaction = Transaction::create([
                 'transaction_ref' => $requestId,
-                'user_id'         => $this->loginUserId,
+                'user_id'         => $user->id,
                 'amount'          => $fee,
                 'description'     => "JAMB PIN Purchase (Pending) - Profile: {$request->profile_id}",
                 'type'            => 'debit',
@@ -456,7 +499,7 @@ class EducationalController extends Controller
                     'email'          => $request->email ?? null,
                 ]),
                 'performed_by'    => $payer_name,
-                'approved_by'     => $this->loginUserId,
+                'approved_by'     => $user->id,
             ]);
 
             // Create Report Record (Pending)
@@ -536,7 +579,9 @@ class EducationalController extends Controller
                                 'transaction_date' => now()->format('d M Y, h:i A'),
                             ];
                             Mail::to($request->email)->send(new JambPurchaseNotification($emailData));
-                        } catch (\Exception $e) { Log::error('JAMB Email Failed: ' . $e->getMessage()); }
+                        } catch (\Exception $e) { 
+                            Log::error('JAMB Email Failed: ' . $e->getMessage()); 
+                        }
                     }
 
                     return redirect()->route('thankyou')->with([
@@ -569,5 +614,3 @@ class EducationalController extends Controller
         }
     }
 }
-
-
