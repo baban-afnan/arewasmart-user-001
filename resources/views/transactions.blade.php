@@ -110,16 +110,20 @@
                                                     </span>
                                                 </td>
                                                 <td class="text-center">
-                                                    @if(in_array($transaction->type, ['credit', 'refund', 'bonus']))
-                                                        <span class="badge bg-success-subtle text-success fw-semibold">{{ ucfirst($transaction->type) }}</span>
-                                                    @elseif($transaction->type == 'debit')
-                                                        <span class="badge bg-danger-subtle text-danger fw-semibold">Debit</span>
+                                                    @if(in_array($transaction->type, ['credit', 'refund', 'bonus', 'manual_credit']))
+                                                        <span class="badge bg-success-subtle text-success fw-semibold">
+                                                            {{ $transaction->type == 'manual_credit' ? 'Credit' : ucfirst($transaction->type) }}
+                                                        </span>
+                                                    @elseif(in_array($transaction->type, ['debit', 'manual_debit']))
+                                                        <span class="badge bg-danger-subtle text-danger fw-semibold">
+                                                            {{ $transaction->type == 'manual_debit' ? 'Debit' : 'Debit' }}
+                                                        </span>
                                                     @else
                                                         <span class="badge bg-info-subtle text-info fw-semibold">{{ ucfirst($transaction->type) }}</span>
                                                     @endif
                                                 </td>
-                                                <td class="text-end fw-bold {{ in_array($transaction->type, ['credit', 'refund', 'bonus']) ? 'text-success' : 'text-danger' }}">
-                                                    {{ in_array($transaction->type, ['credit', 'refund', 'bonus']) ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
+                                                <td class="text-end fw-bold {{ in_array($transaction->type, ['credit', 'refund', 'bonus', 'manual_credit']) ? 'text-success' : 'text-danger' }}">
+                                                    {{ in_array($transaction->type, ['credit', 'refund', 'bonus', 'manual_credit']) ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
                                                 </td>
                                                 <td class="text-center">
                                                     <span class="badge bg-{{ $transaction->status == 'completed' || $transaction->status == 'successful' ? 'success' : ($transaction->status == 'failed' ? 'danger' : 'warning') }}-subtle text-{{ $transaction->status == 'completed' || $transaction->status == 'successful' ? 'success' : ($transaction->status == 'failed' ? 'danger' : 'warning') }} fw-semibold">
@@ -170,8 +174,8 @@
                     </div>
                     <div class="modal-body text-start">
                         <div class="mb-3 text-center">
-                            <h2 class="fw-bold {{ in_array($transaction->type, ['credit', 'refund', 'bonus']) ? 'text-success' : 'text-danger' }}">
-                                {{ in_array($transaction->type, ['credit', 'refund', 'bonus']) ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
+                            <h2 class="fw-bold {{ in_array($transaction->type, ['credit', 'refund', 'bonus', 'manual_credit']) ? 'text-success' : 'text-danger' }}">
+                                {{ in_array($transaction->type, ['credit', 'refund', 'bonus', 'manual_credit']) ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
                             </h2>
                             <span class="badge bg-{{ $transaction->status == 'completed' || $transaction->status == 'successful' ? 'success' : ($transaction->status == 'failed' ? 'danger' : 'warning') }}">
                                 {{ ucfirst($transaction->status) }}
@@ -184,7 +188,15 @@
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span class="text-muted">Type</span>
-                                <span class="fw-semibold">{{ ucfirst($transaction->type) }}</span>
+                                <span class="fw-semibold">
+                                    @if($transaction->type == 'manual_credit')
+                                        Credit
+                                    @elseif($transaction->type == 'manual_debit')
+                                        Debit
+                                    @else
+                                        {{ ucfirst($transaction->type) }}
+                                    @endif
+                                </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span class="text-muted">Date</span>

@@ -1,231 +1,229 @@
 <x-app-layout>
-   <title>Arewa Smart - {{ $title ?? 'Wallet Funding' }}</title>
-  <div class="container mt-4">
-    <div class="row g-4">
+    <title>Arewa Smart - {{ $title ?? 'Wallet Funding' }}</title>
+    
+    <div class="container-fluid px-0 px-lg-3">
+        <div class="row justify-content-center py-3 py-lg-4 g-0 g-lg-3">
+            <div class="col-12 col-xl-11 col-xxl-10">
+                <div class="row g-3 g-lg-4 align-items-stretch">
+                    
+                    
+                    <!-- Left Part: Marketing & Encouragement -->
+                    <div class="col-12 col-lg-6 order-2 order-lg-1">
+                        <div class="card border-0 rounded-4 overflow-hidden shadow-sm bg-dark text-white hero-card h-100 mx-2 mx-lg-0">
+                            <div class="card-body p-4 p-md-5 d-flex flex-column justify-content-center">
+                                <h1 class="h2 h1-lg fw-bold mb-3 text-primary">Power Up Your Digital Life</h1>
+                                <p class="lead mb-4 opacity-75 small">
+                                    Keep your Arewa Smart wallet funded and never experience a "Low Balance" moment again. 
+                                    Enjoy instant, uninterrupted access to Airtime, Data, and Utility bills at the best rates.
+                                </p>
+                                
+                                <div class="mt-auto">
+                                    <div class="d-flex flex-column gap-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary bg-opacity-25 rounded-circle p-2 me-3">
+                                                <i class="bi bi-lightning-charge-fill text-primary"></i>
+                                            </div>
+                                            <span class="fw-semibold small">Instant Wallet Credit</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-success bg-opacity-25 rounded-circle p-2 me-3">
+                                                <i class="bi bi-shield-check text-success"></i>
+                                            </div>
+                                            <span class="fw-semibold small">Secure & Encrypted Payments</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-info bg-opacity-25 rounded-circle p-2 me-3">
+                                                <i class="bi bi-clock-history text-info"></i>
+                                            </div>
+                                            <span class="fw-semibold small">24/7 Service Availability</span>
+                                        </div>
+                                    </div>
+                                </div>
 
-      <!-- Automatic Wallet Funding -->
-      <div class="col-xl-6 col-lg-6">
-        <div class="card shadow-sm border-0 rounded-3">
-          <div class="card-header bg-gradient text-white bg-primary rounded-top">
-            <h4 class="mb-0">
-              <i class="bi bi-bank me-2"></i>Automatic Wallet Funding
-            </h4>
-          </div>
-          <div class="card-body">
+                                <div class="mt-5 d-none d-lg-block">
+                                    <div class="opacity-25 text-end">
+                                        <i class="bi bi-wallet2 display-1"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-            <p class="text-muted">
-              Fund your Arewa Smart wallet easily using your assigned virtual account.
-              Once you make payment, your wallet will be credited instantly after confirmation.
-            </p>
+                    <!-- Right Part: Automatic Wallet Funding -->
+                    <div class="col-12 col-lg-6 order-1 order-lg-2">
+                        <div class="card shadow border-0 rounded-4 overflow-hidden h-100 mx-2 mx-lg-0">
+                            <div class="card-header border-0 py-3 bg-gradient text-white">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-white bg-opacity-25 rounded-circle p-2 me-3">
+                                        <i class="bi bi-bank fs-4"></i>
+                                    </div>
+                                    <h4 class="mb-0 fw-bold">Automatic Funding</h4>
+                                </div>
+                            </div>
+                            
+                            <div class="card-body p-4">
+                                <div class="text-center mb-4">
+                                    <div class="payment-icon-wrapper mb-3">
+                                        <i class="bi bi-send-check text-primary fs-1"></i>
+                                    </div>
+                                    <h5 class="fw-bold">How it Works</h5>
+                                    <p class="text-muted small px-2 px-md-4">
+                                        Transfer any amount to your assigned virtual account below. 
+                                        Your wallet will be credited <strong>instantly</strong>.
+                                    </p>
+                                </div>
 
-            @if (session('success'))
-              <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-            @if (session('error'))
-              <div class="alert alert-danger">{{ session('error') }}</div>
-            @endif
+                                <div class="px-1 px-md-2">
+                                    @if (session('success'))
+                                        <div class="alert alert-success alert-dismissible fade show small py-2" role="alert">
+                                            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                                            <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    @endif
+                                    
+                                    @if (session('error'))
+                                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
+                                            <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
+                                            <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    @endif
 
-            @php
-              $ws = \App\Models\Webservice::where('name', 'wallet funding')
-                    ->where('status', 'active')
-                    ->first();
-            @endphp
+                                    @php
+                                        $ws = \App\Models\Webservice::where('name', 'wallet funding')
+                                              ->where('status', 'active')
+                                              ->first();
+                                    @endphp
 
-            @if($ws)
-              @if($virtualAccount)
-              <form class="row g-3">
-                <div class="col-12">
-                <label class="form-label">Account Name</label>
-                <input type="text" class="form-control" readonly value="{{ $virtualAccount->accountName }}">
+                                    @if($ws)
+                                        @if($virtualAccount)
+                                            <div class="bg-light p-3 rounded-4 mb-4">
+                                                <div class="mb-3">
+                                                    <label class="form-label text-uppercase small fw-bold text-muted mb-1">Account Name</label>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-person text-primary me-2"></i>
+                                                        <span class="fw-bold">{{ $virtualAccount->accountName }}</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label text-uppercase small fw-bold text-muted mb-1">Account Number</label>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-hash text-primary me-2"></i>
+                                                        <span class="fw-bold fs-5 text-primary me-2" id="accNo">{{ $virtualAccount->accountNo }}</span>
+                                                        <button class="btn btn-sm btn-link text-primary p-0" type="button" onclick="copyToClipboard('{{ $virtualAccount->accountNo }}')">
+                                                            <i class="bi bi-clipboard"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-0">
+                                                    <label class="form-label text-uppercase small fw-bold text-muted mb-1">Bank Name</label>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-building text-primary me-2"></i>
+                                                        <span class="fw-bold">{{ $virtualAccount->bankName }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="text-center">
+                                                <span class="badge bg-soft-primary text-primary px-3 py-2 rounded-pill small">
+                                                    <i class="bi bi-clock me-1"></i> Instant delivery 24/7
+                                                </span>
+                                            </div>
+                                        @else
+                                            <div class="text-center py-4">
+                                                <div class="mb-3">
+                                                    <img src="assets/img/apps/thankyou.png" alt="bank" class="img-fluid" style="max-width: 80px;">
+                                                </div>
+                                                <h6 class="fw-bold">No Virtual Account Found</h6>
+                                                <p class="text-muted small mb-4">Generate a dedicated account for instant funding.</p>
+                                                <button type="button" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#virtualAccountModal">
+                                                    <i class="bi bi-plus-circle me-2"></i> Create Account
+                                                </button>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="alert alert-warning border-0 bg-light-warning small">
+                                            <i class="bi bi-exclamation-triangle me-2"></i> Service temporarily unavailable.
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-12">
-                <label class="form-label">Account Number</label>
-                <input type="text" class="form-control" readonly value="{{ $virtualAccount->accountNo }}">
-                </div>
-                <div class="col-12">
-                <label class="form-label">Bank Name</label>
-                <input type="text" class="form-control" readonly value="{{ $virtualAccount->bankName }}">
-                </div>
-              </form>
-              @else
-              <div class="text-center mt-3">
-                <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#virtualAccountModal">
-                <i class="bi bi-plus-circle"></i> Create Virtual Account
-                </a>
-              </div>
-              @endif
-            @else
-              {{-- Wallet Funding service is disabled — hide this section --}}
-            @endif
             </div>
-          </div>
-          </div>
-
-      <!-- Referral Bonus Section -->
-      <div class="col-xl-6 col-lg-6">
-        <div class="card shadow-sm border-0 rounded-3">
-          <div class="card-header bg-gradient bg-primary text-white rounded-top d-flex align-items-center justify-content-between">
-            <h4 class="mb-0">
-              <i class="bi bi-gift me-2"></i>Referral Bonus
-            </h4>
-            <span class="badge bg-light text-primary fw-bold">Active</span>
-          </div>
-          <div class="card-body">
-
-            <p class="text-muted">
-              Earn rewards when you invite your friends to Arewa Smart.  
-              Share your unique referral link below.
-            </p>
-
-            <!-- Referral Code -->
-            <div class="input-group mb-3">
-              <input type="text" class="form-control" id="referralCode" readonly
-                value="https://arewasmart.com.ng/register?ref={{ auth()->user()->referral_code }}">
-              <button class="btn btn-outline-primary" type="button" onclick="copyReferral()">
-                <i class="bi bi-clipboard-check"></i> Copy
-              </button>
-            </div>
-            <small id="copyMsg" class="text-success d-none"><i class="bi bi-check-circle"></i> Copied!</small>
-
-            <!-- Share Buttons -->
-            <div class="d-flex flex-wrap gap-2 mt-3">
-              <button class="btn btn-success" onclick="shareWhatsApp()">
-                <i class="bi bi-whatsapp"></i> WhatsApp
-              </button>
-              <button class="btn btn-primary" onclick="shareFacebook()">
-                <i class="bi bi-facebook"></i> Facebook
-              </button>
-              <button class="btn btn-info text-white" onclick="shareTwitter()">
-                <i class="bi bi-twitter-x"></i> Twitter
-              </button>
-              <button class="btn btn-dark" onclick="nativeShare()">
-                <i class="bi bi-share-fill"></i> More
-              </button>
-            </div>
-
-            <!-- Bonus Details -->
-            <div class="mt-4 text-center">
-              <div class="card bg-light border-0 shadow-sm">
-                <div class="card-body">
-                  <span class="badge bg-success px-3 py-2 mb-2">
-                    <i class="bi bi-wallet2"></i> Bonus Balance
-                  </span>
-                  <h3 class="fw-bold text-primary mb-1">₦{{ number_format($walletData['bonus'], 2) }}</h3>
-                  <p class="text-muted small">Total referral earnings</p>
-
-                  @if($walletData['bonus'] > 0)
-                  <form action="{{ route('wallet.claimBonus') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="btn btn-primary">
-                      <i class="bi bi-cash-coin"></i> Claim Bonus
-                    </button>
-                  </form>
-                  @endif
-                </div>
-              </div>
-            </div>
-
-          </div>
         </div>
-      </div>
-
     </div>
-  </div>
 
-  <!-- Virtual Account Modal -->
-  <div class="modal fade" id="virtualAccountModal" tabindex="-1" aria-labelledby="virtualAccountModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content shadow rounded-4">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title">Create Virtual Account</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
+    <!-- Virtual Account Modal -->
+    <div class="modal fade" id="virtualAccountModal" tabindex="-1" aria-labelledby="virtualAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable mx-2 mx-lg-auto">
+            <div class="modal-content shadow rounded-4">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Create Virtual Account</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
 
-        <div class="modal-body">
-          <form method="POST" action="{{ route('virtual.account.create') }}" class="row g-4">
-            @csrf
-            <div class="col-md-6">
-              <label class="form-label">Full Name</label>
-              <input type="text" class="form-control" name="name" value="{{ auth()->user()->first_name.' '.auth()->user()->last_name.' '.auth()->user()->middle_name }}" required>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Phone Number</label>
-              <input type="text" class="form-control" name="phone" value="{{ auth()->user()->phone_no }}" required>
-            </div>
-            <div class="col-12">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="confirmCheck" required>
-                <label class="form-check-label" for="confirmCheck">
-                  I confirm that the above details are accurate and consent to create a virtual account.
-                </label>
-              </div>
-            </div>
-            <div class="col-12">
-              <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-send-fill me-2"></i> Submit Request
-              </button>
-            </div>
-          </form>
-        </div>
+                <div class="modal-body p-4">
+                    <form method="POST" action="{{ route('virtual.account.create') }}" class="row g-3">
+                        @csrf
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">Full Name</label>
+                            <input type="text" class="form-control" name="name" 
+                                   value="{{ auth()->user()->first_name }} {{ auth()->user()->last_name }} {{ auth()->user()->middle_name }}" 
+                                   required>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">Phone Number</label>
+                            <input type="tel" class="form-control" name="phone" 
+                                   value="{{ auth()->user()->phone_no }}" 
+                                   required>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="confirmCheck" required>
+                                <label class="form-check-label small" for="confirmCheck">
+                                    I confirm that the above details are accurate and consent to create a virtual account.
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary w-100 py-2">
+                                <i class="bi bi-send-fill me-2"></i> Submit Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
-        <div class="modal-footer bg-light">
-          <small class="text-muted">Your virtual account will be generated instantly and linked to your wallet.</small>
+                <div class="modal-footer bg-light p-3">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i> Your virtual account will be generated instantly and linked to your wallet.
+                    </small>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <!-- Copy & Share Scripts -->
-  <script>
-    function copyReferral() {
-      const copyText = document.getElementById("referralCode");
-      copyText.select();
-      copyText.setSelectionRange(0, 99999);
-      navigator.clipboard.writeText(copyText.value);
-      const msg = document.getElementById("copyMsg");
-      msg.classList.remove("d-none");
-      setTimeout(() => msg.classList.add("d-none"), 2000);
-    }
+    <!-- Scripts -->
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Show feedback
+                const btn = event.currentTarget;
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check2 text-success"></i>';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+    </script>
 
-    function shareWhatsApp() {
-      const link = document.getElementById("referralCode").value;
-      const text = encodeURIComponent("Join me on Arewa Smart and earn bonuses! " + link);
-      window.open("https://api.whatsapp.com/send?text=" + text, "_blank");
-    }
-
-    function shareFacebook() {
-      const url = encodeURIComponent(document.getElementById("referralCode").value);
-      window.open("https://www.facebook.com/sharer/sharer.php?u=" + url, "_blank");
-    }
-
-    function shareTwitter() {
-      const link = document.getElementById("referralCode").value;
-      const text = encodeURIComponent("Join me on Arewa Smart! Earn bonuses when you sign up: " + link);
-      window.open("https://twitter.com/intent/tweet?text=" + text, "_blank");
-    }
-
-    function nativeShare() {
-      const link = document.getElementById("referralCode").value;
-      if (navigator.share) {
-        navigator.share({
-          title: 'Arewa Smart Referral',
-          text: 'Join me and earn bonuses!',
-          url: link
-        });
-      } else {
-        alert("Sharing not supported on this browser.");
-      }
-    }
-  </script>
-
-  <style>
-    .bg-gradient {
-      background: linear-gradient(90deg, #005baa, #00b894);
-    }
-    .hover-shadow:hover {
-      box-shadow: 0 0.9rem 1.6rem rgba(0, 0, 0, 0.15);
-      transform: translateY(-4px);
-      transition: all 0.3s ease-in-out;
-    }
-  </style>
 </x-app-layout>

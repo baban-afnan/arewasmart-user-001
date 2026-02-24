@@ -30,20 +30,24 @@
                                 <span class="fw-medium text-dark">#{{ substr($transaction->transaction_ref, 0, 8) }}...</span>
                             </td>
                             <td>
-                                @if(in_array($transaction->type, ['credit', 'refund', 'bonus']))
+                                @if(in_array($transaction->type, ['credit', 'refund', 'bonus', 'manual_credit']))
                                     <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1">
-                                        <i class="ti ti-arrow-down-left me-1"></i>{{ ucfirst($transaction->type) }}
+                                        <i class="ti ti-arrow-down-left me-1"></i>{{ $transaction->type == 'manual_credit' ? 'Credit' : ucfirst($transaction->type) }}
+                                    </span>
+                                @elseif(in_array($transaction->type, ['debit', 'manual_debit']))
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1">
+                                        <i class="ti ti-arrow-up-right me-1"></i>{{ $transaction->type == 'manual_debit' ? 'Debit' : 'Debit' }}
                                     </span>
                                 @else
-                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1">
-                                        <i class="ti ti-arrow-up-right me-1"></i>Debit
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-2 py-1">
+                                        {{ ucfirst($transaction->type) }}
                                     </span>
                                 @endif
                             </td>
                            
                             <td>
-                                <span class="fw-bold {{ in_array($transaction->type, ['credit', 'refund', 'bonus']) ? 'text-success' : 'text-danger' }}">
-                                    {{ in_array($transaction->type, ['credit', 'refund', 'bonus']) ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
+                                <span class="fw-bold {{ in_array($transaction->type, ['credit', 'refund', 'bonus', 'manual_credit']) ? 'text-success' : 'text-danger' }}">
+                                    {{ in_array($transaction->type, ['credit', 'refund', 'bonus', 'manual_credit']) ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
                                 </span>
                             </td>
                             <td>
