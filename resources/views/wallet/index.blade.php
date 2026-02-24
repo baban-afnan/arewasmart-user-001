@@ -109,7 +109,7 @@
                                                     <label class="form-label text-uppercase small fw-bold text-muted mb-1">Account Number</label>
                                                     <div class="d-flex align-items-center">
                                                         <i class="bi bi-hash text-primary me-2"></i>
-                                                        <span class="fw-bold fs-12 text-primary me-2" id="accNo">{{ $virtualAccount->accountNo }}</span>
+                                                        <span class="fw-bold fs-20 text-primary me-2" id="accNo">{{ $virtualAccount->accountNo }}</span>
                                                         <button class="btn btn-sm btn-link text-primary p-0" type="button" onclick="copyToClipboard('{{ $virtualAccount->accountNo }}')">
                                                             <i class="bi bi-clipboard"></i>
                                                         </button>
