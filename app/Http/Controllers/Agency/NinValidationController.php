@@ -152,6 +152,44 @@ class NinValidationController extends Controller
             // 11. Commit
             DB::commit();
 
+            // Check if we already have this nin in the database
+            $existingService = AgentService::where('nin', $request->nin)
+                ->where('service_type', 'nin_validation')
+                ->where('id', '!=', $agentService->id)
+                ->whereNotNull('comment')
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($existingService) {
+                $status = $existingService->status;
+                $cleanResponse = $existingService->comment;
+
+                if (in_array($status, ['failed', 'rejected', 'error'])) {
+                    // Refund logic
+                    DB::beginTransaction();
+                    $wallet = Wallet::where('user_id', $user->id)->lockForUpdate()->first();
+                    $wallet->increment('balance', $servicePrice);
+                    
+                    $transaction->update(['status' => 'failed']);
+                    $agentService->update([
+                        'status' => 'failed',
+                        'comment' => $cleanResponse
+                    ]);
+                    DB::commit();
+
+                    return back()->with('error', 'API Submission Failed: ' . $cleanResponse . '. Your wallet has been refunded.');
+                }
+
+                // Success/Processing logic
+                $transaction->update(['status' => 'completed']);
+                $agentService->update([
+                    'status' => $status,
+                    'comment' => $cleanResponse,
+                ]);
+
+                return back()->with('success', 'Request submitted successfully. Status: ' . $status);
+            }
+
             // 12. API Call to Idenfy
             $apiKey = env('IDENFY_API_KEY');
             $apiBaseUrl = env('IDENFY_API_BASE');

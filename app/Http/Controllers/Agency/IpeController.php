@@ -160,6 +160,49 @@ class IpeController extends Controller
 
         // 12. API Call (Post to s8v)
         try {
+            // Check if we already have this tracking_id in the database
+            $existingService = AgentService::where('tracking_id', $request->tracking_id)
+                ->where('service_type', 'ipe')
+                ->where('id', '!=', $agentService->id)
+                ->whereNotNull('comment')
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($existingService) {
+                $status = $existingService->status;
+                $cleanResponse = $existingService->comment;
+
+                if (in_array($status, ['failed', 'rejected', 'error'])) {
+                    // Refund logic
+                    DB::beginTransaction();
+                    try {
+                        $wallet = Wallet::where('user_id', $user->id)->lockForUpdate()->first();
+                        $wallet->increment('balance', $servicePrice);
+                        
+                        $transaction->update(['status' => 'failed']);
+                        $agentService->update([
+                            'status' => 'failed',
+                            'comment' => $cleanResponse
+                        ]);
+
+                        DB::commit();
+                        return back()->with('error', 'API Submission Failed: ' . $cleanResponse . '. Your wallet has been refunded.');
+                    } catch (\Exception $refundEx) {
+                        DB::rollBack();
+                        Log::critical('IPE Refund Failure (Cache): ' . $refundEx->getMessage(), ['user_id' => $user->id, 'amount' => $servicePrice]);
+                        return back()->with('error', 'API Submission Failed and refund failed. Please contact support immediately.');
+                    }
+                }
+
+                $transaction->update(['status' => 'completed']);
+                $agentService->update([
+                    'status' => $status,
+                    'comment' => $cleanResponse,
+                ]);
+
+                return back()->with('success', 'Request submitted successfully. Status: ' . $status);
+            }
+
             $apiKey = env('NIN_API_KEY');
             $url = 'https://www.s8v.ng/api/clearance';
             
