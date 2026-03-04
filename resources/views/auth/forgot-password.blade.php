@@ -7,7 +7,7 @@
 
             {{-- Logo + Heading --}}
             <div class="text-center mb-4">
-               <img src="{{ asset('assets/img/logo/logo-smart.png') }}" alt="Arewa Smart Logo" class="img-fluid d-block mx-auto"  style="max-width: 150px; height: auto;" >
+               <img src="{{ asset('assets/img/logo/new-logo.png') }}" alt="Arewa Smart Logo" class="img-fluid d-block mx-auto"  style="max-width: 100px; height: auto;" >
                <h2 class="mb-1">Forgot Password</h2>
                 <p class="text-muted mb-4">
                     No problem — enter your email, and we’ll send you a link to reset your password.

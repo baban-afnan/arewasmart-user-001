@@ -4,10 +4,10 @@
         <!-- Header Left - Logo -->
         <div class="header-left">
             <a href="{{ route('dashboard') }}" class="logo">
-                <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Logo">
+                <img src="{{ asset('assets/img/logo/logo1.png') }}" alt="Logo" style="height: 30px; width: auto;">
             </a>
             <a href="{{ route('dashboard') }}" class="dark-logo">
-                <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Logo">
+                <img src="{{ asset('assets/img/logo/logo1.png') }}" alt="Logo" style="height: 30px; width: auto;">
             </a>
         </div>
 
@@ -60,12 +60,18 @@
                                                 </span>
                                                 <i class="ti ti-arrow-right"></i>
                                             </a>                            
-                                            <a href="{{ route('nin-validation') }}" class="d-flex align-items-center justify-content-between p-2 crm-link mb-3">
+                                            <a href="{{ route('nin-validation.index') }}" class="d-flex align-items-center justify-content-between p-2 crm-link mb-3">
                                                 <span class="d-flex align-items-center me-3">
-                                                    <i class="ti ti-id-badge text-default me-2"></i>NIN Validation
+                                                    <i class="ti ti-id text-default me-2"></i>NIN Validation
                                                 </span>
                                                 <i class="ti ti-arrow-right"></i>
-                                            </a>                                
+                                            </a>
+                                            <a href="{{ route('ipe-validation.index') }}" class="d-flex align-items-center justify-content-between p-2 crm-link mb-3">
+                                                <span class="d-flex align-items-center me-3">
+                                                    <i class="ti ti-id-badge text-default me-2"></i>IPE Clearance
+                                                </span>
+                                                <i class="ti ti-arrow-right"></i>
+                                            </a>
                                         </div>
                                         <div class="col-sm-6">                            
                                             <a href="{{ route('wallet') }}" class="d-flex align-items-center justify-content-between p-2 crm-link mb-3">

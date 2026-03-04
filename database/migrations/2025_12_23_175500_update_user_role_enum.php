@@ -12,8 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // For MySQL/MariaDB
-        DB::statement("ALTER TABLE users CHANGE COLUMN role role ENUM('personal', 'agent', 'partner', 'business', 'staff', 'checker', 'super_admin', 'api') DEFAULT 'personal'");
+        if (DB::getDriverName() === 'mysql') {
+            // For MySQL/MariaDB
+            DB::statement("ALTER TABLE users CHANGE COLUMN role role ENUM('personal', 'agent', 'partner', 'business', 'staff', 'checker', 'super_admin', 'api') DEFAULT 'personal'");
+        }
     }
 
     /**
@@ -21,6 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE users CHANGE COLUMN role role ENUM('personal', 'agent', 'partner', 'business', 'staff', 'checker', 'super_admin') DEFAULT 'personal'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE users CHANGE COLUMN role role ENUM('personal', 'agent', 'partner', 'business', 'staff', 'checker', 'super_admin') DEFAULT 'personal'");
+        }
     }
 };

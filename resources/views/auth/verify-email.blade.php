@@ -6,7 +6,7 @@
         <div class="d-flex flex-column justify-content-center align-items-center flex-grow-1 p-4">
             {{-- Logo + Heading --}}
             <div class="text-center mb-4">
-                 <img src="{{ asset('assets/img/logo/logo-smart.png') }}" alt="Arewa Smart Logo" class="img-fluid d-block mx-auto"  style="max-width: 150px; height: auto;" >
+                 <img src="{{ asset('assets/img/logo/new-logo.png') }}" alt="Arewa Smart Logo" class="img-fluid d-block mx-auto"  style="max-width: 100px; height: auto;" >
                 <h2 class="mb-1">Verify Your Email Address</h2>
                 <p class="text-muted mb-4">
                     Thanks for signing up! Please verify your email address by clicking the link we just sent to your inbox.  

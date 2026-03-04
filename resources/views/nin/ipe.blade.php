@@ -1,12 +1,12 @@
 <x-app-layout>
-    <title>Arewa Smart - NIN Validation</title>
+    <title>Arewa Smart - IPE Clearance</title>
     <div class="page-body">
         <div class="container-fluid">
             <div class="page-title mb-3">
                 <div class="row">
                     <div class="col-sm-6 col-12">
-                        <h3 class="fw-bold text-primary">NIN Validation</h3>
-                        <p class="text-muted small mb-0">Submit requests for NIN Validation.</p>
+                        <h3 class="fw-bold text-primary">IPE Clearance</h3>
+                        <p class="text-muted small mb-0">Submit requests for IPE Clearance.</p>
                     </div>
                 </div>
             </div>
@@ -35,7 +35,7 @@
                                 </div>
                             @endif
 
-                            <form method="POST" action="{{ route('nin-validation.store') }}" class="row g-3">
+                            <form method="POST" action="{{ route('ipe-validation.store') }}" class="row g-3">
                                 @csrf
 
                                 <!-- Service Field Selection -->
@@ -54,10 +54,10 @@
                                     </div>
                                 </div>
 
-                                <!-- NIN Input -->
-                                <div class="col-12" id="nin_wrapper">
-                                    <label class="form-label fw-bold">NIN <span class="text-danger">*</span></label>
-                                    <input type="text" name="nin" class="form-control" placeholder="Enter 11-digit NIN" maxlength="11" pattern="\d{11}" required>
+                                <!-- Tracking ID Input -->
+                                <div class="col-12" id="tracking_wrapper">
+                                    <label class="form-label fw-bold">Tracking ID <span class="text-danger">*</span></label>
+                                    <input type="text" name="tracking_id" class="form-control" placeholder="Enter Tracking ID (min 15 chars)" required>
                                 </div>
 
                                 <!-- Price Display -->
@@ -99,7 +99,7 @@
                             <!-- Filters -->
                             <form class="row g-3 mb-3" method="GET">
                                 <div class="col-md-6">
-                                    <input class="form-control" name="search" type="text" placeholder="Search NIN" value="{{ request('search') }}">
+                                    <input class="form-control" name="search" type="text" placeholder="Search Tracking ID" value="{{ request('search') }}">
                                 </div>
 
                                 <div class="col-md-4">
@@ -125,7 +125,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Reference</th>
-                                            <th>NIN</th>
+                                            <th>Tracking ID</th>
                                             <th>Status</th>
                                             <th class="text-end">Action</th>
                                         </tr>
@@ -140,8 +140,8 @@
                                                 <!-- Reference -->
                                                 <td>{{ $submission->reference }}</td>
 
-                                                <!-- NIN -->
-                                                <td>{{ $submission->nin }}
+                                                <!-- Tracking ID -->
+                                                <td>{{ $submission->tracking_id }}
                                                     <br>
                                                     <small class="fw-semibold text-primary">
                                                         {{ $submission->service_field_name }}
@@ -167,7 +167,7 @@
                                                 <td class="text-end">
                                                     <div class="btn-group">
                                                         <!-- Check Status -->
-                                                        <a href="{{ route('nin-validation.check', $submission->id) }}" class="btn btn-sm btn-outline-primary" title="Check Status">
+                                                        <a href="{{ route('ipe-validation.check', $submission->id) }}" class="btn btn-sm btn-outline-primary" title="Check Status">
                                                             <i class="bi bi-arrow-repeat"></i>
                                                         </a>
 
@@ -207,7 +207,7 @@
                         <div class="modal-header bg-primary text-white py-3 px-4">
                             <div class="d-flex align-items-center gap-2">
                                 <i class="bi bi-chat-left-text fs-4"></i>
-                                <h5 class="modal-title text-white mb-0 fw-semibold">Validation Response</h5>
+                                <h5 class="modal-title text-white mb-0 fw-semibold">IPE Response</h5>
                             </div>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
@@ -298,4 +298,3 @@
         </div>
     </div>
 </x-app-layout>
-

@@ -13,15 +13,15 @@
     <meta name="robots" content="index, follow">
 
     <!-- Apple Touch Icon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/img/logo/logo.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/img/logo/app-logo.png') }}">
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#007bff">
+    <meta name="theme-color" content="#ffffff">
 
     <!-- Favicon -->
-    <link rel="icon" href="{{ asset('assets/img/logo/logo.png') }}" type="image/x-icon" />
-    <link rel="shortcut icon" href="{{ asset('assets/img/logo/logo.png') }}" type="image/x-icon" />
+    <link rel="icon" href="{{ asset('assets/img/logo/app-logo.png') }}" type="image/x-icon" />
+    <link rel="shortcut icon" href="{{ asset('assets/img/logo/app-logo.png') }}" type="image/x-icon" />
 
     
     <!-- Bootstrap CSS -->

@@ -6,13 +6,13 @@
     <!-- Logo -->
     <div class="sidebar-logo">
         <a href="{{ route('dashboard') }}" class="logo logo-normal">
-            <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Logo" width="120" height="70">
+            <img src="{{ asset('assets/img/logo/app-logo.png') }}" alt="Logo" width="70" height="60">
         </a>
         <a href="{{ route('dashboard') }}" class="logo-small">
-            <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Logo" width="120" height="70">
+            <img src="{{ asset('assets/img/logo/app-logo.png') }}" alt="Logo" width="70" height="60">
         </a>
         <a href="{{ route('dashboard') }}" class="dark-logo">
-            <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Logo" width="120" height="70">
+            <img src="{{ asset('assets/img/logo/app-logo.png') }}" alt="Logo" width="70" height="60">
         </a>
     </div>
     <!-- /Logo -->
@@ -74,9 +74,12 @@
                 <!-- Transfer Payment -->
                 <li class="submenu">
                     <a href="javascript:void(0);"
-                       class="{{ request()->routeIs('transfer.index') ? 'active subdrop' : '' }}">
+                       class="{{ request()->routeIs('transfer.index') ? 'active subdrop' : '' }} position-relative">
                         <i class="ti ti-arrows-left-right"></i>
                         <span>Transfer</span>
+                        <span class="badge rounded-pill bg-danger text-white border border-white ms-2" style="font-size: 8px; padding: 2px 5px; animation: pulse-red-sidebar 2s infinite;">
+                            HOT
+                        </span>
                         <span class="menu-arrow"></span>
                     </a>
 
@@ -97,7 +100,10 @@
                 <li class="submenu">
                     <a href="javascript:void(0);" class="{{ request()->routeIs('airtime', 'buy-data', 'electricity', 'cable') ? 'active subdrop' : '' }}">
                         <i class="ti ti-credit-card"></i>
-                        <span>Utility Payment</span>
+                        <span>Bill Payment</span>
+                         <span class="badge rounded-pill bg-danger text-white border border-white ms-2" style="font-size: 8px; padding: 2px 5px; animation: pulse-red-sidebar 2s infinite;">
+                            HOT
+                        </span>
                         <span class="menu-arrow"></span>
                     </a>
                     <ul style="{{ request()->routeIs('airtime', 'buy-data', 'electricity', 'cable') ? 'display: block;' : 'display: none;' }}">
@@ -161,9 +167,10 @@
                         <span>NIN Services</span>
                         <span class="menu-arrow"></span>
                     </a>
-                    <ul style="{{ request()->routeIs('nin-modification') ? 'display: block;' : 'display: none;' }}">
+                    <ul style="{{ request()->routeIs('nin-modification', 'nin-validation.index', 'ipe-validation.index') ? 'display: block;' : 'display: none;' }}">
                         <li><a href="{{ route('nin-modification') }}" class="{{ request()->routeIs('nin-modification') ? 'active' : '' }}">Modification</a></li>
-                        <li><a href="{{ route('nin-validation') }}" class="{{ request()->routeIs('nin-validation') ? 'active' : '' }}">Validation</a></li>
+                        <li><a href="{{ route('nin-validation.index') }}" class="{{ request()->routeIs('nin-validation.index') ? 'active' : '' }}">NIN Validation</a></li>
+                        <li><a href="{{ route('ipe-validation.index') }}" class="{{ request()->routeIs('ipe-validation.index') ? 'active' : '' }}">IPE Clearance</a></li>
                     </ul>
                 </li>
 
@@ -183,6 +190,9 @@
                   <li>
                     <a href="{{ route('website.index') }}" class="{{ request()->routeIs('website.index') ? 'active' : '' }}">
                         <i class="ti ti-world"></i><span>Own a website</span>
+                         <span class="badge rounded-pill bg-danger text-white border border-white ms-2" style="font-size: 8px; padding: 2px 5px; animation: pulse-red-sidebar 2s infinite;">
+                            HOT
+                        </span>
                     </a>
                 </li>
 
@@ -192,6 +202,9 @@
                 <li>
                     <a href="{{ route('referrals.index') }}" class="{{ request()->routeIs('referrals.index') ? 'active' : '' }}">
                         <i class="ti ti-user-plus"></i><span>Referral</span>
+                         <span class="badge rounded-pill bg-danger text-white border border-white ms-2" style="font-size: 8px; padding: 2px 5px; animation: pulse-red-sidebar 2s infinite;">
+                            HOT
+                        </span>
                     </a>
                 </li>
                 
@@ -204,6 +217,9 @@
                 <li>
                     <a href="{{ route('api.dashboard') }}" class="menu-link">
                         <i class="menu-icon tf-icons ti ti-world"></i><span>Smart API</span>
+                         <span class="badge rounded-pill bg-danger text-white border border-white ms-2" style="font-size: 8px; padding: 2px 5px; animation: pulse-red-sidebar 2s infinite;">
+                            HOT
+                        </span>
                     </a>
                 </li>
                 
@@ -277,5 +293,10 @@
     text-transform: uppercase;
     color: #6c757d;
     font-weight: 600;
+}
+@keyframes pulse-red-sidebar {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(220, 53, 69, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
 }
  </style>

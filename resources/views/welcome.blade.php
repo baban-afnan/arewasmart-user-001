@@ -392,7 +392,7 @@
     <header>
         <div class="container header-container">
             <a href="#" class="logo">
-                <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Arewa Smart Idea Logo" style="height: 40px; margin-right: 120px;">
+                <img src="{{ asset('assets/img/logo/app-logo.png') }}" alt="Arewa Smart Idea Logo" style="height: 30px; margin-right: 120px;">
             </a>
             
             <!-- Mobile Menu Toggle - Positioned on the right -->
@@ -640,13 +640,16 @@
             <div class="row g-5">
                 <!-- Company Info -->
                 <div class="col-lg-4 col-md-6">
+                    <div class="footer-logo mb-4">
+                        <img src="{{ asset('assets/img/logo/app-logo.png') }}" alt="Logo" style="height: 50px; width: auto;">
+                    </div>
                     <h2 style="color: #F26522; font-weight: 700; margin-bottom: 20px;">Arewa Smart Idea</h2>
                     <p style="color: rgba(255,255,255,0.7); line-height: 1.8; margin-bottom: 25px;">
                         Providing innovative technology solutions to help businesses thrive in the digital world. We are committed to excellence and sustainable growth in Northern Nigeria.
                     </p>
                     <div class="social-links">
-                        <a href="#" class="footer-social"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="footer-social"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.facebook.com/share/184dBwK8HX/" class="footer-social"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.tiktok.com/@bokanturai90?_r=1&_t=ZS-94PAsuRcuPQ" class="footer-social"><i class="fab fa-tiktok"></i></a>
                         <a href="#" class="footer-social"><i class="fab fa-linkedin-in"></i></a>
                         <a href="#" class="footer-social"><i class="fab fa-instagram"></i></a>
                     </div>
@@ -687,11 +690,11 @@
                         </li>
                         <li style="margin-bottom: 15px; display: flex;">
                             <i class="fas fa-phone" style="color: #F26522; margin-top: 5px; margin-right: 10px;"></i>
-                            <span style="color: rgba(255,255,255,0.8);">09112345678</span>
+                            <span style="color: rgba(255,255,255,0.8);">08064333983</span>
                         </li>
                         <li style="margin-bottom: 15px; display: flex;">
                             <i class="fas fa-envelope" style="color: #F26522; margin-top: 5px; margin-right: 10px;"></i>
-                            <span style="color: rgba(255,255,255,0.8);">info@arewasmart.com.ng</span>
+                            <span style="color: rgba(255,255,255,0.8);">arewasmart001@gmail.com</span>
                         </li>
                     </ul>
                 </div>
@@ -700,7 +703,7 @@
             <hr style="border-color: rgba(255,255,255,0.1); margin: 40px 0;">
             
             <div class="footer-bottom text-center">
-                <p style="color: rgba(255,255,255,0.6); margin: 0;">&copy; 2024 Arewa Smart Idea. All rights reserved. | Designed with <i class="fas fa-heart" style="color: #F26522;"></i> by Arewa Smart Team.</p>
+                <p style="color: rgba(255,255,255,0.6); margin: 0;">&copy; 2026 Arewa Smart Idea. All rights reserved. | Designed with <i class="fas fa-heart" style="color: #F26522;"></i> by Arewa Smart Team.</p>
             </div>
         </div>
 
@@ -768,7 +771,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-4">
-                        <img src="{{ asset('assets/img/logo/logo.png') }}" alt="Logo" style="height: 60px;">
+                        <img src="{{ asset('assets/img/logo/new-logo.png') }}" alt="Logo" style="height: 60px;">
                         <h4 class="mt-3 text-dark">Arewa Smart Idea Data Privacy Commitment</h4>
                     </div>
 
@@ -828,7 +831,7 @@
                         <h5>7. Contact Us</h5>
                         <p>If you have any questions about this policy or wish to exercise your rights, please contact our Data Protection Officer at:</p>
                         <p><strong>Email:</strong> privacy@arewasmart.com.ng<br>
-                        <strong>Phone:</strong> 09112345678<br>
+                        <strong>Phone:</strong> 08064333983<br>
                         <strong>Address:</strong> NO983 Babantude Adelke Street Apapa Lagos.</p>
                     </div>
 

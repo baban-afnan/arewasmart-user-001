@@ -17,6 +17,8 @@ use App\Http\Controllers\Agency\NinModificationController;
 use App\Http\Controllers\EnrolmentReportController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\Agency\NinValidationController;
+use App\Http\Controllers\Agency\IpeController;
+use App\Http\Controllers\Agency\LoanController;
 use App\Http\Controllers\NINverificationController;
 use App\Http\Controllers\BvnverificationController;
 use App\Http\Controllers\NINDemoVerificationController;
@@ -198,9 +200,27 @@ Route::get('/', function () {return view('welcome');});
         });
 
         // NIN Validation & IPE Routes
-        Route::get('/nin-validation', [NinValidationController::class, 'index'])->name('nin-validation');
-        Route::post('/nin-validation', [NinValidationController::class, 'store'])->name('nin-validation.store');
-        Route::get('/nin-validation/check/{id}', [NinValidationController::class, 'checkStatus'])->name('nin-validation.check');
+            // NIN Validation
+            Route::controller(NinValidationController::class)->prefix('nin-validation')->name('nin-validation.')->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('/store', 'store')->name('store');
+                Route::get('/check/{id}', 'checkStatus')->name('check');
+                Route::post('/webhook', 'webhook')->name('webhook');
+            });
+
+            // IPE Clearance
+            Route::controller(IpeController::class)->prefix('ipe-validation')->name('ipe-validation.')->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('/store', 'store')->name('store');
+                Route::get('/check/{id}', 'checkStatus')->name('check');
+                Route::post('/webhook', 'webhook')->name('webhook');
+            });
+
+            // Loan Service
+            Route::controller(LoanController::class)->prefix('loan')->name('loan.')->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('/store', 'store')->name('store');
+            });
     
         // Support Routes
         Route::prefix('support')->group(function () {

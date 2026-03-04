@@ -12,8 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Step 1: Change to VARCHAR to allow any value temporarily
-        DB::statement("ALTER TABLE agent_services MODIFY COLUMN service_type VARCHAR(255) DEFAULT 'not_selected'");
+        if (DB::getDriverName() === 'mysql') {
+            // Step 1: Change to VARCHAR to allow any value temporarily
+            DB::statement("ALTER TABLE agent_services MODIFY COLUMN service_type VARCHAR(255) DEFAULT 'not_selected'");
+        }
 
         // Step 2: Update existing records to match the new uppercase format
         DB::table('agent_services')->where('service_type', 'bvn_search')->update(['service_type' => 'BVN_SEARCH']);
@@ -33,27 +35,29 @@ return new class extends Migration
         DB::table('agent_services')->where('service_type', 'corporate')->update(['service_type' => 'TIN COOPERATE']);
 
 
-        // Step 3: Restrict ENUM to only the requested new values
-        DB::statement("ALTER TABLE agent_services MODIFY COLUMN service_type ENUM(
-            'VNIN TO NIBSS',
-            'BVN_SEARCH',
-            'BVN_MODIFICATION',
-            'CRM',
-            'BVN_USER',
-            'APPROVAL REQUEST',
-            'AFFIDAVIT',
-            'NIN_SELFSERVICE',
-            'NIN_VALIDATION',
-            'IPE',
-            'NIN MODIFICATION',
-            'TIN INDIVIDUAL',
-            'TIN COOPERATE',
-            'CAC',
-            'SERVICE_001',
-            'SERVICE_002',
-            'SERVICE_003',
-            'not_selected'
-        ) DEFAULT 'not_selected'");
+        if (DB::getDriverName() === 'mysql') {
+            // Step 3: Restrict ENUM to only the requested new values
+            DB::statement("ALTER TABLE agent_services MODIFY COLUMN service_type ENUM(
+                'VNIN TO NIBSS',
+                'BVN_SEARCH',
+                'BVN_MODIFICATION',
+                'CRM',
+                'BVN_USER',
+                'APPROVAL REQUEST',
+                'AFFIDAVIT',
+                'NIN_SELFSERVICE',
+                'NIN_VALIDATION',
+                'IPE',
+                'NIN MODIFICATION',
+                'TIN INDIVIDUAL',
+                'TIN COOPERATE',
+                'CAC',
+                'SERVICE_001',
+                'SERVICE_002',
+                'SERVICE_003',
+                'not_selected'
+            ) DEFAULT 'not_selected'");
+        }
     }
 
     /**
@@ -61,21 +65,23 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Revert to the previous list if needed. 
-        // Note: This might fail if there are values in the table that are not in the old list.
-        DB::statement("ALTER TABLE agent_services MODIFY COLUMN service_type ENUM(
-            'VNIN TO NIBSS', 
-            'bvn_search', 
-            'bvn_modification', 
-            'crm', 
-            'bvn_user', 
-            'approval_request', 
-            'affidavit', 
-            'nin_selfservice', 
-            'nin_validation',
-            'ipe', 
-            'not_selected', 
-            'nin_modification'
-        ) DEFAULT 'not_selected'");
+        if (DB::getDriverName() === 'mysql') {
+            // Revert to the previous list if needed. 
+            // Note: This might fail if there are values in the table that are not in the old list.
+            DB::statement("ALTER TABLE agent_services MODIFY COLUMN service_type ENUM(
+                'VNIN TO NIBSS', 
+                'bvn_search', 
+                'bvn_modification', 
+                'crm', 
+                'bvn_user', 
+                'approval_request', 
+                'affidavit', 
+                'nin_selfservice', 
+                'nin_validation',
+                'ipe', 
+                'not_selected', 
+                'nin_modification'
+            ) DEFAULT 'not_selected'");
+        }
     }
 };

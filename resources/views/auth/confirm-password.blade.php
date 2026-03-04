@@ -6,7 +6,7 @@
         <div class="d-flex flex-column justify-content-center align-items-center flex-grow-1 p-4">
 
             {{-- Logo + Heading --}}
-            <img src="{{ asset('assets/img/logo/logo-smart.png') }}" alt="Arewa Smart Logo" class="img-fluid d-block mx-auto"  style="max-width: 150px; height: auto;" >
+            <img src="{{ asset('assets/img/logo/new-logo.png') }}" alt="Arewa Smart Logo" class="img-fluid d-block mx-auto"  style="max-width: 100px; height: auto;" >
                 <h2 class="mb-1">Confirm Password</h2>
                 <p class="text-muted mb-4">
                     This is a secure area of the application. <br>

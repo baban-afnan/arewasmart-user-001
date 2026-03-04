@@ -12,8 +12,8 @@
 
         {{-- Add your custom assets for the registration page here if they aren't included by @vite --}}
         {{-- For this example, I'll assume your custom CSS is not managed by Vite and must be included separately --}}
-        <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/img/logo/logo.png') }}">
-        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/img/apple-touch-icon.png') }}">
+        <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/img/logo/app-logo.png') }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/img/logo/app-logo.png') }}">
         <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ asset('assets/plugins/icons/feather/feather.css') }}">
         <link rel="stylesheet" href="{{ asset('assets/plugins/tabler-icons/tabler-icons.min.css') }}">

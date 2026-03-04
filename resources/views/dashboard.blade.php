@@ -47,11 +47,11 @@
 
     @php
         $hour = date('H');
-        $timeGreeting = 'Good morning';
+        $timeGreeting = 'Morning';
         if ($hour >= 12 && $hour < 17) {
-            $timeGreeting = 'Good afternoon';
+            $timeGreeting = 'Afternoon';
         } elseif ($hour >= 17) {
-            $timeGreeting = 'Good evening';
+            $timeGreeting = 'Evening';
         }
         
         $user = Auth::user();
@@ -114,9 +114,6 @@
 
        <!-- Alerts (kept as in project) -->
         @include('pages.alart')
-      
-
-      
 
         <!-- Dashboard widgets and sections -->
         <div class="row mt-3 d-none d-lg-flex">
@@ -127,13 +124,14 @@
             @include('pages.dashboard.services')
         </div>
 
-        <div class="row d-none d-lg-flex">
-            @include('pages.dashboard.trans')
-        </div>
-
-           <!-- advert section for mobile Users -->
+          <!-- advert section for mobile Users -->
         <div class="row">
          @include('pages.dashboard.advert')
+        </div>
+
+     
+        <div class="row d-none d-lg-flex">
+            @include('pages.dashboard.trans')
         </div>
     </div>
          

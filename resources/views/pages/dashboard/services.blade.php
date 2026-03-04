@@ -12,23 +12,26 @@
                 @php
                     $services = [
                         ['route' => route('wallet'), 'icon' => 'ti-wallet', 'color' => 'primary', 'name' => 'Wallet'],
-                        ['route' => route('airtime'), 'icon' => 'ti-phone-call', 'color' => 'info', 'name' => 'Airtime'],
-                        ['modal' => '#dataplans', 'icon' => 'ti-world', 'color' => 'warning', 'name' => 'Data'],
+                        ['route' => route('airtime'), 'icon' => 'ti-phone-call', 'color' => 'info', 'name' => 'Airtime', 'hot' => true],
+                        ['modal' => '#dataplans', 'icon' => 'ti-world', 'color' => 'warning', 'name' => 'Data', 'hot' => true],
                         ['route' => route('electricity'), 'icon' => 'ti-bolt', 'color' => 'danger', 'name' => 'Electricity'],
                         ['route' => route('education'), 'icon' => 'ti-school', 'color' => 'success', 'name' => 'Education'],
                         ['route' => route('jamb'), 'icon' => 'ti-certificate', 'color' => 'secondary', 'name' => 'Jamb Pin'],
-                        ['route' => route('bvn-crm'), 'icon' => 'ti-users', 'color' => 'info', 'name' => 'CRM'],
+                        ['route' => route('bvn-crm'), 'icon' => 'ti-users', 'color' => 'info', 'name' => 'CRM', 'hot' => true],
                         ['route' => route('send-vnin'), 'icon' => 'ti-fingerprint', 'color' => 'warning', 'name' => 'Vnin/Fas'],
-                        ['route' => route('modification'), 'icon' => 'ti-user-edit', 'color' => 'danger', 'name' => 'BVN Mod'],
+                        ['route' => route('modification'), 'icon' => 'ti-user-edit', 'color' => 'danger', 'name' => 'BVN Mod', 'hot' => true],
                         ['route' => route('phone.search.index'), 'icon' => 'ti-search', 'color' => 'success', 'name' => 'Search BVN'],
                         ['modal' => '#agentEnrolmentModal', 'icon' => 'ti-user-plus', 'color' => 'secondary', 'name' => 'BVN Agent'],
                         ['route' => route('nin-modification'), 'icon' => 'ti-id', 'color' => 'info', 'name' => 'NIN Mod'],
-                        ['route' => route('nin-validation'), 'icon' => 'ti-checkbox', 'color' => 'warning', 'name' => 'Validation'],
+                        ['route' => route('nin-validation.index'), 'icon' => 'ti-checkbox', 'color' => 'warning', 'name' => 'NIN Validation'],
+                        ['route' => route('ipe-validation.index'), 'icon' => 'ti-clear-formatting', 'color' => 'info', 'name' => 'IPE'],
                         ['route' => route('website.index'), 'icon' => 'ti-browser', 'color' => 'danger', 'name' => 'Website'],
                         ['route' => route('cac.index'), 'icon' => 'ti-briefcase', 'color' => 'success', 'name' => 'CAC Reg'],
                         ['route' => route('enrolment.report'), 'icon' => 'ti-file-text', 'color' => 'secondary', 'name' => 'Report'],
                         ['modal' => '#verifyModal', 'icon' => 'ti-id-badge', 'color' => 'info', 'name' => 'Verify NIN'],
                         ['modal' => '#verifyModalbvn', 'icon' => 'ti-shield-check', 'color' => 'secondary', 'name' => 'Verify BVN'],
+                        ['route' => route('loan.index'), 'icon' => 'ti-checkbox', 'color' => 'warning', 'name' => 'Loan', 'hot' => true],
+                        ['route' => route('support.index'), 'icon' => 'ti-message-plus', 'color' => 'primary', 'name' => 'Support', 'hot' => true],
                     ];
                 @endphp
 
@@ -42,7 +45,12 @@
                                 @endif
                                 class="text-decoration-none service-item"
                             >
-                                <div class="service-content p-2 p-md-3">
+                                <div class="service-content p-2 p-md-3 position-relative">
+                                    @if(isset($sv['hot']) && $sv['hot'])
+                                        <span class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger text-white border border-white" style="font-size: 8px; padding: 3px 6px; z-index: 1; margin-top: 10px; margin-right: 2px; animation: pulse-red 2s infinite;">
+                                            HOT
+                                        </span>
+                                    @endif
                                     <div class="service-icon mb-2 mx-auto bg-{{ $sv['color'] }}-soft">
                                         <i class="ti {{ $sv['icon'] }} fs-15 fs-md-4 text-{{ $sv['color'] }}"></i>
                                     </div>
@@ -567,5 +575,10 @@
 
 .modal-dialog-scrollable .modal-body::-webkit-scrollbar-thumb:hover {
     background: #555;
+}
+@keyframes pulse-red {
+    0% { transform: translate(50%, -50%) scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { transform: translate(50%, -50%) scale(1); box-shadow: 0 0 0 6px rgba(220, 53, 69, 0); }
+    100% { transform: translate(50%, -50%) scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
 }
 </style>
