@@ -4,15 +4,15 @@
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
     <!-- Logo -->
-    <div class="sidebar-logo">
+    <div class="sidebar-logo d-flex justify-content-center align-items-center w-8 text-center">
         <a href="{{ route('dashboard') }}" class="logo logo-normal">
-            <img src="{{ asset('assets/img/logo/app-logo.png') }}" alt="Logo" width="70" height="60">
+            <img src="{{ asset('assets/img/logo/app-logo.png') }}" alt="Logo" width="70" height="70">
         </a>
         <a href="{{ route('dashboard') }}" class="logo-small">
-            <img src="{{ asset('assets/img/logo/app-logo.png') }}" alt="Logo" width="70" height="60">
+            <img src="{{ asset('assets/img/logo/app-logo.png') }}" alt="Logo" width="70" height="70">
         </a>
         <a href="{{ route('dashboard') }}" class="dark-logo">
-            <img src="{{ asset('assets/img/logo/app-logo.png') }}" alt="Logo" width="70" height="60">
+            <img src="{{ asset('assets/img/logo/app-logo.png') }}" alt="Logo" width="70" height="70">
         </a>
     </div>
     <!-- /Logo -->
@@ -268,6 +268,13 @@
     margin-right: 10px;
     width: 20px;
     text-align: center;
+}
+
+.sidebar-logo {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    background-color: #fff; /* or your preferred background color */
 }
 
 /* Submenu styling */
