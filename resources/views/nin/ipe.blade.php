@@ -238,7 +238,7 @@
                                     <i class="bi bi-chat-left-text fs-15 text-white"></i>
                                 </div>
                                 <div>
-                                    <h5 class="modal-title text-white mb-0 fw-bold fs-5">IPE Clearance Response</h5>
+                                    <h5 class="modal-title text-white mb-0 fw-bold fs-15">IPE Clearance Response</h5>
                                     <p class="small text-white-50 mb-0">Details of your submission</p>
                                 </div>
                             </div>
