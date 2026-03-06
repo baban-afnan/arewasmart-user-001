@@ -241,11 +241,11 @@
                     </a>
                 </li>
                 
-                <li>
+                <li class="px-3 mt-4 mb-3">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <a href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();">
-                            <i class="ti ti-logout"></i><span>Logout</span>
+                        <a href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();" class="btn btn-primary w-100 text-white d-flex justify-content-center align-items-center shadow-sm" style="border-radius: 8px;">
+                            <i class="ti ti-logout me-2"></i><span>Logout</span>
                         </a>
                     </form>
                 </li>
