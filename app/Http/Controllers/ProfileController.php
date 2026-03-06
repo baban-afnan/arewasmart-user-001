@@ -47,7 +47,7 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         
-        $validated = $request->validate([
+        $rules = [
             'first_name' => 'required|string|max:255|min:2',
             'last_name' => 'required|string|max:255|min:2',
             'middle_name' => 'nullable|string|max:255',
@@ -55,27 +55,39 @@ class ProfileController extends Controller
             'lga' => 'required|string|max:255',
             'state' => 'required|string|max:255',
             'address' => 'required|string|max:500',
-            'bvn' => 'required|digits:11|unique:users,bvn,' . $user->id,
             'pin' => 'required|digits:5',
             'termsCheck' => 'required|string|max:500', 
-        ], [
+        ];
+
+        if (empty($user->bvn)) {
+            $rules['bvn'] = 'required|digits:11|unique:users,bvn,' . $user->id;
+        } else {
+            $rules['bvn'] = 'nullable|digits:11|unique:users,bvn,' . $user->id;
+        }
+
+        $validated = $request->validate($rules, [
             'pin.required' => 'Transaction PIN is required.',
             'pin.digits' => 'PIN must be exactly 5 digits.',
         ]);
 
         try {
-            $user->update([
+            $updateData = [
                 'first_name' => $validated['first_name'],
                 'last_name' => $validated['last_name'],
-                'middle_name' => $validated['middle_name'],
+                'middle_name' => $validated['middle_name'] ?? null,
                 'phone_no' => $validated['phone_no'],
                 'lga' => $validated['lga'],
                 'state' => $validated['state'],
                 'address' => $validated['address'],
-                'bvn' => $validated['bvn'],
                 'pin' => bcrypt($validated['pin']), 
                 'profile_completed' => true, 
-            ]);
+            ];
+
+            if (!empty($validated['bvn'])) {
+                $updateData['bvn'] = $validated['bvn'];
+            }
+
+            $user->update($updateData);
 
             return redirect()->route('dashboard')->with('success', 'Account successfully! Welcome aboard! 🎉');
         } catch (\Exception $e) {
